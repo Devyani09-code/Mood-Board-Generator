@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Moodboard Studio"
+description = "An AI-powered creative workspace that guides users through a playful card-based brief, generates an editable visual moodboard, and supports prompt-based refinements plus copy and download actions."
+version = "1.0.0"
+id = "artifacts/moodboard-studio"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22806
+
+[services.development]
+run = "pnpm --filter @workspace/moodboard-studio run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/moodboard-studio", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/moodboard-studio/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22806"
+BASE_PATH = "/"
