@@ -12,29 +12,24 @@ export default function HomePage() {
               <span className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-[#263d49] text-[#f1e5c9] shadow-sm">
                 <span className="serif text-[27px] leading-none">M</span>
               </span>
-              <span className="text-[11px] font-bold uppercase tracking-[.22em]">Morrow / studio</span>
+              <span className="text-[11px] font-bold uppercase tracking-[.22em]">Morrow  studio</span>
             </Link>
             <nav className="flex items-center gap-5 text-[11px] font-bold uppercase tracking-[.16em] sm:gap-8">
-              <a href="#ritual" className="hidden transition-colors hover:text-[#b36b57] sm:block" data-testid="link-about-ritual">The ritual</a>
               <Link href="/sign-in" className="rounded-full border border-[#263d49]/30 px-4 py-2 transition-all hover:border-[#263d49] hover:bg-[#263d49] hover:text-[#f1e5c9]" data-testid="link-sign-in">Sign in</Link>
             </nav>
           </header>
 
           <div className="grid items-end gap-12 pt-20 lg:grid-cols-[1.05fr_.95fr] lg:gap-20 lg:pt-28">
             <div className="relative z-10 max-w-[720px]">
-              <div className="reveal flex items-center gap-3 text-[#b36b57]">
-                <CircleDot size={13} strokeWidth={1.5} />
-                <span className="eyebrow">A private creative ritual</span>
-              </div>
               <h1 className="reveal reveal-delay-1 serif mt-8 max-w-[760px] text-[clamp(4rem,9vw,9.2rem)] leading-[.84] tracking-[-.065em] text-[#263d49]">
-                Give the<br /><em>idea</em> a world.
+                Stage<br /><em>your</em>ideas.
               </h1>
               <p className="reveal reveal-delay-2 mt-9 max-w-[470px] text-[15px] leading-7 text-[#435b65] sm:text-[17px]">
-                Morrow is the quiet room between a first thought and a clear direction. Bring an unfinished feeling. Leave with a visual language you can trust.
+                Morrow transforms early ideas into considered visual identities. Bring the starting point. Leave with a clear creative direction and a visual language built to stand apart
               </p>
               <div className="reveal reveal-delay-3 mt-10 flex flex-wrap items-center gap-4">
                 <Link href="/sign-up" className="group flex items-center gap-3 rounded-full bg-[#263d49] px-6 py-3.5 text-[11px] font-bold uppercase tracking-[.15em] text-[#f1e5c9] transition-all hover:-translate-y-0.5 hover:bg-[#b36b57]" data-testid="link-start-ritual">
-                  Begin the ritual <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
+                  Let's Begin!! <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
                 </Link>
                 <a href="#ritual" className="flex items-center gap-2 px-2 py-3 text-[11px] font-bold uppercase tracking-[.15em] text-[#435b65] transition-colors hover:text-[#b36b57]" data-testid="link-see-how">
                   See how it works <ArrowDown size={14} />
@@ -65,13 +60,13 @@ export default function HomePage() {
           <div className="grid gap-14 lg:grid-cols-[.55fr_1fr] lg:gap-24">
             <div>
               <span className="eyebrow text-[#d7a491]">A gentler starting point</span>
-              <h2 className="serif mt-6 max-w-[440px] text-5xl leading-[.95] tracking-[-.04em] sm:text-6xl">Not a brief.<br /><em>A beginning.</em></h2>
+              <h2 className="serif mt-6 max-w-[440px] text-5xl leading-[.95] tracking-[-.04em] sm:text-6xl"><em>Not a brief.<br />A clear direction.</em></h2>
             </div>
             <div className="grid gap-0 sm:grid-cols-3">
               {[
-                ['01', 'Name the feeling', 'A small prompt makes room for what you already know.'],
-                ['02', 'Choose the weather', 'Select a few visual instincts. Contradiction is welcome.'],
-                ['03', 'Follow the thread', 'A living board appears. Nudge it until it sounds like you.'],
+                ['01', 'Define the idea', 'We start by understanding the project, its context, and what it needs to achieve.'],
+                ['02', 'Establish the direction', 'We explore references, perspectives, and possibilities to identify a clear creative route.'],
+                ['03', 'Build your board', 'The chosen direction becomes a distinct visual language, refined with purpose and consistency.'],
               ].map(([number, title, copy], index) => (
                 <div key={number} className={`border-t border-[#f1e5c9]/25 py-6 sm:border-l sm:border-t-0 sm:pl-6 ${index > 0 ? 'mt-4 sm:mt-0' : ''}`} data-testid={`card-ritual-step-${number}`}>
                   <span className="text-[11px] tracking-[.18em] text-[#d7a491]">{number}</span>
@@ -84,27 +79,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="paper-wash px-6 py-24 sm:px-10 lg:px-16" style={{ backgroundImage: `linear-gradient(rgba(241,229,201,.56), rgba(241,229,201,.56)), url(${paperTexture})` }}>
-        <div className="mx-auto grid max-w-[1400px] items-center gap-16 lg:grid-cols-[1fr_.8fr]">
-          <div className="relative max-w-[690px]">
-            <div className="absolute -left-4 top-[-28px] text-[#b36b57]"><Sparkles size={28} strokeWidth={1.2} /></div>
-            <span className="eyebrow text-[#b36b57]">The studio promise</span>
-            <p className="serif mt-6 text-[clamp(2.7rem,5.4vw,5.6rem)] leading-[.94] tracking-[-.05em] text-[#263d49]">
-              Leave the blank page behind. Keep the <em>possibility.</em>
-            </p>
-          </div>
-          <div className="border-t border-[#263d49]/25 pt-6 lg:mt-10">
-            <BookOpen size={22} strokeWidth={1.2} className="text-[#b36b57]" />
-            <p className="mt-5 max-w-[330px] text-[14px] leading-7 text-[#435b65]">Your boards are yours alone: a private shelf of directions, saved in the moment they become clear.</p>
-            <Link href="/sign-up" className="mt-8 inline-flex items-center gap-3 text-[11px] font-bold uppercase tracking-[.16em] text-[#263d49] transition-colors hover:text-[#b36b57]" data-testid="link-create-board">
-              Open your studio <MoveUpRight size={15} />
-            </Link>
-          </div>
-        </div>
-      </section>
-
       <footer className="flex flex-col justify-between gap-4 bg-[#d2dadd] px-6 py-7 text-[10px] font-bold uppercase tracking-[.16em] text-[#435b65] sm:flex-row sm:px-10 lg:px-16">
-        <span>© 2025 Morrow / studio</span>
+        <span>© 2025 Morrow  studio</span>
         <span className="text-[#b36b57]">for ideas in their early light</span>
       </footer>
     </main>
