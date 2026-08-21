@@ -12,7 +12,7 @@ export default function HomePage() {
               <span className="flex h-10 w-10 items-center justify-center rounded-[12px] bg-[#263d49] text-[#f1e5c9] shadow-sm">
                 <span className="serif text-[27px] leading-none">M</span>
               </span>
-              <span className="text-[11px] font-bold uppercase tracking-[.22em]">Morrow  studio</span>
+              <span className="text-[11px] font-bold uppercase tracking-[.22em]">Morrow studio</span>
             </Link>
             <nav className="flex items-center gap-5 text-[11px] font-bold uppercase tracking-[.16em] sm:gap-8">
               <Link href="/sign-in" className="rounded-full border border-[#263d49]/30 px-4 py-2 transition-all hover:border-[#263d49] hover:bg-[#263d49] hover:text-[#f1e5c9]" data-testid="link-sign-in">Sign in</Link>
@@ -22,7 +22,7 @@ export default function HomePage() {
           <div className="grid items-end gap-12 pt-20 lg:grid-cols-[1.05fr_.95fr] lg:gap-20 lg:pt-28">
             <div className="relative z-10 max-w-[720px]">
               <h1 className="reveal reveal-delay-1 serif mt-8 max-w-[760px] text-[clamp(4rem,9vw,9.2rem)] leading-[.84] tracking-[-.065em] text-[#263d49]">
-                Stage<br /><em>your</em>ideas.
+                Stage<br /><em>your</em> ideas.
               </h1>
               <p className="reveal reveal-delay-2 mt-9 max-w-[470px] text-[15px] leading-7 text-[#435b65] sm:text-[17px]">
                 Morrow transforms early ideas into considered visual identities. Bring the starting point. Leave with a clear creative direction and a visual language built to stand apart
@@ -42,14 +42,14 @@ export default function HomePage() {
               <div className="relative rotate-[3.5deg] overflow-hidden border-[10px] border-[#e1e2d9]/70 bg-[#8295a0] shadow-[18px_25px_0_rgba(38,61,73,.12),0_32px_50px_rgba(38,61,73,.22)]">
                 <img src={paperTexture} alt="Aged blue-gray editorial paper texture" className="block aspect-square w-full object-cover opacity-90" data-testid="img-paper-texture" />
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#526b78]/10 p-8 text-center text-[#f1e5c9]">
-                  <span className="eyebrow text-[#f1e5c9]/70">No. 01 / visual direction</span>
+                  <span className="eyebrow text-[#f1e5c9]/70">No. 01  visual direction</span>
                   <span className="serif mt-5 text-[clamp(2rem,5vw,4.2rem)] leading-[.9]">begin<br /><em>anywhere</em></span>
                   <span className="mt-5 max-w-[240px] text-[10px] uppercase tracking-[.2em] text-[#f1e5c9]/75">the first mark is enough</span>
                 </div>
               </div>
-              <div className="absolute -bottom-11 -right-2 flex rotate-[-5deg] items-center gap-2 bg-[#f1e5c9] px-4 py-3 text-[10px] font-bold uppercase tracking-[.16em] text-[#263d49] shadow-md sm:-right-12" data-testid="text-studio-note">
+              {/* <div className="absolute -bottom-11 -right-2 flex rotate-[-5deg] items-center gap-2 bg-[#f1e5c9] px-4 py-3 text-[10px] font-bold uppercase tracking-[.16em] text-[#263d49] shadow-md sm:-right-12" data-testid="text-studio-note">
                 <ScanLine size={14} className="text-[#b36b57]" /> made for the in-between
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
