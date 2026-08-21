@@ -5,7 +5,7 @@ import { Link } from 'wouter';
 export default function HomePage() {
   return (
     <main className="grain min-h-[100dvh] overflow-hidden bg-[#d2dadd] text-[#263d49]" style={{ backgroundImage: `linear-gradient(rgba(210,218,221,.84), rgba(210,218,221,.84)), url(${paperTexture})`, backgroundSize: 'cover', backgroundAttachment: 'fixed' }}>
-      <section className="relative min-h-[720px] px-6 pb-20 pt-7 sm:px-10 lg:px-16">
+      <section className="relative min-h-screen px-6 pb-20 pt-7 sm:px-10 lg:px-16">
         <div className="mx-auto max-w-[1400px]">
           <header className="flex items-center justify-between border-b border-[#263d49]/20 pb-5">
             <Link href="/" className="group flex items-center gap-3" data-testid="link-home-logo">
@@ -47,9 +47,6 @@ export default function HomePage() {
                   <span className="mt-5 max-w-[240px] text-[10px] uppercase tracking-[.2em] text-[#f1e5c9]/75">the first mark is enough</span>
                 </div>
               </div>
-              {/* <div className="absolute -bottom-11 -right-2 flex rotate-[-5deg] items-center gap-2 bg-[#f1e5c9] px-4 py-3 text-[10px] font-bold uppercase tracking-[.16em] text-[#263d49] shadow-md sm:-right-12" data-testid="text-studio-note">
-                <ScanLine size={14} className="text-[#b36b57]" /> made for the in-between
-              </div> */}
             </div>
           </div>
         </div>
