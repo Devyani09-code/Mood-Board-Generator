@@ -422,6 +422,35 @@ function ProfilePanel({ user, boardCount }: { user: ReturnType<typeof useUser>['
 export default function StudioPage() {
   const { user } = useUser();
   const { signOut } = useClerk();
+
+  // TEMPORARY DIAGNOSTIC — remove once Unsplash fetching is confirmed working.
+  useEffect(() => {
+    (async () => {
+      console.log('%c[DIAGNOSTIC] starting checks...', 'color: #b36b57; font-weight: bold;');
+      try {
+        const healthRes = await fetch('/api/healthz');
+        console.log('[DIAGNOSTIC] /api/healthz status:', healthRes.status, 'ok:', healthRes.ok);
+        console.log('[DIAGNOSTIC] /api/healthz body:', await healthRes.text());
+      } catch (err) {
+        console.error('[DIAGNOSTIC] /api/healthz request threw:', err);
+      }
+      try {
+        const unsplashRes = await fetch('/api/moodboards/debug/unsplash');
+        console.log('[DIAGNOSTIC] /api/moodboards/debug/unsplash status:', unsplashRes.status, 'ok:', unsplashRes.ok);
+        const text = await unsplashRes.text();
+        console.log('[DIAGNOSTIC] /api/moodboards/debug/unsplash raw body:', text);
+        try {
+          console.log('[DIAGNOSTIC] parsed JSON:', JSON.parse(text));
+        } catch {
+          console.log('[DIAGNOSTIC] body was not valid JSON (likely an HTML error page)');
+        }
+      } catch (err) {
+        console.error('[DIAGNOSTIC] /api/moodboards/debug/unsplash request threw:', err);
+      }
+      console.log('%c[DIAGNOSTIC] done \u2014 send Claude everything above.', 'color: #b36b57; font-weight: bold;');
+    })();
+  }, []);
+
   const [step, setStep] = useState(0);
   const [boardType, setBoardType] = useState<'moodboard' | 'brandboard' | null>(null);
   const [purpose, setPurpose] = useState('');
