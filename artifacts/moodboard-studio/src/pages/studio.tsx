@@ -192,6 +192,125 @@ function getLayoutConfig(layoutStyle: string) {
   }
 }
 
+function loadImageElement(url: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error(`Failed to load ${url}`));
+    img.src = url;
+  });
+}
+
+function drawCoverImage(ctx: CanvasRenderingContext2D, img: HTMLImageElement, x: number, y: number, w: number, h: number) {
+  const scale = Math.max(w / img.width, h / img.height);
+  const sw = w / scale;
+  const sh = h / scale;
+  const sx = (img.width - sw) / 2;
+  const sy = (img.height - sh) / 2;
+  ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+}
+
+function wrapCanvasText(ctx: CanvasRenderingContext2D, text: string, x: number, y: number, maxWidth: number, lineHeight: number, maxLines = 6) {
+  const words = text.split(/\s+/);
+  let line = '';
+  let lines = 0;
+  for (const word of words) {
+    const test = line ? `${line} ${word}` : word;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      ctx.fillText(line, x, y);
+      line = word;
+      y += lineHeight;
+      lines += 1;
+      if (lines >= maxLines) return y;
+    } else {
+      line = test;
+    }
+  }
+  if (line) ctx.fillText(line, x, y);
+  return y + lineHeight;
+}
+
+function getExportColumns(layoutStyle: string) {
+  if (layoutStyle === 'Clean grid') return 4;
+  if (layoutStyle === 'Structured brand grid') return 2;
+  return 3;
+}
+
+async function renderBoardToCanvas(board: Moodboard, layoutStyle: string): Promise<HTMLCanvasElement> {
+  const cols = getExportColumns(layoutStyle);
+  const cellW = 340;
+  const cellH = 230;
+  const gap = 18;
+  const padding = 48;
+  const headerH = 150;
+  const rows = Math.ceil(board.layout.length / cols);
+  const width = padding * 2 + cols * cellW + (cols - 1) * gap;
+  const height = padding * 2 + headerH + rows * cellH + (rows - 1) * gap + 60;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Canvas not supported');
+
+  ctx.fillStyle = '#d2dadd';
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.fillStyle = '#263d49';
+  ctx.font = 'bold 40px Georgia, serif';
+  ctx.fillText(board.title, padding, padding + 42);
+  ctx.font = '16px Arial';
+  ctx.fillStyle = '#435b65';
+  wrapCanvasText(ctx, board.tagline, padding, padding + 78, width - padding * 2, 22, 2);
+
+  for (let i = 0; i < board.layout.length; i += 1) {
+    const tile = board.layout[i];
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    const x = padding + col * (cellW + gap);
+    const y = padding + headerH + row * (cellH + gap);
+
+    if (tile.type === 'image') {
+      if (tile.imageUrl) {
+        try {
+          const img = await loadImageElement(tile.imageUrl);
+          drawCoverImage(ctx, img, x, y, cellW, cellH);
+        } catch {
+          ctx.fillStyle = tile.accent ?? '#8295a0';
+          ctx.fillRect(x, y, cellW, cellH);
+        }
+      } else {
+        ctx.fillStyle = tile.accent ?? '#8295a0';
+        ctx.fillRect(x, y, cellW, cellH);
+      }
+    } else if (tile.type === 'color') {
+      ctx.fillStyle = tile.accent ?? tile.value ?? '#8295a0';
+      ctx.fillRect(x, y, cellW, cellH);
+    } else {
+      ctx.fillStyle = '#e8e1d2';
+      ctx.fillRect(x, y, cellW, cellH);
+      ctx.fillStyle = '#263d49';
+      ctx.font = tile.type === 'quote' ? 'italic 19px Georgia, serif' : '15px Arial';
+      wrapCanvasText(ctx, tile.value, x + 18, y + 40, cellW - 36, tile.type === 'quote' ? 26 : 22, 7);
+    }
+
+    ctx.fillStyle = 'rgba(38,61,73,0.88)';
+    ctx.fillRect(x, y + cellH - 28, cellW, 28);
+    ctx.fillStyle = '#f1e5c9';
+    ctx.font = 'bold 11px Arial';
+    ctx.fillText(tile.label.toUpperCase(), x + 12, y + cellH - 9);
+  }
+
+  return canvas;
+}
+
+function canvasToPngBlob(canvas: HTMLCanvasElement): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error('Could not create image'))), 'image/png');
+  });
+}
+
 function TileArt({ tile }: { tile: MoodboardTile }) {
   if (tile.type === 'color') return <div className="h-full min-h-[100px] w-full" style={{ backgroundColor: tile.value }} />;
   if (tile.type === 'image') {
@@ -229,14 +348,37 @@ function MoodboardEditor({ board, boardType, purpose, layoutStyle, styles, promp
       setCopied('');
     }
   };
-  const download = () => {
-    const blob = new Blob([JSON.stringify(board, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = `${board.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'morrow-board'}.json`;
-    anchor.click();
-    URL.revokeObjectURL(url);
+  const [exporting, setExporting] = useState<'download' | 'copy' | null>(null);
+  const download = async () => {
+    setExporting('download');
+    try {
+      const canvas = await renderBoardToCanvas(board, layoutStyle);
+      const blob = await canvasToPngBlob(canvas);
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `${board.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'morrow-board'}.png`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Board export failed:', error);
+    } finally {
+      setExporting(null);
+    }
+  };
+  const copyBoardImage = async () => {
+    setExporting('copy');
+    try {
+      const canvas = await renderBoardToCanvas(board, layoutStyle);
+      const blob = await canvasToPngBlob(canvas);
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      setCopied('board');
+      window.setTimeout(() => setCopied(''), 1800);
+    } catch (error) {
+      console.error('Board copy failed:', error);
+    } finally {
+      setExporting(null);
+    }
   };
   return (
     <div className="mx-auto max-w-[1400px] px-5 py-7 sm:px-8 lg:px-12">
@@ -247,8 +389,8 @@ function MoodboardEditor({ board, boardType, purpose, layoutStyle, styles, promp
           <p className="mt-4 max-w-[600px] text-[15px] leading-7 text-[#435b65]" data-testid="text-moodboard-tagline">{board.tagline}</p>
         </div>
         <div className="flex shrink-0 gap-2">
-          <button type="button" onClick={() => copy(JSON.stringify(board, null, 2), 'board')} className="flex items-center gap-2 border border-[#263d49]/30 px-3 py-2 text-[10px] font-bold uppercase tracking-[.13em] text-[#263d49] transition-colors hover:border-[#b36b57] hover:text-[#b36b57]" data-testid="button-copy-moodboard">{copied === 'board' ? <Check size={14} /> : <Clipboard size={14} />} {copied === 'board' ? 'Copied' : 'Copy'}</button>
-          <button type="button" onClick={download} className="flex items-center gap-2 border border-[#263d49]/30 px-3 py-2 text-[10px] font-bold uppercase tracking-[.13em] text-[#263d49] transition-colors hover:border-[#b36b57] hover:text-[#b36b57]" data-testid="button-download-moodboard"><Download size={14} /> Download</button>
+          <button type="button" onClick={copyBoardImage} disabled={exporting !== null} className="flex items-center gap-2 border border-[#263d49]/30 px-3 py-2 text-[10px] font-bold uppercase tracking-[.13em] text-[#263d49] transition-colors hover:border-[#b36b57] hover:text-[#b36b57] disabled:opacity-60" data-testid="button-copy-moodboard">{copied === 'board' ? <Check size={14} /> : <Clipboard size={14} />} {exporting === 'copy' ? 'Copying…' : copied === 'board' ? 'Copied' : 'Copy'}</button>
+          <button type="button" onClick={download} disabled={exporting !== null} className="flex items-center gap-2 border border-[#263d49]/30 px-3 py-2 text-[10px] font-bold uppercase tracking-[.13em] text-[#263d49] transition-colors hover:border-[#b36b57] hover:text-[#b36b57] disabled:opacity-60" data-testid="button-download-moodboard"><Download size={14} /> {exporting === 'download' ? 'Preparing…' : 'Download'}</button>
         </div>
       </div>
       <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_310px]">
@@ -269,6 +411,7 @@ function MoodboardEditor({ board, boardType, purpose, layoutStyle, styles, promp
               {PROMPT_SUGGESTIONS.map((suggestion) => <button type="button" key={suggestion} onClick={() => refine.setPrompt(suggestion)} className="border border-[#263d49]/20 px-2 py-1.5 text-[10px] text-[#435b65] transition-colors hover:border-[#b36b57] hover:text-[#b36b57]" data-testid={`button-suggestion-${suggestion.replaceAll(' ', '-').toLowerCase()}`}>{suggestion}</button>)}
             </div>
             {refine.error && <p className="mt-3 text-[12px] leading-5 text-[#a25242]" data-testid="status-refine-error">{getErrorMessage(refine.error)}</p>}
+            {refine.isSuccess && !refine.isPending && !refine.error && <p className="mt-3 text-[12px] leading-5 text-[#5c7a52]" data-testid="status-refine-success">Direction applied \u2014 the board above just updated.</p>}
             <button type="submit" disabled={refine.isPending || refine.prompt.trim().length < 3} className="mt-5 flex w-full items-center justify-center gap-2 bg-[#263d49] px-4 py-3 text-[10px] font-bold uppercase tracking-[.15em] text-[#f1e5c9] transition-colors hover:bg-[#b36b57] disabled:cursor-not-allowed disabled:opacity-50" data-testid="button-refine-moodboard">{refine.isPending ? 'Reworking the thread' : 'Apply direction'} {refine.isPending ? <span className="loading-dashes" aria-hidden="true"><i /><i /><i /></span> : <Send size={14} />}</button>
           </form>
           <div className="border border-[#263d49]/20 bg-[#dbe0dd]/50 p-5" data-testid="panel-palette">

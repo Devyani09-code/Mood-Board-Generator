@@ -211,8 +211,9 @@ router.post("/moodboards/refine", requireAuth, async (req, res): Promise<void> =
       boardType,
       `Refine this existing ${boardType} for "${purpose}" using the selected styles: ${styles.join(", ")}. Preferred layout composition: ${layoutStyle}.
 The user's requested change is: "${prompt}".
+This change must be clearly visible in the result: update the specific tiles it affects (their label, value, and/or accent color), and reflect it in the direction paragraph and keywords too. Do not return a board that is nearly identical to the input \u2014 a refinement with no noticeable difference is a failure.
 Previous refinement requests, in order: ${promptHistory?.length ? promptHistory.map((item, index) => `${index + 1}. ${item}`).join(" | ") : "none yet"}.
-Preserve what is already working, but apply the request clearly and return the complete revised moodboard.
+Keep tiles that are unrelated to this request as they are, but change what the request asks for.
 Existing moodboard JSON:
 ${JSON.stringify(moodboard)}`,
     );
