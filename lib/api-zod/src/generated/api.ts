@@ -27,6 +27,8 @@ export const generateMoodboardBodyStylesMax = 6;
 
 
 export const GenerateMoodboardBody = zod.object({
+  "boardType": zod.enum(['moodboard', 'brandboard']),
+  "layoutStyle": zod.string(),
   "purpose": zod.string().min(generateMoodboardBodyPurposeMin),
   "styles": zod.array(zod.string()).min(1).max(generateMoodboardBodyStylesMax)
 })
@@ -52,7 +54,8 @@ export const GenerateMoodboardResponse = zod.object({
   "label": zod.string(),
   "value": zod.string(),
   "accent": zod.string().nullable(),
-  "size": zod.enum(['small', 'medium', 'large'])
+  "size": zod.enum(['small', 'medium', 'large']),
+  "imageUrl": zod.string().nullable().optional()
 }))
 })
 
@@ -74,6 +77,8 @@ export const refineMoodboardBodyMoodboardPaletteMax = 6;
 
 
 export const RefineMoodboardBody = zod.object({
+  "boardType": zod.enum(['moodboard', 'brandboard']),
+  "layoutStyle": zod.string(),
   "purpose": zod.string().min(refineMoodboardBodyPurposeMin),
   "styles": zod.array(zod.string()).min(1).max(refineMoodboardBodyStylesMax),
   "prompt": zod.string().min(refineMoodboardBodyPromptMin),
@@ -94,7 +99,8 @@ export const RefineMoodboardBody = zod.object({
   "label": zod.string(),
   "value": zod.string(),
   "accent": zod.string().nullable(),
-  "size": zod.enum(['small', 'medium', 'large'])
+  "size": zod.enum(['small', 'medium', 'large']),
+  "imageUrl": zod.string().nullable().optional()
 }))
 })
 })
@@ -120,7 +126,8 @@ export const RefineMoodboardResponse = zod.object({
   "label": zod.string(),
   "value": zod.string(),
   "accent": zod.string().nullable(),
-  "size": zod.enum(['small', 'medium', 'large'])
+  "size": zod.enum(['small', 'medium', 'large']),
+  "imageUrl": zod.string().nullable().optional()
 }))
 })
 

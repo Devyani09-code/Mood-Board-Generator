@@ -15,4 +15,6 @@ export interface MoodboardTile {
   /** @nullable */
   accent: string | null;
   size: MoodboardTileSize;
+  /** @nullable */
+  imageUrl?: string | null;
 }

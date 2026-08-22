@@ -53,8 +53,9 @@ const moodboardShape = {
           value: { type: "string" },
           accent: { type: ["string", "null"] },
           size: { type: "string", enum: ["small", "medium", "large"] },
+          imageUrl: { type: ["string", "null"] },
         },
-        required: ["type", "label", "value", "accent", "size"],
+        required: ["type", "label", "value", "accent", "size", "imageUrl"],
         additionalProperties: false,
       },
     },
@@ -63,13 +64,22 @@ const moodboardShape = {
   additionalProperties: false,
 } as const;
 
-const baseSystemPrompt = `You are a senior art director creating an editorial moodboard for a creative person.
+const moodboardSystemPrompt = `You are a senior art director creating an editorial moodboard for a creative person.
 Return only valid JSON matching the requested schema. Keep the board specific, evocative, and practical.
-Use 4-6 palette colors with valid 6-digit hex values. Create 7-9 layout tiles, mixing image, text, color, and quote.
-For image tiles, use a short evocative visual description instead of a URL. For quote tiles, write original copy, never attribute it to a real person.
+Use 4-6 palette colors with valid 6-digit hex values. Create 7-9 layout tiles, mixing image, text, color, and quote, with at least 4 image tiles.
+For image tiles, the "value" field must be a short, concrete Unsplash search query (2-4 words, e.g. "sun-bleached terracotta rooftop", "moody midnight ocean") that would realistically return a matching real photo. Do not write a poetic description, write a searchable query.
+For quote tiles, write original copy, never attribute it to a real person.
 Make each tile label useful and each size intentional.`;
 
-async function createMoodboard(prompt: string): Promise<unknown> {
+const brandboardSystemPrompt = `You are a senior brand designer creating a brand board for a creative person's product or business idea.
+Return only valid JSON matching the requested schema. Keep the board specific, practical, and on-brand.
+Use 4-6 palette colors with valid 6-digit hex values, labeled by role (primary, secondary, accent, neutral, etc).
+Create 7-9 layout tiles using mostly text and color tile types: a tile for the brand name/logo concept, a tagline tile, a typography direction tile (describe the type pairing in words), a voice/tone tile, and 2-3 palette/color tiles. You may include at most 1-2 image tiles for texture/mood reference only.
+For any image tile, the "value" field must be a short concrete Unsplash search query (2-4 words) for a texture or background reference, not a product mockup.
+For quote/text tiles, write original brand copy, never attribute it to a real person.
+Make each tile label useful and each size intentional.`;
+
+async function createMoodboard(boardType: "moodboard" | "brandboard", prompt: string): Promise<unknown> {
   const response = await openai.chat.completions.create({
     model: "gpt-5.4-mini",
     max_completion_tokens: 2400,
@@ -82,7 +92,7 @@ async function createMoodboard(prompt: string): Promise<unknown> {
       },
     },
     messages: [
-      { role: "system", content: baseSystemPrompt },
+      { role: "system", content: boardType === "brandboard" ? brandboardSystemPrompt : moodboardSystemPrompt },
       { role: "user", content: prompt },
     ],
   });
@@ -92,7 +102,34 @@ async function createMoodboard(prompt: string): Promise<unknown> {
     throw new Error("AI returned an empty moodboard");
   }
 
-  return JSON.parse(content);
+  const parsed = JSON.parse(content) as { layout?: Array<{ type: string; value: string; imageUrl?: string | null }> };
+  if (Array.isArray(parsed.layout)) {
+    await Promise.all(
+      parsed.layout.map(async (tile) => {
+        if (tile.type === "image") {
+          tile.imageUrl = await fetchUnsplashImage(tile.value);
+        }
+      }),
+    );
+  }
+
+  return parsed;
+}
+
+async function fetchUnsplashImage(query: string): Promise<string | null> {
+  const accessKey = process.env.UNSPLASH_ACCESS_KEY;
+  if (!accessKey) return null;
+  try {
+    const url = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=1&orientation=squarish`;
+    const response = await fetch(url, {
+      headers: { Authorization: `Client-ID ${accessKey}` },
+    });
+    if (!response.ok) return null;
+    const data = (await response.json()) as { results?: Array<{ urls?: { regular?: string } }> };
+    return data.results?.[0]?.urls?.regular ?? null;
+  } catch {
+    return null;
+  }
 }
 
 router.post("/moodboards/generate", requireAuth, async (req, res): Promise<void> => {
@@ -104,11 +141,13 @@ router.post("/moodboards/generate", requireAuth, async (req, res): Promise<void>
   }
 
   try {
-    const { purpose, styles } = parsed.data;
+    const { purpose, styles, boardType, layoutStyle } = parsed.data;
     const moodboard = await createMoodboard(
-      `Create a moodboard for this purpose: "${purpose}".
+      boardType,
+      `Create a ${boardType} for this purpose: "${purpose}".
 Selected style directions: ${styles.join(", ")}.
-Give it a memorable title, a concise tagline, a visual direction paragraph, useful keywords, and a tactile editorial composition.`,
+Preferred layout composition: ${layoutStyle}.
+Give it a memorable title, a concise tagline, a visual direction paragraph, useful keywords, and a tactile ${boardType === "brandboard" ? "brand identity" : "editorial"} composition.`,
     );
     res.json(GenerateMoodboardResponse.parse(moodboard));
   } catch (error) {
@@ -126,9 +165,10 @@ router.post("/moodboards/refine", requireAuth, async (req, res): Promise<void> =
   }
 
   try {
-    const { purpose, styles, prompt, promptHistory, moodboard } = parsed.data;
+    const { purpose, styles, prompt, promptHistory, moodboard, boardType, layoutStyle } = parsed.data;
     const refined = await createMoodboard(
-      `Refine this existing moodboard for "${purpose}" using the selected styles: ${styles.join(", ")}.
+      boardType,
+      `Refine this existing ${boardType} for "${purpose}" using the selected styles: ${styles.join(", ")}. Preferred layout composition: ${layoutStyle}.
 The user's requested change is: "${prompt}".
 Previous refinement requests, in order: ${promptHistory?.length ? promptHistory.map((item, index) => `${index + 1}. ${item}`).join(" | ") : "none yet"}.
 Preserve what is already working, but apply the request clearly and return the complete revised moodboard.

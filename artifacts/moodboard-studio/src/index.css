@@ -157,7 +157,9 @@
 }
 .paper-wash {
   background-color: #d1d7d7;
-  background-size: 720px auto;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 .serif { font-family: var(--app-font-serif); }
 .eyebrow { font-size: .68rem; line-height: 1; letter-spacing: .18em; text-transform: uppercase; font-weight: 700; }

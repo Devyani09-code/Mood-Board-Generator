@@ -8,6 +8,11 @@ import { Link } from 'wouter';
 
 const STYLE_OPTIONS = ['quiet luxury', 'raw & tactile', 'cinematic', 'sun-washed', 'editorial', 'strange & tender'];
 const PROMPT_SUGGESTIONS = ['More room to breathe', 'Pull it toward midnight', 'Make it feel hand-made'];
+const BOARD_TYPE_OPTIONS: Array<{ value: 'moodboard' | 'brandboard'; label: string; copy: string }> = [
+  { value: 'moodboard', label: 'Moodboard', copy: 'A visual reference collage of real photos, color, and tone.' },
+  { value: 'brandboard', label: 'Brand board', copy: 'A structured identity board \u2014 logo direction, typography, palette, voice.' },
+];
+const LAYOUT_OPTIONS = ['Asymmetric collage', 'Clean grid', 'Scrapbook stack', 'Structured brand grid'];
 
 function getErrorMessage(error: unknown) {
   if (typeof error === 'object' && error && 'data' in error) {
@@ -20,8 +25,12 @@ function getErrorMessage(error: unknown) {
 
 function BriefCard({
   step,
+  boardType,
+  setBoardType,
   purpose,
   setPurpose,
+  layoutStyle,
+  setLayoutStyle,
   styles,
   toggleStyle,
   onAdvance,
@@ -32,8 +41,12 @@ function BriefCard({
   error,
 }: {
   step: number;
+  boardType: 'moodboard' | 'brandboard' | null;
+  setBoardType: (value: 'moodboard' | 'brandboard') => void;
   purpose: string;
   setPurpose: (value: string) => void;
+  layoutStyle: string;
+  setLayoutStyle: (value: string) => void;
   styles: string[];
   toggleStyle: (style: string) => void;
   onAdvance: () => void;
@@ -45,11 +58,19 @@ function BriefCard({
 }) {
   const [notice, setNotice] = useState('');
   const advance = () => {
-    if (step === 1 && purpose.trim().length < 3) {
+    if (step === 1 && !boardType) {
+      setNotice('Choose a board type to continue.');
+      return;
+    }
+    if (step === 2 && purpose.trim().length < 3) {
       setNotice('Give the idea a little more room — three characters is enough.');
       return;
     }
-    if (step === 2 && styles.length === 0) {
+    if (step === 3 && !layoutStyle) {
+      setNotice('Pick a layout to continue.');
+      return;
+    }
+    if (step === 4 && styles.length === 0) {
       setNotice('Choose at least one visual instinct.');
       return;
     }
@@ -64,7 +85,7 @@ function BriefCard({
       <div className="relative border border-[#263d49]/30 bg-[#e7e2d5]/95 p-7 shadow-[0_22px_50px_rgba(38,61,73,.18)] sm:p-12">
         <div className="flex items-center justify-between border-b border-[#263d49]/20 pb-4">
           <span className="eyebrow text-[#b36b57]">{step === 0 ? 'A note before we begin' : `Fragment 0${step}`}</span>
-          <span className="text-[11px] font-bold text-[#435b65]">{step + 1} / 3</span>
+          <span className="text-[11px] font-bold text-[#435b65]">{step + 1} / 5</span>
         </div>
         {step === 0 && (
             <div className="py-10 sm:py-12">
@@ -74,12 +95,45 @@ function BriefCard({
         )}
         {step === 1 && (
           <div className="py-10 sm:py-12">
+            <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#263d49]">What are you <em>building?</em></h2>
+            <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#435b65]">Choose the kind of board that fits what you need right now.</p>
+            <div className="mt-9 grid gap-3 sm:grid-cols-2">
+              {BOARD_TYPE_OPTIONS.map((option) => {
+                const selected = boardType === option.value;
+                return (
+                  <button type="button" key={option.value} onClick={() => setBoardType(option.value)} className={`rounded-lg border p-4 text-left transition-all ${selected ? 'border-[#263d49] bg-[#263d49] text-[#f1e5c9]' : 'border-[#263d49]/30 text-[#435b65] hover:-translate-y-0.5 hover:border-[#b36b57]'}`} data-testid={`button-board-type-${option.value}`} aria-pressed={selected}>
+                    <span className="flex items-center gap-2 text-[13px] font-bold">{selected && <Check size={14} />}{option.label}</span>
+                    <span className={`mt-1.5 block text-[11px] leading-5 ${selected ? 'text-[#f1e5c9]/75' : 'text-[#435b65]/80'}`}>{option.copy}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+        {step === 2 && (
+          <div className="py-10 sm:py-12">
             <label htmlFor="purpose" className="serif italic block max-w-[560px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#263d49]">What are you <em>making?</em></label>
             <p className="mt-5 max-w-[360px] text-[13px] leading-6 text-[#435b65]">A sentence, a secret, a working title. Follow the thread rather than polishing it.</p>
             <textarea id="purpose" value={purpose} onChange={(event) => setPurpose(event.target.value)} placeholder="I want to make..." rows={3} className="mt-9 w-full resize-none border-0 border-b border-[#263d49]/35 bg-transparent px-0 py-3 text-[18px] leading-7 text-[#263d49] outline-none placeholder:text-[#435b65]/50 focus:border-[#b36b57]" data-testid="input-purpose" />
           </div>
         )}
-        {step === 2 && (
+        {step === 3 && (
+          <div className="py-10 sm:py-12">
+            <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#263d49]">Pick a <em>layout.</em></h2>
+            <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#435b65]">How should the board be composed?</p>
+            <div className="mt-9 flex flex-wrap gap-2.5">
+              {LAYOUT_OPTIONS.map((option) => {
+                const selected = layoutStyle === option;
+                return (
+                  <button type="button" key={option} onClick={() => setLayoutStyle(option)} className={`rounded-full border px-4 py-2.5 text-[12px] transition-all ${selected ? 'border-[#263d49] bg-[#263d49] text-[#f1e5c9]' : 'border-[#263d49]/30 text-[#435b65] hover:-translate-y-0.5 hover:border-[#b36b57] hover:text-[#b36b57]'}`} data-testid={`button-layout-${option.replaceAll(' ', '-').toLowerCase()}`} aria-pressed={selected}>
+                    {selected && <Check size={13} className="mr-1.5 inline" />}{option}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+        {step === 4 && (
           <div className="py-10 sm:py-12">
             <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#263d49]">What is the <em>weather?</em></h2>
             <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#435b65]">Choose the instincts that already belong to the idea. You can hold more than one.</p>
@@ -98,9 +152,9 @@ function BriefCard({
         {notice && <p className="mb-5 text-[12px] font-medium text-[#a25242]" data-testid="status-brief-validation">{notice}</p>}
         {Boolean(error) && <p className="mb-5 border-l-2 border-[#a25242] pl-3 text-[12px] leading-5 text-[#a25242]" data-testid="status-generation-error">{getErrorMessage(error)}</p>}
         <div className="flex items-center justify-between border-t border-[#263d49]/20 pt-5">
-          <span className="hidden text-[11px] uppercase tracking-[.14em] text-[#435b65]/70 sm:block">{step === 0 ? 'Take a breath' : step === 1 ? 'Keep it close' : 'Trust your eye'}</span>
-          <button type="button" onClick={step === 2 ? onGenerate : advance} disabled={isGenerating} className="group ml-auto flex items-center gap-3 rounded-full bg-[#263d49] px-5 py-3 text-[11px] font-bold uppercase tracking-[.15em] text-[#f1e5c9] transition-all hover:bg-[#b36b57] disabled:cursor-wait disabled:opacity-60" data-testid={step === 2 ? 'button-generate-moodboard' : 'button-advance-brief'}>
-            {isGenerating ? 'Developing the board' : step === 2 ? 'Develop my board' : 'Continue'} {isGenerating ? <span className="loading-dashes" aria-hidden="true"><i /><i /><i /></span> : <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />}
+          <span className="hidden text-[11px] uppercase tracking-[.14em] text-[#435b65]/70 sm:block">{step === 0 ? 'Take a breath' : step === 4 ? 'Trust your eye' : 'Keep it close'}</span>
+          <button type="button" onClick={step === 4 ? onGenerate : advance} disabled={isGenerating} className="group ml-auto flex items-center gap-3 rounded-full bg-[#263d49] px-5 py-3 text-[11px] font-bold uppercase tracking-[.15em] text-[#f1e5c9] transition-all hover:bg-[#b36b57] disabled:cursor-wait disabled:opacity-60" data-testid={step === 4 ? 'button-generate-moodboard' : 'button-advance-brief'}>
+            {isGenerating ? 'Developing the board' : step === 4 ? 'Develop my board' : 'Continue'} {isGenerating ? <span className="loading-dashes" aria-hidden="true"><i /><i /><i /></span> : <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />}
           </button>
         </div>
       </div>
@@ -110,7 +164,12 @@ function BriefCard({
 
 function TileArt({ tile }: { tile: MoodboardTile }) {
   if (tile.type === 'color') return <div className="h-full min-h-[100px] w-full" style={{ backgroundColor: tile.value }} />;
-  if (tile.type === 'image') return <div className="tile-image-art h-full min-h-[170px] w-full overflow-hidden" />;
+  if (tile.type === 'image') {
+    if (tile.imageUrl) {
+      return <img src={tile.imageUrl} alt={tile.label} className="h-full min-h-[170px] w-full object-cover" loading="lazy" />;
+    }
+    return <div className="tile-image-art h-full min-h-[170px] w-full overflow-hidden" />;
+  }
   if (tile.type === 'quote') return <div className="flex h-full min-h-[120px] items-center justify-center bg-[#263d49] p-6 text-center text-[#f1e5c9]"><span className="serif text-2xl leading-tight">“{tile.value}”</span></div>;
   return <div className="flex h-full min-h-[100px] items-end bg-[#d9c6a0] p-5"><span className="serif text-2xl leading-tight text-[#263d49]">{tile.value}</span></div>;
 }
@@ -127,8 +186,8 @@ function MoodboardTileCard({ tile, index }: { tile: MoodboardTile; index: number
   );
 }
 
-function MoodboardEditor({ board, purpose, styles, promptHistory, onReset, onRefined }: { board: Moodboard; purpose: string; styles: string[]; promptHistory: string[]; onReset: () => void; onRefined: (board: Moodboard, prompt: string) => void }) {
-  const refine = useRefinement(board, purpose, styles, promptHistory, onRefined);
+function MoodboardEditor({ board, boardType, purpose, layoutStyle, styles, promptHistory, onReset, onRefined }: { board: Moodboard; boardType: 'moodboard' | 'brandboard'; purpose: string; layoutStyle: string; styles: string[]; promptHistory: string[]; onReset: () => void; onRefined: (board: Moodboard, prompt: string) => void }) {
+  const refine = useRefinement(board, boardType, purpose, layoutStyle, styles, promptHistory, onRefined);
   const [copied, setCopied] = useState('');
   const copy = async (text: string, label: string) => {
     try {
@@ -197,7 +256,7 @@ function MoodboardEditor({ board, purpose, styles, promptHistory, onReset, onRef
   );
 }
 
-function useRefinement(board: Moodboard, purpose: string, styles: string[], promptHistory: string[], onRefined: (board: Moodboard, prompt: string) => void) {
+function useRefinement(board: Moodboard, boardType: 'moodboard' | 'brandboard', purpose: string, layoutStyle: string, styles: string[], promptHistory: string[], onRefined: (board: Moodboard, prompt: string) => void) {
   const [prompt, setPrompt] = useState('');
   const mutation = useRefineMoodboard({
     mutation: {
@@ -214,7 +273,7 @@ function useRefinement(board: Moodboard, purpose: string, styles: string[], prom
     submit: (event: FormEvent) => {
       event.preventDefault();
       if (prompt.trim().length < 3 || mutation.isPending) return;
-      mutation.mutate({ data: { purpose, styles, prompt: prompt.trim(), promptHistory, moodboard: board } });
+      mutation.mutate({ data: { boardType, purpose, layoutStyle, styles, prompt: prompt.trim(), promptHistory, moodboard: board } });
     },
   };
 }
@@ -333,7 +392,9 @@ export default function StudioPage() {
   const { user } = useUser();
   const { signOut } = useClerk();
   const [step, setStep] = useState(0);
+  const [boardType, setBoardType] = useState<'moodboard' | 'brandboard' | null>(null);
   const [purpose, setPurpose] = useState('');
+  const [layoutStyle, setLayoutStyle] = useState('');
   const [styles, setStyles] = useState<string[]>([]);
   const [board, setBoard] = useState<Moodboard | null>(null);
   const [history, setHistory] = useState<Moodboard[]>([]);
@@ -347,20 +408,20 @@ export default function StudioPage() {
   const toggleStyle = (style: string) => setStyles((current) => current.includes(style) ? current.filter((item) => item !== style) : [...current, style]);
   const advance = () => {
     setIsExiting(true);
-    window.setTimeout(() => { setStep((current) => Math.min(current + 1, 2)); setIsExiting(false); }, 400);
+    window.setTimeout(() => { setStep((current) => Math.min(current + 1, 4)); setIsExiting(false); }, 400);
   };
   const submit = () => {
-    if (purpose.trim().length < 3 || styles.length === 0) return;
-    generate.mutate({ data: { purpose: purpose.trim(), styles } });
+    if (!boardType || purpose.trim().length < 3 || !layoutStyle || styles.length === 0) return;
+    generate.mutate({ data: { boardType, purpose: purpose.trim(), layoutStyle, styles } });
   };
-  const reset = () => { setBoard(null); setStep(0); setPurpose(''); setStyles([]); };
+  const reset = () => { setBoard(null); setStep(0); setBoardType(null); setPurpose(''); setLayoutStyle(''); setStyles([]); };
   const healthLabel = useMemo(() => health.data?.status === 'ok' ? 'studio connected' : health.isLoading ? 'checking studio' : 'quiet mode', [health.data?.status, health.isLoading]);
 
   if (board) {
     return (
       <main className="grain min-h-[100dvh] bg-[#d2dadd] text-[#263d49]" style={{ backgroundImage: `linear-gradient(rgba(210,218,221,.82), rgba(210,218,221,.82)), url(${paperTexture})`, backgroundSize: 'cover', backgroundAttachment: 'fixed' }}>
         <StudioHeader healthLabel={healthLabel} userName={user?.firstName || 'maker'} signOut={() => signOut({ redirectUrl: import.meta.env.BASE_URL || '/' })} />
-        <MoodboardEditor board={board} purpose={purpose} styles={styles} onReset={reset} onRefined={setBoard} />
+        <MoodboardEditor board={board} boardType={boardType ?? 'moodboard'} purpose={purpose} layoutStyle={layoutStyle} styles={styles} promptHistory={promptHistory} onReset={reset} onRefined={(nextBoard, prompt) => { setBoard(nextBoard); setPromptHistory((current) => [...current, prompt].slice(-8)); }} />
       </main>
     );
   }
@@ -370,11 +431,11 @@ export default function StudioPage() {
       <section className="flex min-h-[calc(100dvh-80px)] flex-col items-center justify-center px-5 py-12 sm:px-8">
         <div className="mb-8 w-full max-w-[700px]">
           <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[.16em] text-[#435b65]">
-            <span>New visual direction</span><span data-testid="text-brief-progress">{Math.round(((step + 1) / 3) * 100)}%</span>
+            <span>New visual direction</span><span data-testid="text-brief-progress">{Math.round(((step + 1) / 5) * 100)}%</span>
           </div>
-          <div className="mt-3 h-[2px] w-full bg-[#263d49]/15"><div className="h-full bg-[#b36b57] transition-all duration-500" style={{ width: `${((step + 1) / 3) * 100}%` }} /></div>
+          <div className="mt-3 h-[2px] w-full bg-[#263d49]/15"><div className="h-full bg-[#b36b57] transition-all duration-500" style={{ width: `${((step + 1) / 5) * 100}%` }} /></div>
         </div>
-        <BriefCard step={step} purpose={purpose} setPurpose={setPurpose} styles={styles} toggleStyle={toggleStyle} onAdvance={advance} onGenerate={submit} isExiting={isExiting} isGenerating={generate.isPending} error={generate.error} />
+        <BriefCard step={step} boardType={boardType} setBoardType={setBoardType} purpose={purpose} setPurpose={setPurpose} layoutStyle={layoutStyle} setLayoutStyle={setLayoutStyle} styles={styles} toggleStyle={toggleStyle} onAdvance={advance} onGenerate={submit} isExiting={isExiting} isGenerating={generate.isPending} error={generate.error} />
       </section>
     </main>
   );

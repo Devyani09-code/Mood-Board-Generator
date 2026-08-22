@@ -98,6 +98,11 @@ components:
     MoodboardGenerateInput:
       type: object
       properties:
+        boardType:
+          type: string
+          enum: [moodboard, brandboard]
+        layoutStyle:
+          type: string
         purpose:
           type: string
           minLength: 3
@@ -108,11 +113,18 @@ components:
           items:
             type: string
       required:
+        - boardType
+        - layoutStyle
         - purpose
         - styles
     MoodboardRefineInput:
       type: object
       properties:
+        boardType:
+          type: string
+          enum: [moodboard, brandboard]
+        layoutStyle:
+          type: string
         purpose:
           type: string
           minLength: 3
@@ -133,6 +145,8 @@ components:
         moodboard:
           $ref: "#/components/schemas/Moodboard"
       required:
+        - boardType
+        - layoutStyle
         - purpose
         - styles
         - prompt
@@ -198,6 +212,8 @@ components:
         size:
           type: string
           enum: [small, medium, large]
+        imageUrl:
+          type: ["string", "null"]
       required:
         - type
         - label

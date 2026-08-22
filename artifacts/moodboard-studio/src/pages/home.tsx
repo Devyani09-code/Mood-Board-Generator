@@ -27,10 +27,10 @@ export default function HomePage() {
                 <span className="eyebrow">A private creative ritual</span>
               </div>
               <h1 className="reveal reveal-delay-1 serif mt-8 max-w-[760px] text-[clamp(4rem,9vw,9.2rem)] leading-[.84] tracking-[-.065em] text-[#263d49]">
-                Give the<br /><em>idea</em> a world.
+                Stage your <em>ideas</em>.
               </h1>
               <p className="reveal reveal-delay-2 mt-9 max-w-[470px] text-[15px] leading-7 text-[#435b65] sm:text-[17px]">
-                Morrow is the quiet room between a first thought and a clear direction. Bring an unfinished feeling. Leave with a visual language you can trust.
+                Morrow transforms early ideas into considered visual identities. Bring the starting point. Leave with a clear creative direction and a visual language built to stand apart.
               </p>
               <div className="reveal reveal-delay-3 mt-10 flex flex-wrap items-center gap-4">
                 <Link href="/sign-up" className="group flex items-center gap-3 rounded-full bg-[#263d49] px-6 py-3.5 text-[11px] font-bold uppercase tracking-[.15em] text-[#f1e5c9] transition-all hover:-translate-y-0.5 hover:bg-[#b36b57]" data-testid="link-start-ritual">
@@ -69,9 +69,9 @@ export default function HomePage() {
             </div>
             <div className="grid gap-0 sm:grid-cols-3">
               {[
-                ['01', 'Name the feeling', 'A small prompt makes room for what you already know.'],
-                ['02', 'Choose the weather', 'Select a few visual instincts. Contradiction is welcome.'],
-                ['03', 'Follow the thread', 'A living board appears. Nudge it until it sounds like you.'],
+                ['01', 'Describe the idea', 'A few sentences are enough. Tell us what you\u2019re building and why it matters.'],
+                ['02', 'Set the direction', 'Pick the visual styles that fit. Mix and match freely.'],
+                ['03', 'Refine the board', 'Your moodboard takes shape instantly. Adjust it until it\u2019s exactly right.'],
               ].map(([number, title, copy], index) => (
                 <div key={number} className={`border-t border-[#f1e5c9]/25 py-6 sm:border-l sm:border-t-0 sm:pl-6 ${index > 0 ? 'mt-4 sm:mt-0' : ''}`} data-testid={`card-ritual-step-${number}`}>
                   <span className="text-[11px] tracking-[.18em] text-[#d7a491]">{number}</span>

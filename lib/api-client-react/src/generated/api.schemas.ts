@@ -9,7 +9,17 @@ export interface HealthStatus {
   status: string;
 }
 
+export type MoodboardGenerateInputBoardType = typeof MoodboardGenerateInputBoardType[keyof typeof MoodboardGenerateInputBoardType];
+
+
+export const MoodboardGenerateInputBoardType = {
+  moodboard: 'moodboard',
+  brandboard: 'brandboard',
+} as const;
+
 export interface MoodboardGenerateInput {
+  boardType: MoodboardGenerateInputBoardType;
+  layoutStyle: string;
   /** @minLength 3 */
   purpose: string;
   /**
@@ -51,6 +61,8 @@ export interface MoodboardTile {
   /** @nullable */
   accent: string | null;
   size: MoodboardTileSize;
+  /** @nullable */
+  imageUrl?: string | null;
 }
 
 export interface Moodboard {
@@ -68,6 +80,8 @@ export interface Moodboard {
 }
 
 export interface MoodboardRefineInput {
+  boardType: MoodboardGenerateInputBoardType;
+  layoutStyle: string;
   /** @minLength 3 */
   purpose: string;
   /**
