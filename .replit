@@ -21,3 +21,8 @@ timeoutMs = 20000
 
 [nix]
 channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+PEXELS_API_KEY = "K2rJ9esaBYPeUf1z1UIMVyIqioh5bLSJeC3nELTg4qNI4mvMy3FYkEfn"
