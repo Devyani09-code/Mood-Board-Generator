@@ -144,6 +144,35 @@ async function fetchUnsplashImage(query: string): Promise<string | null> {
   }
 }
 
+router.get("/moodboards/debug/unsplash", async (req, res): Promise<void> => {
+  const accessKey = process.env.UNSPLASH_ACCESS_KEY;
+  const query = typeof req.query.query === "string" ? req.query.query : "sunset ocean";
+  if (!accessKey) {
+    res.json({ ok: false, reason: "UNSPLASH_ACCESS_KEY is not set in the environment" });
+    return;
+  }
+  try {
+    const url = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=1&orientation=squarish`;
+    const response = await fetch(url, { headers: { Authorization: `Client-ID ${accessKey}` } });
+    const bodyText = await response.text();
+    let bodyJson: unknown = null;
+    try {
+      bodyJson = JSON.parse(bodyText);
+    } catch {
+      bodyJson = bodyText;
+    }
+    res.json({
+      ok: response.ok,
+      status: response.status,
+      statusText: response.statusText,
+      keyPrefix: accessKey.slice(0, 6),
+      body: bodyJson,
+    });
+  } catch (error) {
+    res.json({ ok: false, reason: "fetch threw", error: error instanceof Error ? error.message : String(error) });
+  }
+});
+
 router.post("/moodboards/generate", requireAuth, async (req, res): Promise<void> => {
   const parsed = GenerateMoodboardBody.safeParse(req.body);
   if (!parsed.success) {
