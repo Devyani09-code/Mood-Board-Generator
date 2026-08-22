@@ -118,16 +118,28 @@ async function createMoodboard(boardType: "moodboard" | "brandboard", prompt: st
 
 async function fetchUnsplashImage(query: string): Promise<string | null> {
   const accessKey = process.env.UNSPLASH_ACCESS_KEY;
-  if (!accessKey) return null;
+  if (!accessKey) {
+    console.error("[unsplash] UNSPLASH_ACCESS_KEY is not set in the environment");
+    return null;
+  }
   try {
     const url = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=1&orientation=squarish`;
     const response = await fetch(url, {
       headers: { Authorization: `Client-ID ${accessKey}` },
     });
-    if (!response.ok) return null;
+    if (!response.ok) {
+      const body = await response.text().catch(() => "");
+      console.error(`[unsplash] request failed for query "${query}": ${response.status} ${response.statusText} ${body}`);
+      return null;
+    }
     const data = (await response.json()) as { results?: Array<{ urls?: { regular?: string } }> };
-    return data.results?.[0]?.urls?.regular ?? null;
-  } catch {
+    const photoUrl = data.results?.[0]?.urls?.regular ?? null;
+    if (!photoUrl) {
+      console.error(`[unsplash] no results returned for query "${query}"`);
+    }
+    return photoUrl;
+  } catch (error) {
+    console.error(`[unsplash] fetch threw for query "${query}":`, error);
     return null;
   }
 }
