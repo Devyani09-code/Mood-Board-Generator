@@ -20,6 +20,7 @@ export const MoodboardGenerateInputBoardType = {
 export interface MoodboardGenerateInput {
   boardType: MoodboardGenerateInputBoardType;
   layoutStyle: string;
+  imageCount: number;
   /** @minLength 3 */
   purpose: string;
   /**
@@ -82,6 +83,7 @@ export interface Moodboard {
 export interface MoodboardRefineInput {
   boardType: MoodboardGenerateInputBoardType;
   layoutStyle: string;
+  imageCount: number;
   /** @minLength 3 */
   purpose: string;
   /**

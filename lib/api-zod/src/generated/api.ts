@@ -29,6 +29,7 @@ export const generateMoodboardBodyStylesMax = 6;
 export const GenerateMoodboardBody = zod.object({
   "boardType": zod.enum(['moodboard', 'brandboard']),
   "layoutStyle": zod.string(),
+  "imageCount": zod.number().min(1).max(12),
   "purpose": zod.string().min(generateMoodboardBodyPurposeMin),
   "styles": zod.array(zod.string()).min(1).max(generateMoodboardBodyStylesMax)
 })
@@ -79,6 +80,7 @@ export const refineMoodboardBodyMoodboardPaletteMax = 6;
 export const RefineMoodboardBody = zod.object({
   "boardType": zod.enum(['moodboard', 'brandboard']),
   "layoutStyle": zod.string(),
+  "imageCount": zod.number().min(1).max(12),
   "purpose": zod.string().min(refineMoodboardBodyPurposeMin),
   "styles": zod.array(zod.string()).min(1).max(refineMoodboardBodyStylesMax),
   "prompt": zod.string().min(refineMoodboardBodyPromptMin),
