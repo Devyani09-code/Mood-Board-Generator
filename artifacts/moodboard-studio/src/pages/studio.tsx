@@ -162,6 +162,36 @@ function BriefCard({
   );
 }
 
+function getLayoutConfig(layoutStyle: string) {
+  switch (layoutStyle) {
+    case 'Clean grid':
+      return {
+        container: 'grid auto-rows-[160px] grid-cols-2 gap-4 sm:auto-rows-[170px] sm:grid-cols-4',
+        tileSize: () => '',
+        tileExtra: () => 'rounded-sm',
+      };
+    case 'Scrapbook stack':
+      return {
+        container: 'grid auto-rows-[150px] grid-cols-2 gap-6 sm:auto-rows-[160px] sm:grid-cols-3',
+        tileSize: (tile: MoodboardTile) => tile.size === 'large' ? 'sm:col-span-2 sm:row-span-2' : tile.size === 'medium' ? 'sm:row-span-2' : '',
+        tileExtra: (index: number) => `${['rotate-[-2deg]', 'rotate-[1.5deg]', 'rotate-[-1deg]'][index % 3]} shadow-xl`,
+      };
+    case 'Structured brand grid':
+      return {
+        container: 'grid auto-rows-[170px] grid-cols-2 gap-2',
+        tileSize: (_tile: MoodboardTile, index: number) => index === 0 ? 'col-span-2 row-span-2' : '',
+        tileExtra: () => 'rounded-none',
+      };
+    case 'Asymmetric collage':
+    default:
+      return {
+        container: 'grid auto-rows-[135px] grid-cols-1 gap-3 sm:auto-rows-[150px] sm:grid-cols-3',
+        tileSize: (tile: MoodboardTile) => tile.size === 'large' ? 'sm:col-span-2 sm:row-span-2' : tile.size === 'medium' ? 'sm:row-span-2' : '',
+        tileExtra: () => '',
+      };
+  }
+}
+
 function TileArt({ tile }: { tile: MoodboardTile }) {
   if (tile.type === 'color') return <div className="h-full min-h-[100px] w-full" style={{ backgroundColor: tile.value }} />;
   if (tile.type === 'image') {
@@ -174,10 +204,11 @@ function TileArt({ tile }: { tile: MoodboardTile }) {
   return <div className="flex h-full min-h-[100px] items-end bg-[#d9c6a0] p-5"><span className="serif text-2xl leading-tight text-[#263d49]">{tile.value}</span></div>;
 }
 
-function MoodboardTileCard({ tile, index }: { tile: MoodboardTile; index: number }) {
-  const sizeClass = tile.size === 'large' ? 'sm:col-span-2 sm:row-span-2' : tile.size === 'medium' ? 'sm:row-span-2' : '';
+function MoodboardTileCard({ tile, index, layoutConfig }: { tile: MoodboardTile; index: number; layoutConfig: ReturnType<typeof getLayoutConfig> }) {
+  const sizeClass = layoutConfig.tileSize(tile, index);
+  const extraClass = layoutConfig.tileExtra(index);
   return (
-    <article className={`group relative overflow-hidden border border-[#263d49]/25 bg-[#e8e1d2] ${sizeClass}`} data-testid={`card-moodboard-tile-${index}`}>
+    <article className={`group relative overflow-hidden border border-[#263d49]/25 bg-[#e8e1d2] ${sizeClass} ${extraClass}`} data-testid={`card-moodboard-tile-${index}`}>
       <TileArt tile={tile} />
       <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-[#263d49]/85 px-3 py-2 text-[9px] font-bold uppercase tracking-[.14em] text-[#f1e5c9]">
         <span>{tile.label}</span><span className="text-[#d7a491]">{tile.type}</span>
@@ -222,8 +253,8 @@ function MoodboardEditor({ board, boardType, purpose, layoutStyle, styles, promp
       </div>
       <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_310px]">
         <section className="studio-grid border border-[#263d49]/15 bg-[#dce0dc]/45 p-3 sm:p-5" data-testid="panel-moodboard-canvas">
-          <div className="grid auto-rows-[135px] grid-cols-1 gap-3 sm:auto-rows-[150px] sm:grid-cols-3">
-            {board.layout.map((tile, index) => <MoodboardTileCard key={`${tile.label}-${index}`} tile={tile} index={index} />)}
+          <div className={getLayoutConfig(layoutStyle).container}>
+            {board.layout.map((tile, index) => <MoodboardTileCard key={`${tile.label}-${index}`} tile={tile} index={index} layoutConfig={getLayoutConfig(layoutStyle)} />)}
           </div>
           <div className="mt-5 flex flex-wrap gap-2 border-t border-[#263d49]/15 pt-4">
             {board.keywords.map((keyword, index) => <span key={keyword} className="rounded-full border border-[#263d49]/25 px-3 py-1.5 text-[10px] uppercase tracking-[.12em] text-[#435b65]" data-testid={`text-keyword-${index}`}>{keyword}</span>)}
