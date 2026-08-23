@@ -1,13 +1,12 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type DragEvent, type FormEvent } from 'react';
 import { useClerk, useUser } from '@clerk/react';
-import { getHealthCheckQueryKey, useGenerateMoodboard, useHealthCheck, useRefineMoodboard } from '@workspace/api-client-react';
+import { getHealthCheckQueryKey, useGenerateMoodboard, useHealthCheck } from '@workspace/api-client-react';
 import type { Moodboard, MoodboardTile } from '@workspace/api-client-react';
-import { ArrowRight, Check, Clipboard, Download, History, LayoutDashboard, LogOut, Menu, RefreshCw, Send, SlidersHorizontal, Sparkles, UserRound, X } from 'lucide-react';
+import { ArrowRight, Check, Clipboard, Download, History, LayoutDashboard, LogOut, Menu, RefreshCw, SlidersHorizontal, UserRound, X } from 'lucide-react';
 import paperTexture from '@assets/moodboard-paper-blank.png';
 import { Link } from 'wouter';
 
 const STYLE_OPTIONS = ['quiet luxury', 'raw & tactile', 'cinematic', 'sun-washed', 'editorial', 'strange & tender'];
-const PROMPT_SUGGESTIONS = ['More room to breathe', 'Pull it toward midnight', 'Make it feel hand-made'];
 const BOARD_TYPE_OPTIONS: Array<{ value: 'moodboard' | 'brandboard'; label: string; copy: string }> = [
   { value: 'moodboard', label: 'Moodboard', copy: 'A visual reference collage of real photos, color, and tone.' },
   { value: 'brandboard', label: 'Brand board', copy: 'A structured identity board \u2014 logo direction, typography, palette, voice.' },
@@ -485,33 +484,84 @@ function PaletteTileCard({ board, copied, onCopyColor, sizeClass, extraClass }: 
   );
 }
 
-function MoodboardTileCard({ tile, index, layoutConfig }: { tile: MoodboardTile; index: number; layoutConfig: ReturnType<typeof getLayoutConfig> }) {
-  const sizeClass = layoutConfig.tileSize(tile, index);
-  const extraClass = layoutConfig.tileExtra(index);
+function EditableTile({ tile, index, sizeClass, extraClass, allowResize, allowDrag, onSizeChange, onImageChange, onDragStart, onDragOver, onDrop, testIdPrefix }: {
+  tile: MoodboardTile;
+  index: number;
+  sizeClass: string;
+  extraClass: string;
+  allowResize: boolean;
+  allowDrag: boolean;
+  onSizeChange: (size: 'small' | 'medium' | 'large') => void;
+  onImageChange: (url: string) => void;
+  onDragStart?: (event: DragEvent) => void;
+  onDragOver?: (event: DragEvent) => void;
+  onDrop?: (event: DragEvent) => void;
+  testIdPrefix: string;
+}) {
+  const [open, setOpen] = useState(false);
+
+  const handleUpload = (file: File | undefined) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        onImageChange(reader.result);
+        setOpen(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
-    <article className={`group relative overflow-hidden border border-[#263d49]/25 bg-[#e8e1d2] ${sizeClass} ${extraClass}`} data-testid={`card-moodboard-tile-${index}`}>
+    <article
+      className={`group relative overflow-hidden border border-[#263d49]/25 bg-[#e8e1d2] cursor-pointer ${allowDrag ? 'cursor-grab active:cursor-grabbing' : ''} ${sizeClass} ${extraClass}`}
+      data-testid={`${testIdPrefix}-${index}`}
+      onClick={() => setOpen((value) => !value)}
+      draggable={allowDrag}
+      onDragStart={allowDrag ? onDragStart : undefined}
+      onDragOver={allowDrag ? onDragOver : undefined}
+      onDrop={allowDrag ? onDrop : undefined}
+    >
       <TileArt tile={tile} />
       <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-[#263d49]/85 px-3 py-2 text-[9px] font-bold uppercase tracking-[.14em] text-[#f1e5c9]">
         <span>{tile.label}</span><span className="text-[#d7a491]">{tile.type}</span>
       </div>
+      {open && (
+        <div className="absolute inset-0 z-10 flex flex-col justify-between gap-2 bg-[#263d49]/95 p-3 text-[#f1e5c9]" onClick={(event) => event.stopPropagation()} data-testid={`${testIdPrefix}-edit-panel-${index}`}>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-[.12em]">Edit tile</span>
+            <button type="button" onClick={() => setOpen(false)} data-testid={`button-close-edit-${index}`}><X size={14} /></button>
+          </div>
+          <div className="space-y-2">
+            {allowResize && (
+              <div>
+                <span className="mb-1 block text-[9px] uppercase tracking-[.1em] text-[#f1e5c9]/60">Size</span>
+                <div className="flex gap-1.5">
+                  {(['small', 'medium', 'large'] as const).map((size) => (
+                    <button type="button" key={size} onClick={() => onSizeChange(size)} className={`flex-1 border px-2 py-1.5 text-[9px] uppercase tracking-[.08em] transition-colors ${tile.size === size ? 'border-[#f1e5c9] bg-[#f1e5c9]/15' : 'border-[#f1e5c9]/30 hover:bg-[#f1e5c9]/10'}`} data-testid={`button-tile-size-${size}-${index}`}>{size}</button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {allowDrag && <p className="text-[9px] leading-4 text-[#f1e5c9]/60">Drag this tile onto another to swap their positions.</p>}
+            <label className="block cursor-pointer border border-[#f1e5c9]/30 px-2 py-1.5 text-center text-[9px] uppercase tracking-[.08em] hover:bg-[#f1e5c9]/10" data-testid={`input-tile-upload-${index}`}>
+              Replace image
+              <input type="file" accept="image/*" className="hidden" onChange={(event) => handleUpload(event.target.files?.[0])} />
+            </label>
+          </div>
+        </div>
+      )}
     </article>
   );
 }
 
-function BrandBoardGrid({ board, copied, onCopyColor }: { board: Moodboard; copied: string; onCopyColor: (hex: string) => void }) {
+function BrandBoardGrid({ board, copied, onCopyColor, onImageChange }: { board: Moodboard; copied: string; onCopyColor: (hex: string) => void; onImageChange: (index: number, url: string) => void }) {
   const tiles = board.layout;
   const get = (index: number) => tiles[index];
-  const cellClass = 'group relative overflow-hidden border border-[#263d49]/25 bg-[#e8e1d2]';
-  const labelClass = 'absolute inset-x-0 bottom-0 flex items-center justify-between bg-[#263d49]/85 px-3 py-2 text-[9px] font-bold uppercase tracking-[.14em] text-[#f1e5c9]';
   const Cell = ({ index }: { index: number }) => {
     const tile = get(index);
     if (!tile) return null;
-    return (
-      <article className={`${cellClass} h-full min-h-[150px]`} data-testid={`card-brand-tile-${index}`}>
-        <TileArt tile={tile} />
-        <div className={labelClass}><span>{tile.label}</span><span className="text-[#d7a491]">{tile.type}</span></div>
-      </article>
-    );
+    return <EditableTile tile={tile} index={index} sizeClass="h-full min-h-[150px]" extraClass="" allowResize={false} allowDrag={false} onSizeChange={() => {}} onImageChange={(url) => onImageChange(index, url)} testIdPrefix="card-brand-tile" />;
   };
   return (
     <div className="grid gap-3">
@@ -532,8 +582,7 @@ function BrandBoardGrid({ board, copied, onCopyColor }: { board: Moodboard; copi
   );
 }
 
-function MoodboardEditor({ board, boardType, purpose, layoutStyle, imageCount, styles, promptHistory, onReset, onRefined }: { board: Moodboard; boardType: 'moodboard' | 'brandboard'; purpose: string; layoutStyle: string; imageCount: number; styles: string[]; promptHistory: string[]; onReset: () => void; onRefined: (board: Moodboard, prompt: string) => void }) {
-  const refine = useRefinement(board, boardType, purpose, layoutStyle, imageCount, styles, promptHistory, onRefined);
+function MoodboardEditor({ board, boardType, layoutStyle, onReset, onBoardChange }: { board: Moodboard; boardType: 'moodboard' | 'brandboard'; layoutStyle: string; onReset: () => void; onBoardChange: (board: Moodboard) => void }) {
   const [copied, setCopied] = useState('');
   const copy = async (text: string, label: string) => {
     try {
@@ -576,6 +625,32 @@ function MoodboardEditor({ board, boardType, purpose, layoutStyle, imageCount, s
       setExporting(null);
     }
   };
+
+  const updateTileSize = (index: number, size: 'small' | 'medium' | 'large') => {
+    const nextLayout = board.layout.map((tile, i) => (i === index ? { ...tile, size } : tile));
+    onBoardChange({ ...board, layout: nextLayout });
+  };
+  const updateTileImage = (index: number, imageUrl: string) => {
+    const nextLayout = board.layout.map((tile, i) => (i === index ? { ...tile, imageUrl } : tile));
+    onBoardChange({ ...board, layout: nextLayout });
+  };
+  const dragIndexRef = useRef<number | null>(null);
+  const handleDragStart = (index: number) => () => {
+    dragIndexRef.current = index;
+  };
+  const handleDragOver = () => (event: DragEvent) => {
+    event.preventDefault();
+  };
+  const handleDrop = (index: number) => (event: DragEvent) => {
+    event.preventDefault();
+    const from = dragIndexRef.current;
+    dragIndexRef.current = null;
+    if (from === null || from === index) return;
+    const nextLayout = [...board.layout];
+    [nextLayout[from], nextLayout[index]] = [nextLayout[index], nextLayout[from]];
+    onBoardChange({ ...board, layout: nextLayout });
+  };
+
   return (
     <div className="mx-auto max-w-[1400px] px-5 py-7 sm:px-8 lg:px-12">
       <div className="mb-8 flex flex-col gap-5 border-b border-[#263d49]/20 pb-7 sm:flex-row sm:items-end sm:justify-between">
@@ -592,10 +667,26 @@ function MoodboardEditor({ board, boardType, purpose, layoutStyle, imageCount, s
       <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_310px]">
         <section className="studio-grid border border-[#263d49]/15 bg-[#dce0dc]/45 p-3 sm:p-5" data-testid="panel-moodboard-canvas">
           {boardType === 'brandboard' ? (
-            <BrandBoardGrid board={board} copied={copied} onCopyColor={(hex) => copy(hex, hex)} />
+            <BrandBoardGrid board={board} copied={copied} onCopyColor={(hex) => copy(hex, hex)} onImageChange={updateTileImage} />
           ) : (
             <div className={getLayoutConfig(layoutStyle).container}>
-              {board.layout.map((tile, index) => <MoodboardTileCard key={`${tile.label}-${index}`} tile={tile} index={index} layoutConfig={getLayoutConfig(layoutStyle)} />)}
+              {board.layout.map((tile, index) => (
+                <EditableTile
+                  key={`${tile.label}-${index}`}
+                  tile={tile}
+                  index={index}
+                  sizeClass={getLayoutConfig(layoutStyle).tileSize(tile, index)}
+                  extraClass={getLayoutConfig(layoutStyle).tileExtra(index)}
+                  allowResize
+                  allowDrag
+                  onSizeChange={(size) => updateTileSize(index, size)}
+                  onImageChange={(url) => updateTileImage(index, url)}
+                  onDragStart={handleDragStart(index)}
+                  onDragOver={handleDragOver()}
+                  onDrop={handleDrop(index)}
+                  testIdPrefix="card-moodboard-tile"
+                />
+              ))}
               <PaletteTileCard board={board} copied={copied} onCopyColor={(hex) => copy(hex, hex)} sizeClass={getLayoutConfig(layoutStyle).tileSize({ type: 'color', label: 'Palette', value: '', accent: null, size: 'large' }, board.layout.length)} extraClass={getLayoutConfig(layoutStyle).tileExtra(board.layout.length)} />
             </div>
           )}
@@ -604,17 +695,10 @@ function MoodboardEditor({ board, boardType, purpose, layoutStyle, imageCount, s
           </div>
         </section>
         <aside className="space-y-5">
-          <form onSubmit={refine.submit} className="border border-[#263d49]/25 bg-[#ebe6da]/75 p-5" data-testid="form-refine-moodboard">
-            <div className="flex items-center gap-2 text-[#b36b57]"><Sparkles size={16} strokeWidth={1.5} /><span className="eyebrow">Nudge the direction</span></div>
-            <p className="mt-4 text-[13px] leading-6 text-[#435b65]">Say what is missing. The board will move with you.</p>
-            <textarea value={refine.prompt} onChange={(event) => refine.setPrompt(event.target.value)} placeholder="Make the type feel more..." rows={4} className="mt-4 w-full resize-none border border-[#263d49]/25 bg-[#dce0dc]/50 p-3 text-[13px] leading-6 text-[#263d49] outline-none placeholder:text-[#435b65]/55 focus:border-[#b36b57]" data-testid="input-refine-prompt" />
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {PROMPT_SUGGESTIONS.map((suggestion) => <button type="button" key={suggestion} onClick={() => refine.setPrompt(suggestion)} className="border border-[#263d49]/20 px-2 py-1.5 text-[10px] text-[#435b65] transition-colors hover:border-[#b36b57] hover:text-[#b36b57]" data-testid={`button-suggestion-${suggestion.replaceAll(' ', '-').toLowerCase()}`}>{suggestion}</button>)}
-            </div>
-            {refine.error && <p className="mt-3 text-[12px] leading-5 text-[#a25242]" data-testid="status-refine-error">{getErrorMessage(refine.error)}</p>}
-            {refine.isSuccess && !refine.isPending && !refine.error && <p className="mt-3 text-[12px] leading-5 text-[#5c7a52]" data-testid="status-refine-success">Direction applied \u2014 the board above just updated.</p>}
-            <button type="submit" disabled={refine.isPending || refine.prompt.trim().length < 3} className="mt-5 flex w-full items-center justify-center gap-2 bg-[#263d49] px-4 py-3 text-[10px] font-bold uppercase tracking-[.15em] text-[#f1e5c9] transition-colors hover:bg-[#b36b57] disabled:cursor-not-allowed disabled:opacity-50" data-testid="button-refine-moodboard">{refine.isPending ? 'Reworking the thread' : 'Apply direction'} {refine.isPending ? <span className="loading-dashes" aria-hidden="true"><i /><i /><i /></span> : <Send size={14} />}</button>
-          </form>
+          <div className="border border-[#263d49]/25 bg-[#ebe6da]/75 p-5">
+            <div className="flex items-center gap-2 text-[#b36b57]"><SlidersHorizontal size={16} strokeWidth={1.5} /><span className="eyebrow">Edit the board</span></div>
+            <p className="mt-4 text-[13px] leading-6 text-[#435b65]">Click any tile to resize it or replace its image with your own upload.{boardType === 'moodboard' ? ' Drag a tile onto another to swap their positions.' : ''}</p>
+          </div>
           <div className="border-t border-[#263d49]/20 pt-4">
             <p className="text-[11px] leading-5 text-[#435b65]">Direction: <span className="text-[#263d49]" data-testid="text-moodboard-direction">{board.direction}</span></p>
             <button type="button" onClick={onReset} className="mt-4 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.14em] text-[#435b65] transition-colors hover:text-[#b36b57]" data-testid="button-new-brief"><RefreshCw size={14} /> Start another brief</button>
@@ -623,28 +707,6 @@ function MoodboardEditor({ board, boardType, purpose, layoutStyle, imageCount, s
       </div>
     </div>
   );
-}
-
-function useRefinement(board: Moodboard, boardType: 'moodboard' | 'brandboard', purpose: string, layoutStyle: string, imageCount: number, styles: string[], promptHistory: string[], onRefined: (board: Moodboard, prompt: string) => void) {
-  const [prompt, setPrompt] = useState('');
-  const mutation = useRefineMoodboard({
-    mutation: {
-      onSuccess: (nextBoard) => {
-        onRefined(nextBoard, prompt.trim());
-        setPrompt('');
-      },
-    },
-  });
-  return {
-    ...mutation,
-    prompt,
-    setPrompt,
-    submit: (event: FormEvent) => {
-      event.preventDefault();
-      if (prompt.trim().length < 3 || mutation.isPending) return;
-      mutation.mutate({ data: { boardType, purpose, layoutStyle, imageCount, styles, prompt: prompt.trim(), promptHistory, moodboard: board } });
-    },
-  };
 }
 
 type StudioSection = 'dashboard' | 'history' | 'profile';
@@ -799,7 +861,6 @@ export default function StudioPage() {
   const [styles, setStyles] = useState<string[]>([]);
   const [board, setBoard] = useState<Moodboard | null>(null);
   const [history, setHistory] = useState<Moodboard[]>([]);
-  const [promptHistory, setPromptHistory] = useState<string[]>([]);
   const [activeSection, setActiveSection] = useState<StudioSection>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
@@ -824,7 +885,7 @@ export default function StudioPage() {
     return (
       <main className="grain min-h-[100dvh] bg-[#d2dadd] text-[#263d49]" style={{ backgroundImage: `linear-gradient(rgba(210,218,221,.82), rgba(210,218,221,.82)), url(${paperTexture})`, backgroundSize: 'cover', backgroundAttachment: 'fixed' }}>
         <StudioHeader healthLabel={healthLabel} userName={user?.firstName || 'maker'} signOut={() => signOut({ redirectUrl: import.meta.env.BASE_URL || '/' })} />
-        <MoodboardEditor board={board} boardType={boardType ?? 'moodboard'} purpose={purpose} layoutStyle={layoutStyle} imageCount={imageCount} styles={styles} promptHistory={promptHistory} onReset={reset} onRefined={(nextBoard, prompt) => { setBoard(nextBoard); setPromptHistory((current) => [...current, prompt].slice(-8)); }} />
+        <MoodboardEditor board={board} boardType={boardType ?? 'moodboard'} layoutStyle={layoutStyle} onReset={reset} onBoardChange={setBoard} />
       </main>
     );
   }

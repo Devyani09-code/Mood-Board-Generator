@@ -300,6 +300,16 @@ Give it a memorable title, a concise tagline, a visual direction paragraph, and 
   }
 });
 
+router.get("/moodboards/search-image", requireAuth, async (req, res): Promise<void> => {
+  const query = typeof req.query.query === "string" ? req.query.query.trim() : "";
+  if (query.length < 2) {
+    res.status(400).json({ error: "A search query is required" });
+    return;
+  }
+  const imageUrl = await fetchStockImage(query);
+  res.json({ imageUrl });
+});
+
 router.post("/moodboards/refine", requireAuth, async (req, res): Promise<void> => {
   const parsed = RefineMoodboardBody.safeParse(req.body);
   if (!parsed.success) {
