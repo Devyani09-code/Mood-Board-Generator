@@ -336,13 +336,14 @@ function FreeformFrame({ frame, onMove, onResize, onClick, children, testId }: {
   );
 }
 
-function FreeformTile({ tile, index, frame, onMove, onResize, onImageChange }: {
+function FreeformTile({ tile, index, frame, onMove, onResize, onImageChange, onDelete }: {
   tile: MoodboardTile;
   index: number;
   frame: TileFrame;
   onMove: (x: number, y: number) => void;
   onResize: (w: number, h: number) => void;
   onImageChange: (url: string) => void;
+  onDelete: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const handleUpload = (file: File | undefined) => {
@@ -359,9 +360,6 @@ function FreeformTile({ tile, index, frame, onMove, onResize, onImageChange }: {
   return (
     <FreeformFrame frame={frame} onMove={onMove} onResize={onResize} onClick={() => setOpen((v) => !v)} testId={`card-moodboard-tile-${index}`}>
       <TileArt tile={tile} />
-      <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-[#263d49]/85 px-3 py-2 text-[9px] font-bold uppercase tracking-[.14em] text-[#f1e5c9]">
-        <span>{tile.label}</span><span className="text-[#d7a491]">{tile.type}</span>
-      </div>
       {open && (
         <div data-no-drag className="absolute inset-0 z-30 flex flex-col justify-between gap-2 bg-[#263d49]/95 p-3 text-[#f1e5c9]" onClick={(event) => event.stopPropagation()}>
           <div className="flex items-center justify-between">
@@ -372,6 +370,9 @@ function FreeformTile({ tile, index, frame, onMove, onResize, onImageChange }: {
             Replace image
             <input type="file" accept="image/*" className="hidden" onChange={(event) => handleUpload(event.target.files?.[0])} />
           </label>
+          <button type="button" onClick={onDelete} className="block w-full border border-[#a25242]/60 px-2 py-1.5 text-center text-[9px] uppercase tracking-[.08em] text-[#e0a598] hover:bg-[#a25242]/20" data-testid={`button-delete-tile-${index}`}>
+            Delete tile
+          </button>
           <p className="text-[9px] leading-4 text-[#f1e5c9]/60">Drag the tile to move it. Drag the bottom-right corner to resize.</p>
         </div>
       )}
@@ -604,9 +605,6 @@ function EditableTile({ tile, index, sizeClass, extraClass, allowResize, allowDr
       onDrop={allowDrag ? onDrop : undefined}
     >
       <TileArt tile={tile} />
-      <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-[#263d49]/85 px-3 py-2 text-[9px] font-bold uppercase tracking-[.14em] text-[#f1e5c9]">
-        <span>{tile.label}</span><span className="text-[#d7a491]">{tile.type}</span>
-      </div>
       {open && (
         <div className="absolute inset-0 z-10 flex flex-col justify-between gap-2 bg-[#263d49]/95 p-3 text-[#f1e5c9]" onClick={(event) => event.stopPropagation()} data-testid={`${testIdPrefix}-edit-panel-${index}`}>
           <div className="flex items-center justify-between">
@@ -716,6 +714,11 @@ function MoodboardEditor({ board, boardType, layoutStyle, onReset, onBoardChange
     const nextLayout = board.layout.map((tile, i) => (i === index ? { ...tile, type: 'image' as const, imageUrl } : tile));
     onBoardChange({ ...board, layout: nextLayout });
   };
+  const deleteTile = (index: number) => {
+    const nextLayout = board.layout.filter((_, i) => i !== index);
+    onBoardChange({ ...board, layout: nextLayout });
+    setFrames((current) => current.filter((_, i) => i !== index));
+  };
   const updateFrame = (index: number, patch: Partial<TileFrame>) => {
     setFrames((current) => current.map((frame, i) => (i === index ? { ...frame, ...patch } : frame)));
   };
@@ -726,8 +729,7 @@ function MoodboardEditor({ board, boardType, layoutStyle, onReset, onBoardChange
       <div className="mb-8 flex flex-col gap-5 border-b border-[#263d49]/20 pb-7 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <span className="eyebrow text-[#b36b57]">A living direction / {board.id.slice(0, 8)}</span>
-          <h1 className="serif mt-3 max-w-[700px] text-[clamp(3rem,6vw,6.7rem)] leading-[.86] tracking-[-.065em] text-[#263d49]" data-testid="text-moodboard-title">{board.title}</h1>
-          <p className="mt-4 max-w-[600px] text-[15px] leading-7 text-[#435b65]" data-testid="text-moodboard-tagline">{board.tagline}</p>
+          <p className="mt-3 max-w-[600px] text-[15px] leading-7 text-[#435b65]" data-testid="text-moodboard-tagline">{board.tagline}</p>
         </div>
         <div className="flex shrink-0 gap-2">
           <button type="button" onClick={copyBoardImage} disabled={exporting !== null} className="flex items-center gap-2 border border-[#263d49]/30 px-3 py-2 text-[10px] font-bold uppercase tracking-[.13em] text-[#263d49] transition-colors hover:border-[#b36b57] hover:text-[#b36b57] disabled:opacity-60" data-testid="button-copy-moodboard">{copied === 'board' ? <Check size={14} /> : <Clipboard size={14} />} {exporting === 'copy' ? 'Copying…' : copied === 'board' ? 'Copied' : 'Copy'}</button>
@@ -749,6 +751,7 @@ function MoodboardEditor({ board, boardType, layoutStyle, onReset, onBoardChange
                   onMove={(x, y) => updateFrame(index, { x, y })}
                   onResize={(w, h) => updateFrame(index, { w, h })}
                   onImageChange={(url) => updateTileImage(index, url)}
+                  onDelete={() => deleteTile(index)}
                 />
               ))}
               {frames[board.layout.length] && (
@@ -763,14 +766,11 @@ function MoodboardEditor({ board, boardType, layoutStyle, onReset, onBoardChange
               )}
             </div>
           )}
-          <div className="mt-5 flex flex-wrap gap-2 border-t border-[#263d49]/15 pt-4">
-            {board.keywords.map((keyword, index) => <span key={keyword} className="rounded-full border border-[#263d49]/25 px-3 py-1.5 text-[10px] uppercase tracking-[.12em] text-[#435b65]" data-testid={`text-keyword-${index}`}>{keyword}</span>)}
-          </div>
         </section>
         <aside className="space-y-5">
           <div className="border border-[#263d49]/25 bg-[#ebe6da]/75 p-5">
             <div className="flex items-center gap-2 text-[#b36b57]"><SlidersHorizontal size={16} strokeWidth={1.5} /><span className="eyebrow">Edit the board</span></div>
-            <p className="mt-4 text-[13px] leading-6 text-[#435b65]">{boardType === 'moodboard' ? 'Drag any tile to move it. Drag its bottom-right corner to resize freely. Click a tile to replace its image.' : 'Click any tile to replace its image with your own upload.'}</p>
+            <p className="mt-4 text-[13px] leading-6 text-[#435b65]">{boardType === 'moodboard' ? 'Drag any tile to move it. Drag its bottom-right corner to resize freely. Click a tile to replace its image or delete it.' : 'Click any tile to replace its image with your own upload.'}</p>
           </div>
           <div className="border-t border-[#263d49]/20 pt-4">
             <p className="text-[11px] leading-5 text-[#435b65]">Direction: <span className="text-[#263d49]" data-testid="text-moodboard-direction">{board.direction}</span></p>
