@@ -23,6 +23,8 @@ export interface MoodboardGenerateInput {
   imageCount: number;
   /** @minLength 3 */
   purpose: string;
+  logoDescription?: string;
+  logoImageDataUrl?: string;
   /**
      * @minItems 1
      * @maxItems 6

@@ -14,6 +14,7 @@ const BOARD_TYPE_OPTIONS: Array<{ value: 'moodboard' | 'brandboard'; label: stri
 ];
 const LAYOUT_OPTIONS = ['Asymmetric collage', 'Clean grid', 'Scrapbook stack', 'Structured brand grid'];
 const IMAGE_COUNT_OPTIONS = [3, 4, 5, 6, 8, 10];
+const BRAND_ETHOS_OPTIONS = ['vintage', 'classy', 'modern', 'sophisticated', 'playful', 'edgy'];
 
 function getErrorMessage(error: unknown) {
   if (typeof error === 'object' && error && 'data' in error) {
@@ -30,6 +31,10 @@ function BriefCard({
   setBoardType,
   purpose,
   setPurpose,
+  logoDescription,
+  setLogoDescription,
+  logoImageDataUrl,
+  setLogoImageDataUrl,
   layoutStyle,
   setLayoutStyle,
   imageCount,
@@ -48,6 +53,10 @@ function BriefCard({
   setBoardType: (value: 'moodboard' | 'brandboard') => void;
   purpose: string;
   setPurpose: (value: string) => void;
+  logoDescription: string;
+  setLogoDescription: (value: string) => void;
+  logoImageDataUrl: string | null;
+  setLogoImageDataUrl: (value: string | null) => void;
   layoutStyle: string;
   setLayoutStyle: (value: string) => void;
   imageCount: number;
@@ -61,6 +70,7 @@ function BriefCard({
   isGenerating: boolean;
   error: unknown;
 }) {
+  const isBrand = boardType === 'brandboard';
   const [notice, setNotice] = useState('');
   const advance = () => {
     if (step === 1 && !boardType) {
@@ -68,19 +78,29 @@ function BriefCard({
       return;
     }
     if (step === 2 && purpose.trim().length < 3) {
-      setNotice('Give the idea a little more room — three characters is enough.');
+      setNotice(isBrand ? 'Describe the brand a little more \u2014 three characters is enough.' : 'Give the idea a little more room \u2014 three characters is enough.');
       return;
     }
-    if (step === 3 && !layoutStyle) {
+    if (step === 3 && isBrand && logoDescription.trim().length < 3 && !logoImageDataUrl) {
+      setNotice('Describe the logo or attach an image to continue.');
+      return;
+    }
+    if (step === 3 && !isBrand && !layoutStyle) {
       setNotice('Pick a layout to continue.');
       return;
     }
     if (step === 4 && styles.length === 0) {
-      setNotice('Choose at least one visual instinct.');
+      setNotice(isBrand ? 'Choose at least one ethos word.' : 'Choose at least one visual instinct.');
       return;
     }
     setNotice('');
     onAdvance();
+  };
+  const handleLogoFile = (file: File | undefined) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setLogoImageDataUrl(typeof reader.result === 'string' ? reader.result : null);
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -117,12 +137,31 @@ function BriefCard({
         )}
         {step === 2 && (
           <div className="py-10 sm:py-12">
-            <label htmlFor="purpose" className="serif italic block max-w-[560px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#263d49]">What are you <em>making?</em></label>
-            <p className="mt-5 max-w-[360px] text-[13px] leading-6 text-[#435b65]">A sentence, a secret, a working title. Follow the thread rather than polishing it.</p>
-            <textarea id="purpose" value={purpose} onChange={(event) => setPurpose(event.target.value)} placeholder="I want to make..." rows={3} className="mt-9 w-full resize-none border-0 border-b border-[#263d49]/35 bg-transparent px-0 py-3 text-[18px] leading-7 text-[#263d49] outline-none placeholder:text-[#435b65]/50 focus:border-[#b36b57]" data-testid="input-purpose" />
+            <label htmlFor="purpose" className="serif italic block max-w-[560px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#263d49]">{isBrand ? <>Describe your <em>brand.</em></> : <>What are you <em>making?</em></>}</label>
+            <p className="mt-5 max-w-[360px] text-[13px] leading-6 text-[#435b65]">{isBrand ? 'What does it do, who is it for, what does it stand for?' : 'A sentence, a secret, a working title. Follow the thread rather than polishing it.'}</p>
+            <textarea id="purpose" value={purpose} onChange={(event) => setPurpose(event.target.value)} placeholder={isBrand ? 'Our brand is...' : 'I want to make...'} rows={3} className="mt-9 w-full resize-none border-0 border-b border-[#263d49]/35 bg-transparent px-0 py-3 text-[18px] leading-7 text-[#263d49] outline-none placeholder:text-[#435b65]/50 focus:border-[#b36b57]" data-testid="input-purpose" />
           </div>
         )}
-        {step === 3 && (
+        {step === 3 && isBrand && (
+          <div className="py-10 sm:py-12">
+            <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#263d49]">Insert the <em>logo.</em></h2>
+            <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#435b65]">Describe it, attach an image, or both.</p>
+            <textarea value={logoDescription} onChange={(event) => setLogoDescription(event.target.value)} placeholder="Describe the logo..." rows={3} className="mt-8 w-full resize-none border-0 border-b border-[#263d49]/35 bg-transparent px-0 py-3 text-[16px] leading-7 text-[#263d49] outline-none placeholder:text-[#435b65]/50 focus:border-[#b36b57]" data-testid="input-logo-description" />
+            <div className="mt-6 flex items-center gap-4">
+              <label className="cursor-pointer rounded-full border border-[#263d49]/30 px-4 py-2.5 text-[11px] font-bold uppercase tracking-[.14em] text-[#435b65] transition-colors hover:border-[#b36b57] hover:text-[#b36b57]" data-testid="input-logo-image">
+                Attach image
+                <input type="file" accept="image/*" className="hidden" onChange={(event) => handleLogoFile(event.target.files?.[0])} />
+              </label>
+              {logoImageDataUrl && (
+                <span className="flex items-center gap-2 text-[12px] text-[#435b65]">
+                  <img src={logoImageDataUrl} alt="Logo preview" className="h-10 w-10 rounded border border-[#263d49]/25 object-cover" />
+                  <button type="button" onClick={() => setLogoImageDataUrl(null)} className="underline hover:text-[#b36b57]">remove</button>
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+        {step === 3 && !isBrand && (
           <div className="py-10 sm:py-12">
             <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#263d49]">Pick a <em>layout.</em></h2>
             <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#435b65]">How should the board be composed?</p>
@@ -146,15 +185,15 @@ function BriefCard({
         )}
         {step === 4 && (
           <div className="py-10 sm:py-12">
-            <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#263d49]">What is the <em>weather?</em></h2>
-            <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#435b65]">Choose the instincts that already belong to the idea. You can hold more than one.</p>
+            <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#263d49]">{isBrand ? <>The brand <em>ethos.</em></> : <>What is the <em>weather?</em></>}</h2>
+            <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#435b65]">{isBrand ? 'Which words already describe it? You can hold more than one.' : 'Choose the instincts that already belong to the idea. You can hold more than one.'}</p>
             <div className="mt-9 flex flex-wrap gap-2.5">
-              {STYLE_OPTIONS.map((style) => {
+              {(isBrand ? BRAND_ETHOS_OPTIONS : STYLE_OPTIONS).map((style) => {
                 const selected = styles.includes(style);
                 return (
                   <button type="button" key={style} onClick={() => toggleStyle(style)} className={`rounded-full border px-4 py-2.5 text-[12px] transition-all ${selected ? 'border-[#263d49] bg-[#263d49] text-[#f1e5c9]' : 'border-[#263d49]/30 text-[#435b65] hover:-translate-y-0.5 hover:border-[#b36b57] hover:text-[#b36b57]'}`} data-testid={`button-style-${style.replaceAll(' ', '-')}`} aria-pressed={selected}>
-                    {selected && <Check size={13} className="mr-1.5 inline" />}{style}
-                  </button>
+                  {selected && <Check size={13} className="mr-1.5 inline" />}{style}
+                </button>
                 );
               })}
             </div>
@@ -248,6 +287,127 @@ function getExportColumns(layoutStyle: string) {
   return 3;
 }
 
+async function drawTileCell(ctx: CanvasRenderingContext2D, tile: MoodboardTile, x: number, y: number, w: number, h: number) {
+  if (tile.type === 'image') {
+    if (tile.imageUrl) {
+      try {
+        const img = await loadImageElement(tile.imageUrl);
+        drawCoverImage(ctx, img, x, y, w, h);
+      } catch {
+        ctx.fillStyle = tile.accent ?? '#8295a0';
+        ctx.fillRect(x, y, w, h);
+      }
+    } else {
+      ctx.fillStyle = tile.accent ?? '#8295a0';
+      ctx.fillRect(x, y, w, h);
+    }
+  } else if (tile.type === 'color') {
+    ctx.fillStyle = tile.accent ?? tile.value ?? '#8295a0';
+    ctx.fillRect(x, y, w, h);
+  } else {
+    ctx.fillStyle = '#e8e1d2';
+    ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = '#263d49';
+    ctx.font = tile.type === 'quote' ? 'italic 19px Georgia, serif' : '15px Arial';
+    wrapCanvasText(ctx, tile.value, x + 18, y + 40, w - 36, tile.type === 'quote' ? 26 : 22, 7);
+  }
+  ctx.fillStyle = 'rgba(38,61,73,0.88)';
+  ctx.fillRect(x, y + h - 28, w, 28);
+  ctx.fillStyle = '#f1e5c9';
+  ctx.font = 'bold 11px Arial';
+  ctx.fillText(tile.label.toUpperCase(), x + 12, y + h - 9);
+}
+
+function drawPaletteCell(ctx: CanvasRenderingContext2D, board: Moodboard, x: number, y: number, w: number, h: number, perRow: number) {
+  ctx.fillStyle = '#dbe0dd';
+  ctx.fillRect(x, y, w, h);
+  const swatchSize = 26;
+  const swatchGap = 10;
+  board.palette.forEach((color, index) => {
+    const sc = index % perRow;
+    const sr = Math.floor(index / perRow);
+    const sx = x + 16 + sc * (w / perRow);
+    const sy = y + 40 + sr * (swatchSize + swatchGap + 20);
+    ctx.fillStyle = color.hex;
+    ctx.fillRect(sx, sy, swatchSize, swatchSize);
+    ctx.fillStyle = '#263d49';
+    ctx.font = 'bold 10px Arial';
+    ctx.fillText(color.name, sx + swatchSize + 8, sy + 12);
+    ctx.font = '9px Arial';
+    ctx.fillStyle = '#435b65';
+    ctx.fillText(color.hex, sx + swatchSize + 8, sy + 24);
+  });
+  ctx.fillStyle = 'rgba(38,61,73,0.88)';
+  ctx.fillRect(x, y + h - 28, w, 28);
+  ctx.fillStyle = '#f1e5c9';
+  ctx.font = 'bold 11px Arial';
+  ctx.fillText('PALETTE', x + 12, y + h - 9);
+}
+
+function drawHeader(ctx: CanvasRenderingContext2D, board: Moodboard, padding: number, width: number) {
+  ctx.fillStyle = '#d2dadd';
+  ctx.fillRect(0, 0, width, ctx.canvas.height);
+  ctx.fillStyle = '#263d49';
+  ctx.font = 'bold 40px Georgia, serif';
+  ctx.fillText(board.title, padding, padding + 42);
+  ctx.font = '16px Arial';
+  ctx.fillStyle = '#435b65';
+  wrapCanvasText(ctx, board.tagline, padding, padding + 78, width - padding * 2, 22, 2);
+}
+
+async function renderBrandBoardToCanvas(board: Moodboard): Promise<HTMLCanvasElement> {
+  const cellW = 320;
+  const gap = 14;
+  const padding = 48;
+  const headerH = 150;
+  const row1H = 220;
+  const row2H = 160;
+  const row3H = 140;
+  const row4H = 160;
+  const row5H = 190;
+  const width = padding * 2 + cellW * 3 + gap * 2;
+  const colW = (width - padding * 2 - gap) / 2;
+  const height = padding * 2 + headerH + row1H + gap + row2H + gap + row3H + gap + (row4H * 2 + gap) + gap + row5H;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Canvas not supported');
+  drawHeader(ctx, board, padding, width);
+
+  const get = (i: number) => board.layout[i];
+  let y = padding + headerH;
+
+  const t0 = get(0);
+  if (t0) await drawTileCell(ctx, t0, padding, y, width - padding * 2, row1H);
+  y += row1H + gap;
+
+  for (let i = 0; i < 3; i += 1) {
+    const t = get(1 + i);
+    if (t) await drawTileCell(ctx, t, padding + i * (cellW + gap), y, cellW, row2H);
+  }
+  y += row2H + gap;
+
+  drawPaletteCell(ctx, board, padding, y, width - padding * 2, row3H, 3);
+  y += row3H + gap;
+
+  const t4 = get(4);
+  if (t4) await drawTileCell(ctx, t4, padding, y, colW, row4H * 2 + gap);
+  const t5 = get(5);
+  if (t5) await drawTileCell(ctx, t5, padding + colW + gap, y, colW, row4H);
+  const t6 = get(6);
+  if (t6) await drawTileCell(ctx, t6, padding + colW + gap, y + row4H + gap, colW, row4H);
+  y += row4H * 2 + gap * 2;
+
+  const t7 = get(7);
+  if (t7) await drawTileCell(ctx, t7, padding, y, colW, row5H);
+  const t8 = get(8);
+  if (t8) await drawTileCell(ctx, t8, padding + colW + gap, y, colW, row5H);
+
+  return canvas;
+}
+
 async function renderBoardToCanvas(board: Moodboard, layoutStyle: string): Promise<HTMLCanvasElement> {
   const cols = getExportColumns(layoutStyle);
   const cellW = 340;
@@ -265,16 +425,7 @@ async function renderBoardToCanvas(board: Moodboard, layoutStyle: string): Promi
   canvas.height = height;
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('Canvas not supported');
-
-  ctx.fillStyle = '#d2dadd';
-  ctx.fillRect(0, 0, width, height);
-
-  ctx.fillStyle = '#263d49';
-  ctx.font = 'bold 40px Georgia, serif';
-  ctx.fillText(board.title, padding, padding + 42);
-  ctx.font = '16px Arial';
-  ctx.fillStyle = '#435b65';
-  wrapCanvasText(ctx, board.tagline, padding, padding + 78, width - padding * 2, 22, 2);
+  drawHeader(ctx, board, padding, width);
 
   for (let i = 0; i < board.layout.length; i += 1) {
     const tile = board.layout[i];
@@ -282,36 +433,7 @@ async function renderBoardToCanvas(board: Moodboard, layoutStyle: string): Promi
     const row = Math.floor(i / cols);
     const x = padding + col * (cellW + gap);
     const y = padding + headerH + row * (cellH + gap);
-
-    if (tile.type === 'image') {
-      if (tile.imageUrl) {
-        try {
-          const img = await loadImageElement(tile.imageUrl);
-          drawCoverImage(ctx, img, x, y, cellW, cellH);
-        } catch {
-          ctx.fillStyle = tile.accent ?? '#8295a0';
-          ctx.fillRect(x, y, cellW, cellH);
-        }
-      } else {
-        ctx.fillStyle = tile.accent ?? '#8295a0';
-        ctx.fillRect(x, y, cellW, cellH);
-      }
-    } else if (tile.type === 'color') {
-      ctx.fillStyle = tile.accent ?? tile.value ?? '#8295a0';
-      ctx.fillRect(x, y, cellW, cellH);
-    } else {
-      ctx.fillStyle = '#e8e1d2';
-      ctx.fillRect(x, y, cellW, cellH);
-      ctx.fillStyle = '#263d49';
-      ctx.font = tile.type === 'quote' ? 'italic 19px Georgia, serif' : '15px Arial';
-      wrapCanvasText(ctx, tile.value, x + 18, y + 40, cellW - 36, tile.type === 'quote' ? 26 : 22, 7);
-    }
-
-    ctx.fillStyle = 'rgba(38,61,73,0.88)';
-    ctx.fillRect(x, y + cellH - 28, cellW, 28);
-    ctx.fillStyle = '#f1e5c9';
-    ctx.font = 'bold 11px Arial';
-    ctx.fillText(tile.label.toUpperCase(), x + 12, y + cellH - 9);
+    await drawTileCell(ctx, tile, x, y, cellW, cellH);
   }
 
   {
@@ -320,30 +442,7 @@ async function renderBoardToCanvas(board: Moodboard, layoutStyle: string): Promi
     const row = Math.floor(i / cols);
     const x = padding + col * (cellW + gap);
     const y = padding + headerH + row * (cellH + gap);
-    ctx.fillStyle = '#dbe0dd';
-    ctx.fillRect(x, y, cellW, cellH);
-    const swatchSize = 26;
-    const swatchGap = 10;
-    const perRow = 2;
-    board.palette.forEach((color, index) => {
-      const sc = index % perRow;
-      const sr = Math.floor(index / perRow);
-      const sx = x + 16 + sc * (cellW / perRow);
-      const sy = y + 40 + sr * (swatchSize + swatchGap + 20);
-      ctx.fillStyle = color.hex;
-      ctx.fillRect(sx, sy, swatchSize, swatchSize);
-      ctx.fillStyle = '#263d49';
-      ctx.font = 'bold 10px Arial';
-      ctx.fillText(color.name, sx + swatchSize + 8, sy + 12);
-      ctx.font = '9px Arial';
-      ctx.fillStyle = '#435b65';
-      ctx.fillText(color.hex, sx + swatchSize + 8, sy + 24);
-    });
-    ctx.fillStyle = 'rgba(38,61,73,0.88)';
-    ctx.fillRect(x, y + cellH - 28, cellW, 28);
-    ctx.fillStyle = '#f1e5c9';
-    ctx.font = 'bold 11px Arial';
-    ctx.fillText('PALETTE', x + 12, y + cellH - 9);
+    drawPaletteCell(ctx, board, x, y, cellW, cellH, 2);
   }
 
   return canvas;
@@ -399,6 +498,40 @@ function MoodboardTileCard({ tile, index, layoutConfig }: { tile: MoodboardTile;
   );
 }
 
+function BrandBoardGrid({ board, copied, onCopyColor }: { board: Moodboard; copied: string; onCopyColor: (hex: string) => void }) {
+  const tiles = board.layout;
+  const get = (index: number) => tiles[index];
+  const cellClass = 'group relative overflow-hidden border border-[#263d49]/25 bg-[#e8e1d2]';
+  const labelClass = 'absolute inset-x-0 bottom-0 flex items-center justify-between bg-[#263d49]/85 px-3 py-2 text-[9px] font-bold uppercase tracking-[.14em] text-[#f1e5c9]';
+  const Cell = ({ index }: { index: number }) => {
+    const tile = get(index);
+    if (!tile) return null;
+    return (
+      <article className={`${cellClass} h-full min-h-[150px]`} data-testid={`card-brand-tile-${index}`}>
+        <TileArt tile={tile} />
+        <div className={labelClass}><span>{tile.label}</span><span className="text-[#d7a491]">{tile.type}</span></div>
+      </article>
+    );
+  };
+  return (
+    <div className="grid gap-3">
+      <div className="grid grid-rows-[220px]"><Cell index={0} /></div>
+      <div className="grid grid-cols-3 gap-3" style={{ gridAutoRows: '160px' }}>
+        <Cell index={1} /><Cell index={2} /><Cell index={3} />
+      </div>
+      <PaletteTileCard board={board} copied={copied} onCopyColor={onCopyColor} sizeClass="w-full" extraClass="min-h-[130px]" />
+      <div className="grid grid-cols-2 gap-3" style={{ gridAutoRows: '160px' }}>
+        <div className="row-span-2"><Cell index={4} /></div>
+        <Cell index={5} />
+        <Cell index={6} />
+      </div>
+      <div className="grid grid-cols-2 gap-3" style={{ gridAutoRows: '190px' }}>
+        <Cell index={7} /><Cell index={8} />
+      </div>
+    </div>
+  );
+}
+
 function MoodboardEditor({ board, boardType, purpose, layoutStyle, imageCount, styles, promptHistory, onReset, onRefined }: { board: Moodboard; boardType: 'moodboard' | 'brandboard'; purpose: string; layoutStyle: string; imageCount: number; styles: string[]; promptHistory: string[]; onReset: () => void; onRefined: (board: Moodboard, prompt: string) => void }) {
   const refine = useRefinement(board, boardType, purpose, layoutStyle, imageCount, styles, promptHistory, onRefined);
   const [copied, setCopied] = useState('');
@@ -415,7 +548,7 @@ function MoodboardEditor({ board, boardType, purpose, layoutStyle, imageCount, s
   const download = async () => {
     setExporting('download');
     try {
-      const canvas = await renderBoardToCanvas(board, layoutStyle);
+      const canvas = boardType === 'brandboard' ? await renderBrandBoardToCanvas(board) : await renderBoardToCanvas(board, layoutStyle);
       const blob = await canvasToPngBlob(canvas);
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
@@ -432,7 +565,7 @@ function MoodboardEditor({ board, boardType, purpose, layoutStyle, imageCount, s
   const copyBoardImage = async () => {
     setExporting('copy');
     try {
-      const canvas = await renderBoardToCanvas(board, layoutStyle);
+      const canvas = boardType === 'brandboard' ? await renderBrandBoardToCanvas(board) : await renderBoardToCanvas(board, layoutStyle);
       const blob = await canvasToPngBlob(canvas);
       await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
       setCopied('board');
@@ -458,10 +591,14 @@ function MoodboardEditor({ board, boardType, purpose, layoutStyle, imageCount, s
       </div>
       <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_310px]">
         <section className="studio-grid border border-[#263d49]/15 bg-[#dce0dc]/45 p-3 sm:p-5" data-testid="panel-moodboard-canvas">
-          <div className={getLayoutConfig(layoutStyle).container}>
-            {board.layout.map((tile, index) => <MoodboardTileCard key={`${tile.label}-${index}`} tile={tile} index={index} layoutConfig={getLayoutConfig(layoutStyle)} />)}
-            <PaletteTileCard board={board} copied={copied} onCopyColor={(hex) => copy(hex, hex)} sizeClass={getLayoutConfig(layoutStyle).tileSize({ type: 'color', label: 'Palette', value: '', accent: null, size: 'large' }, board.layout.length)} extraClass={getLayoutConfig(layoutStyle).tileExtra(board.layout.length)} />
-          </div>
+          {boardType === 'brandboard' ? (
+            <BrandBoardGrid board={board} copied={copied} onCopyColor={(hex) => copy(hex, hex)} />
+          ) : (
+            <div className={getLayoutConfig(layoutStyle).container}>
+              {board.layout.map((tile, index) => <MoodboardTileCard key={`${tile.label}-${index}`} tile={tile} index={index} layoutConfig={getLayoutConfig(layoutStyle)} />)}
+              <PaletteTileCard board={board} copied={copied} onCopyColor={(hex) => copy(hex, hex)} sizeClass={getLayoutConfig(layoutStyle).tileSize({ type: 'color', label: 'Palette', value: '', accent: null, size: 'large' }, board.layout.length)} extraClass={getLayoutConfig(layoutStyle).tileExtra(board.layout.length)} />
+            </div>
+          )}
           <div className="mt-5 flex flex-wrap gap-2 border-t border-[#263d49]/15 pt-4">
             {board.keywords.map((keyword, index) => <span key={keyword} className="rounded-full border border-[#263d49]/25 px-3 py-1.5 text-[10px] uppercase tracking-[.12em] text-[#435b65]" data-testid={`text-keyword-${index}`}>{keyword}</span>)}
           </div>
@@ -655,6 +792,8 @@ export default function StudioPage() {
   const [step, setStep] = useState(0);
   const [boardType, setBoardType] = useState<'moodboard' | 'brandboard' | null>(null);
   const [purpose, setPurpose] = useState('');
+  const [logoDescription, setLogoDescription] = useState('');
+  const [logoImageDataUrl, setLogoImageDataUrl] = useState<string | null>(null);
   const [layoutStyle, setLayoutStyle] = useState('');
   const [imageCount, setImageCount] = useState(6);
   const [styles, setStyles] = useState<string[]>([]);
@@ -674,9 +813,9 @@ export default function StudioPage() {
   };
   const submit = () => {
     if (!boardType || purpose.trim().length < 3 || !layoutStyle || styles.length === 0) return;
-    generate.mutate({ data: { boardType, purpose: purpose.trim(), layoutStyle, imageCount, styles } });
+    generate.mutate({ data: { boardType, purpose: purpose.trim(), logoDescription: boardType === 'brandboard' ? logoDescription.trim() : undefined, logoImageDataUrl: boardType === 'brandboard' ? logoImageDataUrl ?? undefined : undefined, layoutStyle, imageCount, styles } });
   };
-  const reset = () => { setBoard(null); setStep(0); setBoardType(null); setPurpose(''); setLayoutStyle(''); setImageCount(6); setStyles([]); };
+  const reset = () => { setBoard(null); setStep(0); setBoardType(null); setPurpose(''); setLogoDescription(''); setLogoImageDataUrl(null); setLayoutStyle(''); setImageCount(6); setStyles([]); };
   const healthLabel = useMemo(() => health.data?.status === 'ok' ? 'studio connected' : health.isLoading ? 'checking studio' : 'quiet mode', [health.data?.status, health.isLoading]);
 
   if (board) {
@@ -697,7 +836,7 @@ export default function StudioPage() {
           </div>
           <div className="mt-3 h-[2px] w-full bg-[#263d49]/15"><div className="h-full bg-[#b36b57] transition-all duration-500" style={{ width: `${((step + 1) / 5) * 100}%` }} /></div>
         </div>
-        <BriefCard step={step} boardType={boardType} setBoardType={setBoardType} purpose={purpose} setPurpose={setPurpose} layoutStyle={layoutStyle} setLayoutStyle={setLayoutStyle} imageCount={imageCount} setImageCount={setImageCount} styles={styles} toggleStyle={toggleStyle} onAdvance={advance} onGenerate={submit} isExiting={isExiting} isGenerating={generate.isPending} error={generate.error} />
+        <BriefCard step={step} boardType={boardType} setBoardType={setBoardType} purpose={purpose} setPurpose={setPurpose} logoDescription={logoDescription} setLogoDescription={setLogoDescription} logoImageDataUrl={logoImageDataUrl} setLogoImageDataUrl={setLogoImageDataUrl} layoutStyle={layoutStyle} setLayoutStyle={setLayoutStyle} imageCount={imageCount} setImageCount={setImageCount} styles={styles} toggleStyle={toggleStyle} onAdvance={advance} onGenerate={submit} isExiting={isExiting} isGenerating={generate.isPending} error={generate.error} />
       </section>
     </main>
   );

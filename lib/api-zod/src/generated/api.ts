@@ -31,6 +31,8 @@ export const GenerateMoodboardBody = zod.object({
   "layoutStyle": zod.string(),
   "imageCount": zod.number().min(1).max(12),
   "purpose": zod.string().min(generateMoodboardBodyPurposeMin),
+  "logoDescription": zod.string().optional(),
+  "logoImageDataUrl": zod.string().optional(),
   "styles": zod.array(zod.string()).min(1).max(generateMoodboardBodyStylesMax)
 })
 

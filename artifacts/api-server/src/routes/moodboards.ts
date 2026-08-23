@@ -71,15 +71,28 @@ For image tiles, the "value" field must be a short, concrete stock-photo search 
 For quote tiles, write original copy, never attribute it to a real person.
 Make each tile label useful and each size intentional.`;
 
-const brandboardSystemPrompt = `You are a senior brand designer creating a brand board for a creative person's product or business idea.
-Return only valid JSON matching the requested schema. Keep the board specific, practical, and on-brand.
-Use 4-6 palette colors with valid 6-digit hex values, labeled by role (primary, secondary, accent, neutral, etc).
-Create 7-9 layout tiles using mostly text and color tile types: a tile for the brand name/logo concept, a tagline tile, a typography direction tile (describe the type pairing in words), a voice/tone tile, and 2-3 palette/color tiles. You may include at most 1-2 image tiles for texture/mood reference only.
-For any image tile, the "value" field must be a short concrete Unsplash search query (2-4 words) for a texture or background reference, not a product mockup.
-For quote/text tiles, write original brand copy, never attribute it to a real person.
-Make each tile label useful and each size intentional.`;
+const brandboardSystemPrompt = `You are a senior brand designer creating a brand identity board for a creative person's product or business idea.
+Return only valid JSON matching the requested schema. Use 4-6 palette colors with valid 6-digit hex values, each labeled by role (primary, secondary, accent, neutral, etc).
+The "layout" array must contain EXACTLY 9 tiles, in exactly this order and type, representing a fixed template \u2014 do not skip, reorder, merge, or add tiles:
+1. type "image", label "Logo direction" \u2014 value is a short stock-photo search query (2-4 words) evoking the visual mood the logo should have (not a literal logo photo).
+2. type "image", label "Sticker mark" \u2014 value is a search query for a sticker/badge-style graphic reference matching the brand.
+3. type "image", label "Logo alt" \u2014 value is a search query for an alternate logo-style visual reference.
+4. type "image", label "Icon mark" \u2014 value is a search query for a simple icon/symbol style reference.
+5. type "image", label "Mockup" \u2014 value is a search query for a realistic product or packaging mockup photo reflecting the brand.
+6. type "image", label "Pattern" \u2014 value is a search query for a seamless pattern or texture reference matching the brand aesthetic.
+7. type "text", label "Fonts" \u2014 value names a specific font pairing (real typeface names, e.g. "Headline: Fraunces Bold / Body: Inter") that fits the brand ethos, in one short sentence.
+8. type "image", label "Mockup" \u2014 another product/packaging mockup search query, a different item or angle than tile 5.
+9. type "image", label "Mockup" \u2014 a third distinct product/packaging mockup search query.
+For every image tile, the "value" field must be a short, concrete stock-photo search query (2-4 words) in the style of a well-curated Pinterest brand board \u2014 specific and realistically searchable, not poetic.
+Let the brand's ethos words steer every tile's tone and the overall palette. Do not use "quote" or "color" type tiles in this board \u2014 only "image" and "text" as specified above.
+If a logo description and/or reference image is provided, let it directly inform tiles 1-4 and the palette/direction \u2014 do not describe or reproduce the reference literally, just let it guide the aesthetic.`;
 
-async function createMoodboard(boardType: "moodboard" | "brandboard", prompt: string): Promise<unknown> {
+async function createMoodboard(boardType: "moodboard" | "brandboard", prompt: string, logoImageDataUrl?: string): Promise<unknown> {
+  const userContent: OpenAI.Chat.Completions.ChatCompletionContentPart[] = [{ type: "text", text: prompt }];
+  if (boardType === "brandboard" && logoImageDataUrl) {
+    userContent.push({ type: "image_url", image_url: { url: logoImageDataUrl } });
+  }
+
   const response = await openai.chat.completions.create({
     model: "gpt-5.4-mini",
     max_completion_tokens: 2400,
@@ -93,7 +106,7 @@ async function createMoodboard(boardType: "moodboard" | "brandboard", prompt: st
     },
     messages: [
       { role: "system", content: boardType === "brandboard" ? brandboardSystemPrompt : moodboardSystemPrompt },
-      { role: "user", content: prompt },
+      { role: "user", content: userContent },
     ],
   });
 
@@ -102,8 +115,25 @@ async function createMoodboard(boardType: "moodboard" | "brandboard", prompt: st
     throw new Error("AI returned an empty moodboard");
   }
 
-  const parsed = JSON.parse(content) as { layout?: Array<{ type: string; value: string; imageUrl?: string | null }> };
+  const parsed = JSON.parse(content) as { layout?: Array<{ type: string; label: string; value: string; accent?: string | null; size?: string; imageUrl?: string | null }> };
   if (Array.isArray(parsed.layout)) {
+    if (boardType === "brandboard") {
+      if (parsed.layout.length > 9) {
+        parsed.layout = parsed.layout.slice(0, 9);
+      } else if (parsed.layout.length < 9) {
+        const fallbackLabels = ["Logo direction", "Sticker mark", "Logo alt", "Icon mark", "Mockup", "Pattern", "Fonts", "Mockup", "Mockup"];
+        while (parsed.layout.length < 9) {
+          const index = parsed.layout.length;
+          parsed.layout.push({
+            type: fallbackLabels[index] === "Fonts" ? "text" : "image",
+            label: fallbackLabels[index] ?? "Mockup",
+            value: fallbackLabels[index] === "Fonts" ? "Headline: Fraunces / Body: Inter" : "brand aesthetic reference",
+            accent: null,
+            size: "medium",
+          });
+        }
+      }
+    }
     await Promise.all(
       parsed.layout.map(async (tile) => {
         if (tile.type === "image") {
@@ -223,15 +253,20 @@ router.post("/moodboards/generate", requireAuth, async (req, res): Promise<void>
   }
 
   try {
-    const { purpose, styles, boardType, layoutStyle, imageCount } = parsed.data;
-    const moodboard = await createMoodboard(
-      boardType,
-      `Create a ${boardType} for this purpose: "${purpose}".
+    const { purpose, styles, boardType, layoutStyle, imageCount, logoDescription, logoImageDataUrl } = parsed.data;
+    const promptText =
+      boardType === "brandboard"
+        ? `Create a brand identity board for this brand: "${purpose}".
+Brand ethos words: ${styles.join(", ")}.
+Logo description provided by the user: ${logoDescription?.trim() ? `"${logoDescription.trim()}"` : "none provided"}.
+${logoImageDataUrl ? "A reference logo image is attached \u2014 let it inform the visual direction." : "No reference logo image was attached."}
+Give it a memorable brand name/title, a concise tagline, a visual direction paragraph, and useful keywords.`
+        : `Create a moodboard for this purpose: "${purpose}".
 Selected style directions: ${styles.join(", ")}.
 Preferred layout composition: ${layoutStyle}.
 Include exactly ${imageCount} tiles of type "image", plus a reasonable mix of text, color, and quote tiles around them (aim for ${imageCount + 3}-${imageCount + 5} total tiles).
-Give it a memorable title, a concise tagline, a visual direction paragraph, useful keywords, and a tactile ${boardType === "brandboard" ? "brand identity" : "editorial"} composition.`,
-    );
+Give it a memorable title, a concise tagline, a visual direction paragraph, and useful keywords.`;
+    const moodboard = await createMoodboard(boardType, promptText, boardType === "brandboard" ? logoImageDataUrl : undefined);
     res.json(GenerateMoodboardResponse.parse(moodboard));
   } catch (error) {
     req.log.error({ err: error }, "Moodboard generation failed");
