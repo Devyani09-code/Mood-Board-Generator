@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type DragEvent, type FormEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type DragEvent, type FormEvent, type ReactNode } from 'react';
 import { useClerk, useUser } from '@clerk/react';
 import { getHealthCheckQueryKey, useGenerateMoodboard, useHealthCheck } from '@workspace/api-client-react';
 import type { Moodboard, MoodboardTile } from '@workspace/api-client-react';
@@ -211,35 +211,7 @@ function BriefCard({
   );
 }
 
-function getLayoutConfig(layoutStyle: string) {
-  switch (layoutStyle) {
-    case 'Clean grid':
-      return {
-        container: 'grid auto-rows-[160px] grid-cols-2 gap-4 sm:auto-rows-[170px] sm:grid-cols-4',
-        tileSize: () => '',
-        tileExtra: () => 'rounded-sm',
-      };
-    case 'Scrapbook stack':
-      return {
-        container: 'grid auto-rows-[150px] grid-cols-2 gap-6 sm:auto-rows-[160px] sm:grid-cols-3',
-        tileSize: (tile: MoodboardTile) => tile.size === 'large' ? 'sm:col-span-2 sm:row-span-2' : tile.size === 'medium' ? 'sm:row-span-2' : '',
-        tileExtra: (index: number) => `${['rotate-[-2deg]', 'rotate-[1.5deg]', 'rotate-[-1deg]'][index % 3]} shadow-xl`,
-      };
-    case 'Structured brand grid':
-      return {
-        container: 'grid auto-rows-[170px] grid-cols-2 gap-2',
-        tileSize: (_tile: MoodboardTile, index: number) => index === 0 ? 'col-span-2 row-span-2' : '',
-        tileExtra: () => 'rounded-none',
-      };
-    case 'Asymmetric collage':
-    default:
-      return {
-        container: 'grid auto-rows-[135px] grid-cols-1 gap-3 sm:auto-rows-[150px] sm:grid-cols-3',
-        tileSize: (tile: MoodboardTile) => tile.size === 'large' ? 'sm:col-span-2 sm:row-span-2' : tile.size === 'medium' ? 'sm:row-span-2' : '',
-        tileExtra: () => '',
-      };
-  }
-}
+
 
 function loadImageElement(url: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -284,6 +256,127 @@ function getExportColumns(layoutStyle: string) {
   if (layoutStyle === 'Clean grid') return 4;
   if (layoutStyle === 'Structured brand grid') return 2;
   return 3;
+}
+
+interface TileFrame { x: number; y: number; w: number; h: number; }
+const CANVAS_WIDTH = 1040;
+const MIN_TILE_SIZE = 90;
+
+function buildInitialFrames(tileCount: number, layoutStyle: string): TileFrame[] {
+  const cols = getExportColumns(layoutStyle);
+  const gap = 14;
+  const colW = (CANVAS_WIDTH - gap * (cols - 1)) / cols;
+  const rowH = 190;
+  const frames: TileFrame[] = [];
+  for (let i = 0; i < tileCount; i += 1) {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    frames.push({ x: col * (colW + gap), y: row * (rowH + gap), w: colW, h: rowH });
+  }
+  return frames;
+}
+
+function FreeformFrame({ frame, onMove, onResize, onClick, children, testId }: {
+  frame: TileFrame;
+  onMove: (x: number, y: number) => void;
+  onResize: (w: number, h: number) => void;
+  onClick?: () => void;
+  children: ReactNode;
+  testId: string;
+}) {
+  const dragState = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null);
+  const resizeState = useRef<{ startX: number; startY: number; origW: number; origH: number } | null>(null);
+  const movedRef = useRef(false);
+
+  return (
+    <div
+      className="absolute overflow-hidden border border-[#263d49]/25 bg-[#e8e1d2] cursor-move select-none"
+      style={{ left: frame.x, top: frame.y, width: frame.w, height: frame.h }}
+      data-testid={testId}
+      onPointerDown={(event) => {
+        const target = event.target as HTMLElement;
+        if (target.closest('[data-resize-handle]') || target.closest('[data-no-drag]')) return;
+        (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+        movedRef.current = false;
+        dragState.current = { startX: event.clientX, startY: event.clientY, origX: frame.x, origY: frame.y };
+      }}
+      onPointerMove={(event) => {
+        if (!dragState.current) return;
+        const dx = event.clientX - dragState.current.startX;
+        const dy = event.clientY - dragState.current.startY;
+        if (Math.abs(dx) > 3 || Math.abs(dy) > 3) movedRef.current = true;
+        onMove(Math.max(0, dragState.current.origX + dx), Math.max(0, dragState.current.origY + dy));
+      }}
+      onPointerUp={() => { dragState.current = null; }}
+      onClick={() => {
+        if (movedRef.current) { movedRef.current = false; return; }
+        onClick?.();
+      }}
+    >
+      {children}
+      <div
+        data-resize-handle="true"
+        className="absolute bottom-0 right-0 z-20 h-5 w-5 cursor-nwse-resize border-l-2 border-t-2 border-[#f1e5c9] bg-[#263d49]"
+        data-testid={`${testId}-resize-handle`}
+        onPointerDown={(event) => {
+          event.stopPropagation();
+          (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+          resizeState.current = { startX: event.clientX, startY: event.clientY, origW: frame.w, origH: frame.h };
+        }}
+        onPointerMove={(event) => {
+          if (!resizeState.current) return;
+          event.stopPropagation();
+          const dx = event.clientX - resizeState.current.startX;
+          const dy = event.clientY - resizeState.current.startY;
+          onResize(Math.max(MIN_TILE_SIZE, resizeState.current.origW + dx), Math.max(MIN_TILE_SIZE, resizeState.current.origH + dy));
+        }}
+        onPointerUp={(event) => { event.stopPropagation(); resizeState.current = null; }}
+      />
+    </div>
+  );
+}
+
+function FreeformTile({ tile, index, frame, onMove, onResize, onImageChange }: {
+  tile: MoodboardTile;
+  index: number;
+  frame: TileFrame;
+  onMove: (x: number, y: number) => void;
+  onResize: (w: number, h: number) => void;
+  onImageChange: (url: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const handleUpload = (file: File | undefined) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        onImageChange(reader.result);
+        setOpen(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+  return (
+    <FreeformFrame frame={frame} onMove={onMove} onResize={onResize} onClick={() => setOpen((v) => !v)} testId={`card-moodboard-tile-${index}`}>
+      <TileArt tile={tile} />
+      <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-[#263d49]/85 px-3 py-2 text-[9px] font-bold uppercase tracking-[.14em] text-[#f1e5c9]">
+        <span>{tile.label}</span><span className="text-[#d7a491]">{tile.type}</span>
+      </div>
+      {open && (
+        <div data-no-drag className="absolute inset-0 z-30 flex flex-col justify-between gap-2 bg-[#263d49]/95 p-3 text-[#f1e5c9]" onClick={(event) => event.stopPropagation()}>
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-[.12em]">Edit tile</span>
+            <button type="button" onClick={() => setOpen(false)} data-testid={`button-close-edit-${index}`}><X size={14} /></button>
+          </div>
+          <label className="block cursor-pointer border border-[#f1e5c9]/30 px-2 py-1.5 text-center text-[9px] uppercase tracking-[.08em] hover:bg-[#f1e5c9]/10" data-testid={`input-tile-upload-${index}`}>
+            Replace image
+            <input type="file" accept="image/*" className="hidden" onChange={(event) => handleUpload(event.target.files?.[0])} />
+          </label>
+          <p className="text-[9px] leading-4 text-[#f1e5c9]/60">Drag the tile to move it. Drag the bottom-right corner to resize.</p>
+        </div>
+      )}
+    </FreeformFrame>
+  );
 }
 
 async function drawTileCell(ctx: CanvasRenderingContext2D, tile: MoodboardTile, x: number, y: number, w: number, h: number) {
@@ -407,17 +500,13 @@ async function renderBrandBoardToCanvas(board: Moodboard): Promise<HTMLCanvasEle
   return canvas;
 }
 
-async function renderBoardToCanvas(board: Moodboard, layoutStyle: string): Promise<HTMLCanvasElement> {
-  const cols = getExportColumns(layoutStyle);
-  const cellW = 340;
-  const cellH = 230;
-  const gap = 18;
+async function renderFreeformBoardToCanvas(board: Moodboard, frames: TileFrame[]): Promise<HTMLCanvasElement> {
   const padding = 48;
   const headerH = 150;
-  const totalCells = board.layout.length + 1;
-  const rows = Math.ceil(totalCells / cols);
-  const width = padding * 2 + cols * cellW + (cols - 1) * gap;
-  const height = padding * 2 + headerH + rows * cellH + (rows - 1) * gap + 60;
+  const contentWidth = Math.max(...frames.map((f) => f.x + f.w), CANVAS_WIDTH);
+  const contentHeight = Math.max(...frames.map((f) => f.y + f.h), 400);
+  const width = contentWidth + padding * 2;
+  const height = contentHeight + padding * 2 + headerH;
 
   const canvas = document.createElement('canvas');
   canvas.width = width;
@@ -428,22 +517,14 @@ async function renderBoardToCanvas(board: Moodboard, layoutStyle: string): Promi
 
   for (let i = 0; i < board.layout.length; i += 1) {
     const tile = board.layout[i];
-    const col = i % cols;
-    const row = Math.floor(i / cols);
-    const x = padding + col * (cellW + gap);
-    const y = padding + headerH + row * (cellH + gap);
-    await drawTileCell(ctx, tile, x, y, cellW, cellH);
+    const frame = frames[i];
+    if (!frame) continue;
+    await drawTileCell(ctx, tile, padding + frame.x, padding + headerH + frame.y, frame.w, frame.h);
   }
-
-  {
-    const i = board.layout.length;
-    const col = i % cols;
-    const row = Math.floor(i / cols);
-    const x = padding + col * (cellW + gap);
-    const y = padding + headerH + row * (cellH + gap);
-    drawPaletteCell(ctx, board, x, y, cellW, cellH, 2);
+  const paletteFrame = frames[board.layout.length];
+  if (paletteFrame) {
+    drawPaletteCell(ctx, board, padding + paletteFrame.x, padding + headerH + paletteFrame.y, paletteFrame.w, paletteFrame.h, 2);
   }
-
   return canvas;
 }
 
@@ -594,10 +675,15 @@ function MoodboardEditor({ board, boardType, layoutStyle, onReset, onBoardChange
     }
   };
   const [exporting, setExporting] = useState<'download' | 'copy' | null>(null);
+  const [frames, setFrames] = useState<TileFrame[]>(() => buildInitialFrames(board.layout.length + 1, layoutStyle));
+  useEffect(() => {
+    setFrames(buildInitialFrames(board.layout.length + 1, layoutStyle));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [board.id, layoutStyle]);
   const download = async () => {
     setExporting('download');
     try {
-      const canvas = boardType === 'brandboard' ? await renderBrandBoardToCanvas(board) : await renderBoardToCanvas(board, layoutStyle);
+      const canvas = boardType === 'brandboard' ? await renderBrandBoardToCanvas(board) : await renderFreeformBoardToCanvas(board, frames);
       const blob = await canvasToPngBlob(canvas);
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
@@ -614,7 +700,7 @@ function MoodboardEditor({ board, boardType, layoutStyle, onReset, onBoardChange
   const copyBoardImage = async () => {
     setExporting('copy');
     try {
-      const canvas = boardType === 'brandboard' ? await renderBrandBoardToCanvas(board) : await renderBoardToCanvas(board, layoutStyle);
+      const canvas = boardType === 'brandboard' ? await renderBrandBoardToCanvas(board) : await renderFreeformBoardToCanvas(board, frames);
       const blob = await canvasToPngBlob(canvas);
       await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
       setCopied('board');
@@ -626,30 +712,14 @@ function MoodboardEditor({ board, boardType, layoutStyle, onReset, onBoardChange
     }
   };
 
-  const updateTileSize = (index: number, size: 'small' | 'medium' | 'large') => {
-    const nextLayout = board.layout.map((tile, i) => (i === index ? { ...tile, size } : tile));
-    onBoardChange({ ...board, layout: nextLayout });
-  };
   const updateTileImage = (index: number, imageUrl: string) => {
     const nextLayout = board.layout.map((tile, i) => (i === index ? { ...tile, imageUrl } : tile));
     onBoardChange({ ...board, layout: nextLayout });
   };
-  const dragIndexRef = useRef<number | null>(null);
-  const handleDragStart = (index: number) => () => {
-    dragIndexRef.current = index;
+  const updateFrame = (index: number, patch: Partial<TileFrame>) => {
+    setFrames((current) => current.map((frame, i) => (i === index ? { ...frame, ...patch } : frame)));
   };
-  const handleDragOver = () => (event: DragEvent) => {
-    event.preventDefault();
-  };
-  const handleDrop = (index: number) => (event: DragEvent) => {
-    event.preventDefault();
-    const from = dragIndexRef.current;
-    dragIndexRef.current = null;
-    if (from === null || from === index) return;
-    const nextLayout = [...board.layout];
-    [nextLayout[from], nextLayout[index]] = [nextLayout[index], nextLayout[from]];
-    onBoardChange({ ...board, layout: nextLayout });
-  };
+  const canvasHeight = useMemo(() => Math.max(400, ...frames.map((frame) => frame.y + frame.h)) + 40, [frames]);
 
   return (
     <div className="mx-auto max-w-[1400px] px-5 py-7 sm:px-8 lg:px-12">
@@ -665,29 +735,32 @@ function MoodboardEditor({ board, boardType, layoutStyle, onReset, onBoardChange
         </div>
       </div>
       <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_310px]">
-        <section className="studio-grid border border-[#263d49]/15 bg-[#dce0dc]/45 p-3 sm:p-5" data-testid="panel-moodboard-canvas">
+        <section className="studio-grid overflow-x-auto border border-[#263d49]/15 bg-[#dce0dc]/45 p-3 sm:p-5" data-testid="panel-moodboard-canvas">
           {boardType === 'brandboard' ? (
             <BrandBoardGrid board={board} copied={copied} onCopyColor={(hex) => copy(hex, hex)} onImageChange={updateTileImage} />
           ) : (
-            <div className={getLayoutConfig(layoutStyle).container}>
-              {board.layout.map((tile, index) => (
-                <EditableTile
+            <div className="relative" style={{ width: CANVAS_WIDTH, height: canvasHeight, maxWidth: 'none' }}>
+              {board.layout.map((tile, index) => frames[index] && (
+                <FreeformTile
                   key={`${tile.label}-${index}`}
                   tile={tile}
                   index={index}
-                  sizeClass={getLayoutConfig(layoutStyle).tileSize(tile, index)}
-                  extraClass={getLayoutConfig(layoutStyle).tileExtra(index)}
-                  allowResize
-                  allowDrag
-                  onSizeChange={(size) => updateTileSize(index, size)}
+                  frame={frames[index]}
+                  onMove={(x, y) => updateFrame(index, { x, y })}
+                  onResize={(w, h) => updateFrame(index, { w, h })}
                   onImageChange={(url) => updateTileImage(index, url)}
-                  onDragStart={handleDragStart(index)}
-                  onDragOver={handleDragOver()}
-                  onDrop={handleDrop(index)}
-                  testIdPrefix="card-moodboard-tile"
                 />
               ))}
-              <PaletteTileCard board={board} copied={copied} onCopyColor={(hex) => copy(hex, hex)} sizeClass={getLayoutConfig(layoutStyle).tileSize({ type: 'color', label: 'Palette', value: '', accent: null, size: 'large' }, board.layout.length)} extraClass={getLayoutConfig(layoutStyle).tileExtra(board.layout.length)} />
+              {frames[board.layout.length] && (
+                <FreeformFrame
+                  frame={frames[board.layout.length]}
+                  onMove={(x, y) => updateFrame(board.layout.length, { x, y })}
+                  onResize={(w, h) => updateFrame(board.layout.length, { w, h })}
+                  testId="card-palette-tile"
+                >
+                  <PaletteTileCard board={board} copied={copied} onCopyColor={(hex) => copy(hex, hex)} sizeClass="h-full w-full" extraClass="" />
+                </FreeformFrame>
+              )}
             </div>
           )}
           <div className="mt-5 flex flex-wrap gap-2 border-t border-[#263d49]/15 pt-4">
@@ -697,7 +770,7 @@ function MoodboardEditor({ board, boardType, layoutStyle, onReset, onBoardChange
         <aside className="space-y-5">
           <div className="border border-[#263d49]/25 bg-[#ebe6da]/75 p-5">
             <div className="flex items-center gap-2 text-[#b36b57]"><SlidersHorizontal size={16} strokeWidth={1.5} /><span className="eyebrow">Edit the board</span></div>
-            <p className="mt-4 text-[13px] leading-6 text-[#435b65]">Click any tile to resize it or replace its image with your own upload.{boardType === 'moodboard' ? ' Drag a tile onto another to swap their positions.' : ''}</p>
+            <p className="mt-4 text-[13px] leading-6 text-[#435b65]">{boardType === 'moodboard' ? 'Drag any tile to move it. Drag its bottom-right corner to resize freely. Click a tile to replace its image.' : 'Click any tile to replace its image with your own upload.'}</p>
           </div>
           <div className="border-t border-[#263d49]/20 pt-4">
             <p className="text-[11px] leading-5 text-[#435b65]">Direction: <span className="text-[#263d49]" data-testid="text-moodboard-direction">{board.direction}</span></p>
