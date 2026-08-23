@@ -290,7 +290,7 @@ function FreeformFrame({ frame, onMove, onResize, onClick, children, testId }: {
 
   return (
     <div
-      className="absolute overflow-hidden border border-[#263d49]/25 bg-[#e8e1d2] cursor-move select-none"
+      className="group absolute overflow-hidden border border-[#263d49]/25 bg-[#e8e1d2] cursor-move select-none"
       style={{ left: frame.x, top: frame.y, width: frame.w, height: frame.h }}
       data-testid={testId}
       onPointerDown={(event) => {
@@ -316,7 +316,7 @@ function FreeformFrame({ frame, onMove, onResize, onClick, children, testId }: {
       {children}
       <div
         data-resize-handle="true"
-        className="absolute bottom-0 right-0 z-20 h-5 w-5 cursor-nwse-resize border-l-2 border-t-2 border-[#f1e5c9] bg-[#263d49]"
+        className="absolute bottom-0 right-0 z-20 h-5 w-5 cursor-nwse-resize border-l-2 border-t-2 border-[#f1e5c9] bg-[#263d49] opacity-0 transition-opacity duration-150 group-hover:opacity-100"
         data-testid={`${testId}-resize-handle`}
         onPointerDown={(event) => {
           event.stopPropagation();
@@ -713,7 +713,7 @@ function MoodboardEditor({ board, boardType, layoutStyle, onReset, onBoardChange
   };
 
   const updateTileImage = (index: number, imageUrl: string) => {
-    const nextLayout = board.layout.map((tile, i) => (i === index ? { ...tile, imageUrl } : tile));
+    const nextLayout = board.layout.map((tile, i) => (i === index ? { ...tile, type: 'image' as const, imageUrl } : tile));
     onBoardChange({ ...board, layout: nextLayout });
   };
   const updateFrame = (index: number, patch: Partial<TileFrame>) => {
