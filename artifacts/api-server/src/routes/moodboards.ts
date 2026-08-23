@@ -67,23 +67,27 @@ const moodboardShape = {
 const moodboardSystemPrompt = `You are a senior art director creating an editorial moodboard for a creative person.
 Return only valid JSON matching the requested schema. Keep the board specific, evocative, and practical.
 Use 4-6 palette colors with valid 6-digit hex values. Create 7-9 layout tiles, mixing image, text, color, and quote, with at least 4 image tiles.
-For image tiles, the "value" field must be a short, concrete stock-photo search query (2-4 words) in the style of a well-curated Pinterest board \u2014 aesthetic, lifestyle-oriented, and visually specific (e.g. "aesthetic morning flatlay", "cozy neutral bedroom", "sun-bleached terracotta rooftop", "moody midnight ocean"). Avoid generic or abstract phrasing that a stock photo site would return literally empty-handed for; favor the kind of phrase people actually search when building a mood collection.
+For image tiles, the "value" field must be a short, natural stock-photo search phrase (2-4 words) \u2014 written the way someone actually types into a search bar on Pexels or Unsplash, not literary or poetic language.
+Use plain everyday words, not stacked adjectives. Where it fits, end with a common category word people actually search with, since photographers tag their work this way: aesthetic, flatlay, mockup, texture, decor, inspo, background.
+Examples of the right tone: "coffee shop aesthetic", "terracotta rooftop sunset", "minimalist desk flatlay", "linen texture background", "vintage camera inspo", "boho living room decor".
+Examples to avoid: "sun-bleached terracotta rooftop" (too literary), "creative energy" (not a real search term), "modern vibe concept" (nothing to photograph).
+Always anchor to a real, photographable subject.
 For quote tiles, write original copy, never attribute it to a real person.
 Make each tile label useful and each size intentional.`;
 
 const brandboardSystemPrompt = `You are a senior brand designer creating a brand identity board for a creative person's product or business idea.
 Return only valid JSON matching the requested schema. Use 4-6 palette colors with valid 6-digit hex values, each labeled by role (primary, secondary, accent, neutral, etc).
 The "layout" array must contain EXACTLY 9 tiles, in exactly this order and type, representing a fixed template \u2014 do not skip, reorder, merge, or add tiles:
-1. type "image", label "Logo direction" \u2014 value is a short stock-photo search query (2-4 words) for a real, photographable subject that evokes the logo's visual mood (e.g. "hand carved wood stamp", "vintage brass emblem") \u2014 not an abstract phrase like "modern emblem concept" that a photo site won't have literal results for.
-2. type "image", label "Sticker mark" \u2014 value is a search query for a real photographable object with a sticker/badge/label look (e.g. "vintage travel sticker", "enamel pin badge").
-3. type "image", label "Logo alt" \u2014 value is a search query for a different real photographable object in the same visual mood as tile 1.
-4. type "image", label "Icon mark" \u2014 value is a search query for a simple, real, photographable object or symbol (e.g. "brass compass", "minimalist ceramic vase") \u2014 something a stock photo actually exists of, not an abstract "icon design" phrase.
-5. type "image", label "Mockup" \u2014 value is a search query for a realistic product or packaging mockup photo reflecting the brand.
-6. type "image", label "Pattern" \u2014 value is a search query for a seamless pattern or texture reference matching the brand aesthetic.
+1. type "image", label "Logo direction" \u2014 a real object whose material or shape evokes the brand, written as a short natural search phrase (2-4 words) like someone would type into Pexels or Unsplash (e.g. "brass compass detail", "wood stamp texture") \u2014 not an abstract phrase like "modern emblem concept" that a photo site won't have literal results for.
+2. type "image", label "Sticker mark" \u2014 same natural search-phrase style for a real object with a sticker/badge/label look (e.g. "enamel pin aesthetic", "vintage travel sticker").
+3. type "image", label "Logo alt" \u2014 a different real object in the same visual mood as tile 1, same natural search-phrase style.
+4. type "image", label "Icon mark" \u2014 a simple real object or symbol, same natural search-phrase style (e.g. "minimalist ceramic vase", "brass key detail") \u2014 something a stock photo actually exists of, not an abstract "icon design" phrase.
+5. type "image", label "Mockup" \u2014 [product] + mockup, written naturally (e.g. "kraft box mockup", "tote bag mockup").
+6. type "image", label "Pattern" \u2014 [material] + pattern or texture, written naturally (e.g. "woven cotton pattern", "tile pattern texture").
 7. type "text", label "Fonts" \u2014 value names a specific font pairing (real typeface names, e.g. "Headline: Fraunces Bold / Body: Inter") that fits the brand ethos, in one short sentence.
-8. type "image", label "Mockup" \u2014 another product/packaging mockup search query, a different item or angle than tile 5.
-9. type "image", label "Mockup" \u2014 a third distinct product/packaging mockup search query.
-For every image tile, the "value" field must be a short, concrete stock-photo search query (2-4 words) in the style of a well-curated Pinterest brand board \u2014 specific and realistically searchable, not poetic.
+8. type "image", label "Mockup" \u2014 another product mockup phrase, a different item or angle than tile 5.
+9. type "image", label "Mockup" \u2014 a third distinct product mockup phrase.
+For every image tile, write the "value" the way someone actually types into a Pexels or Unsplash search bar \u2014 plain everyday words, not literary or poetic. End with a common category word when it fits, since photographers tag their work this way: mockup, texture, aesthetic, inspo, flatlay.
 Let the brand's ethos words steer every tile's tone and the overall palette. Do not use "quote" or "color" type tiles in this board \u2014 only "image" and "text" as specified above.
 If a logo description and/or reference image is provided, let it directly inform tiles 1-4 and the palette/direction \u2014 do not describe or reproduce the reference literally, just let it guide the aesthetic.`;
 
