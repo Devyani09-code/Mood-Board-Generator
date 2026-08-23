@@ -74,10 +74,10 @@ Make each tile label useful and each size intentional.`;
 const brandboardSystemPrompt = `You are a senior brand designer creating a brand identity board for a creative person's product or business idea.
 Return only valid JSON matching the requested schema. Use 4-6 palette colors with valid 6-digit hex values, each labeled by role (primary, secondary, accent, neutral, etc).
 The "layout" array must contain EXACTLY 9 tiles, in exactly this order and type, representing a fixed template \u2014 do not skip, reorder, merge, or add tiles:
-1. type "image", label "Logo direction" \u2014 value is a short stock-photo search query (2-4 words) evoking the visual mood the logo should have (not a literal logo photo).
-2. type "image", label "Sticker mark" \u2014 value is a search query for a sticker/badge-style graphic reference matching the brand.
-3. type "image", label "Logo alt" \u2014 value is a search query for an alternate logo-style visual reference.
-4. type "image", label "Icon mark" \u2014 value is a search query for a simple icon/symbol style reference.
+1. type "image", label "Logo direction" \u2014 value is a short stock-photo search query (2-4 words) for a real, photographable subject that evokes the logo's visual mood (e.g. "hand carved wood stamp", "vintage brass emblem") \u2014 not an abstract phrase like "modern emblem concept" that a photo site won't have literal results for.
+2. type "image", label "Sticker mark" \u2014 value is a search query for a real photographable object with a sticker/badge/label look (e.g. "vintage travel sticker", "enamel pin badge").
+3. type "image", label "Logo alt" \u2014 value is a search query for a different real photographable object in the same visual mood as tile 1.
+4. type "image", label "Icon mark" \u2014 value is a search query for a simple, real, photographable object or symbol (e.g. "brass compass", "minimalist ceramic vase") \u2014 something a stock photo actually exists of, not an abstract "icon design" phrase.
 5. type "image", label "Mockup" \u2014 value is a search query for a realistic product or packaging mockup photo reflecting the brand.
 6. type "image", label "Pattern" \u2014 value is a search query for a seamless pattern or texture reference matching the brand aesthetic.
 7. type "text", label "Fonts" \u2014 value names a specific font pairing (real typeface names, e.g. "Headline: Fraunces Bold / Body: Inter") that fits the brand ethos, in one short sentence.
@@ -146,10 +146,32 @@ async function createMoodboard(boardType: "moodboard" | "brandboard", prompt: st
   return parsed;
 }
 
-async function fetchStockImage(query: string): Promise<string | null> {
+const GENERIC_FALLBACK_QUERIES = ["minimal aesthetic texture", "neutral abstract background", "soft studio texture"];
+
+async function fetchStockImage(query: string, attempt = 0): Promise<string | null> {
   const pexelsResult = await fetchPexelsImage(query);
   if (pexelsResult) return pexelsResult;
-  return fetchUnsplashImage(query);
+  const unsplashResult = await fetchUnsplashImage(query);
+  if (unsplashResult) return unsplashResult;
+
+  // Both sources came back empty for this query. Retry with a broader/simpler
+  // version before giving up, since abstract queries (e.g. "icon mark concept")
+  // often return nothing where a shorter or more generic phrase will.
+  const words = query.trim().split(/\s+/);
+  if (words.length > 2) {
+    const shorter = words.slice(0, 2).join(" ");
+    console.error(`[stock-image] no results for "${query}", retrying with shorter query "${shorter}"`);
+    return fetchStockImage(shorter, attempt + 1);
+  }
+
+  if (attempt < GENERIC_FALLBACK_QUERIES.length) {
+    const fallback = GENERIC_FALLBACK_QUERIES[attempt];
+    console.error(`[stock-image] no results for "${query}", falling back to generic query "${fallback}"`);
+    return fetchStockImage(fallback, attempt + 1);
+  }
+
+  console.error(`[stock-image] exhausted all fallbacks for original query, giving up`);
+  return null;
 }
 
 async function fetchPexelsImage(query: string): Promise<string | null> {
