@@ -812,8 +812,10 @@ export default function StudioPage() {
     window.setTimeout(() => { setStep((current) => Math.min(current + 1, 4)); setIsExiting(false); }, 400);
   };
   const submit = () => {
-    if (!boardType || purpose.trim().length < 3 || !layoutStyle || styles.length === 0) return;
-    generate.mutate({ data: { boardType, purpose: purpose.trim(), logoDescription: boardType === 'brandboard' ? logoDescription.trim() : undefined, logoImageDataUrl: boardType === 'brandboard' ? logoImageDataUrl ?? undefined : undefined, layoutStyle, imageCount, styles } });
+    if (!boardType || purpose.trim().length < 3 || styles.length === 0) return;
+    if (boardType === 'moodboard' && !layoutStyle) return;
+    if (boardType === 'brandboard' && logoDescription.trim().length < 3 && !logoImageDataUrl) return;
+    generate.mutate({ data: { boardType, purpose: purpose.trim(), logoDescription: boardType === 'brandboard' ? logoDescription.trim() : undefined, logoImageDataUrl: boardType === 'brandboard' ? logoImageDataUrl ?? undefined : undefined, layoutStyle: boardType === 'moodboard' ? layoutStyle : 'brand template', imageCount, styles } });
   };
   const reset = () => { setBoard(null); setStep(0); setBoardType(null); setPurpose(''); setLogoDescription(''); setLogoImageDataUrl(null); setLayoutStyle(''); setImageCount(6); setStyles([]); };
   const healthLabel = useMemo(() => health.data?.status === 'ok' ? 'studio connected' : health.isLoading ? 'checking studio' : 'quiet mode', [health.data?.status, health.isLoading]);
