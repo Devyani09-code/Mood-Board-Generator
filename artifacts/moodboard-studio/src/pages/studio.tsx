@@ -615,7 +615,7 @@ function MoodboardEditor({ board, boardType, layoutStyle, onReset, onBoardChange
         </div>
       </div>
       <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_310px]">
-        <section className="studio-grid overflow-x-auto border border-[#fef7e5] bg-[#390404]/70 p-3 sm:p-5" data-testid="panel-moodboard-canvas">
+        <section className="studio-grid overflow-x-auto border border-[#fef7e5] bg-[#390404] p-3 sm:p-5" data-testid="panel-moodboard-canvas">
           <div className="relative" style={{ width: CANVAS_WIDTH, height: canvasHeight, maxWidth: 'none' }}>
               {board.layout.map((tile, index) => frames[index] && (
                 <FreeformTile
@@ -642,7 +642,7 @@ function MoodboardEditor({ board, boardType, layoutStyle, onReset, onBoardChange
           </div>
         </section>
         <aside className="space-y-5">
-          <div className="border border-[#390404]/25 bg-[#390404]/70 p-5">
+          <div className="border border-[#390404] bg-[#390404] p-5">
             <div className="flex items-center gap-2 text-[#788240]"><SlidersHorizontal size={16} strokeWidth={1.5} /><span className="eyebrow">Edit the board</span></div>
             <p className="mt-4 text-[13px] leading-6 text-[#fef7e5]">Drag any tile to move it. Drag its bottom-right corner to resize freely. Click a tile to replace its image or delete it.</p>
           </div>
