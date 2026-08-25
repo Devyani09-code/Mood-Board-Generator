@@ -4,18 +4,18 @@ import { Link } from 'wouter';
 
 export default function HomePage() {
   return (
-    <main className="grain min-h-[100dvh] overflow-hidden bg-[#390404] text-[#b7e1da]">
+    <main className="grain min-h-[100dvh] overflow-hidden bg-[#390404] text-[#c0d6ed]">
       <section className="relative min-h-screen px-6 pb-20 pt-7 sm:px-10 lg:px-16">
         <div className="mx-auto max-w-[1400px]">
-          <header className="flex items-center justify-between border-b border-[#b7e1da]/20 pb-5">
+          <header className="flex items-center justify-between border-b border-[#c0d6ed]/20 pb-5">
             <Link href="/" className="group flex items-center gap-3" data-testid="link-home-logo">
-              <span className="flex h-10 w-10 items-center justify-center rounded-[12px] border border-[#b7e1da]/30 bg-[#390404] text-[#fef7e5] shadow-sm">
+              <span className="flex h-10 w-10 items-center justify-center rounded-[12px] border border-[#c0d6ed]/30 bg-[#390404] text-[#fef7e5] shadow-sm">
                 <span className="serif text-[27px] leading-none">M</span>
               </span>
               <span className="text-[11px] font-bold uppercase tracking-[.22em]">Morrow studio</span>
             </Link>
             <nav className="flex items-center gap-5 text-[11px] font-bold uppercase tracking-[.16em] sm:gap-8">
-              <Link href="/sign-in" className="rounded-full border border-[#b7e1da]/30 px-4 py-2 transition-all hover:border-[#b7e1da] hover:bg-[#b7e1da] hover:text-[#390404]" data-testid="link-sign-in">Sign in</Link>
+              <Link href="/sign-in" className="rounded-full border border-[#b7e1da]/30 px-4 py-2 transition-all hover:border-[#c0d6ed] hover:bg-[#b7e1da] hover:text-[#390404]" data-testid="link-sign-in">Sign in</Link>
             </nav>
           </header>
 
@@ -24,7 +24,7 @@ export default function HomePage() {
               <h1 className="reveal reveal-delay-1 serif mt-8 max-w-[760px] text-[clamp(4rem,9vw,9.2rem)] leading-[.84] tracking-[-.065em] text-[#b7e1da]">
                 Stage<br /><em>your</em> ideas.
               </h1>
-              <p className="reveal reveal-delay-2 mt-9 max-w-[470px] text-[15px] leading-7 text-[#b7e1da] sm:text-[17px]">
+              <p className="reveal reveal-delay-2 mt-9 max-w-[470px] text-[15px] leading-7 text-[#c0d6ed] sm:text-[17px]">
                 Morrow transforms early ideas into considered visual identities. Bring the starting point. Leave with a clear creative direction and a visual language built to stand apart
               </p>
               <div className="reveal reveal-delay-3 mt-10 flex flex-wrap items-center gap-4">
