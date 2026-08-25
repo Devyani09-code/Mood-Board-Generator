@@ -830,14 +830,14 @@ export default function StudioPage() {
 
   if (board) {
     return (
-      <main className="grain min-h-[100dvh] bg-[#390404] text-[#c1dbe8]">
+      <main className="grain min-h-[100dvh] bg-[#fef7e5] text-[#390404]">
         <StudioHeader healthLabel={healthLabel} userName={user?.firstName || 'maker'} signOut={() => signOut({ redirectUrl: import.meta.env.BASE_URL || '/' })} />
         <MoodboardEditor board={board} boardType={boardType ?? 'moodboard'} layoutStyle={layoutStyle} onReset={reset} onBoardChange={setBoard} />
       </main>
     );
   }
   return (
-    <main className="grain min-h-[100dvh] bg-[#390404] text-[#c1dbe8]">
+    <main className="grain min-h-[100dvh] bg-[#fef7e5] text-[#390404]">
       <StudioHeader healthLabel={healthLabel} userName={user?.firstName || 'maker'} signOut={() => signOut({ redirectUrl: import.meta.env.BASE_URL || '/' })} />
       <section className="flex min-h-[calc(100dvh-80px)] flex-col items-center justify-center px-5 py-12 sm:px-8">
         <div className="mb-8 w-full max-w-[700px]">
