@@ -28,7 +28,7 @@ export default function HomePage() {
                 Morrow transforms early ideas into considered visual identities. Bring the starting point. Leave with a clear creative direction and a visual language built to stand apart
               </p>
               <div className="reveal reveal-delay-3 mt-10 flex flex-wrap items-center gap-4">
-                <Link href="/sign-up" className="group flex items-center gap-3 rounded-full bg-[#fef7e5] px-6 py-3.5 text-[11px] font-bold uppercase tracking-[.15em] text-[#390404] transition-all hover:-translate-y-0.5 hover:bg-[#390404] text-[#fef7e5]" data-testid="link-start-ritual">
+                <Link href="/sign-up" className="group flex items-center gap-3 rounded-full bg-[#fef7e5] px-6 py-3.5 text-[11px] font-bold uppercase tracking-[.15em] text-[#390404] transition-all hover:-translate-y-0.5 hover:bg-[#390404] hover:text-[#fef7e5]" data-testid="link-start-ritual">
                   Let's Begin!! <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
                 </Link>
                 <a href="#ritual" className="flex items-center gap-2 px-2 py-3 text-[11px] font-bold uppercase tracking-[.15em] text-[#fef7e5] transition-colors hover:text-[#A9B80B]" data-testid="link-see-how">
