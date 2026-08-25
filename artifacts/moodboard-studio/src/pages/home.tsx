@@ -31,7 +31,7 @@ export default function HomePage() {
                 <Link href="/sign-up" className="group flex items-center gap-3 rounded-full bg-[#fef7e5] px-6 py-3.5 text-[11px] font-bold uppercase tracking-[.15em] text-[#390404] transition-all hover:-translate-y-0.5 hover:bg-[#390404] hover:text-[#fef7e5]" data-testid="link-start-ritual">
                   Let's Begin!! <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
                 </Link>
-                <a href="#ritual" className="flex items-center gap-2 px-2 py-3 text-[11px] font-bold uppercase tracking-[.15em] text-[#fef7e5] transition-colors hover:text-[#D8E6C3]" data-testid="link-see-how">
+                <a href="#ritual" className="flex items-center gap-2 px-2 py-3 text-[11px] font-bold uppercase tracking-[.15em] text-[#fef7e5] transition-colors hover:text-[#788240]" data-testid="link-see-how">
                   See how it works <ArrowDown size={14} />
                 </a>
               </div>
@@ -78,7 +78,7 @@ export default function HomePage() {
 
       <footer className="flex flex-col justify-between gap-4 border-t border-[#c1dbe8]/20 bg-[#390404] px-6 py-7 text-[10px] font-bold uppercase tracking-[.16em] text-[#c1dbe8] sm:flex-row sm:px-10 lg:px-16">
         <span>© 2025 Morrow  studio</span>
-        <span className="text-[#D8E6C3]">for ideas in their early light</span>
+        <span className="text-[#788240]">for ideas in their early light</span>
       </footer>
     </main>
   );
