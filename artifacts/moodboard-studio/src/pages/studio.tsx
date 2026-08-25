@@ -3,7 +3,6 @@ import { useClerk, useUser } from '@clerk/react';
 import { getHealthCheckQueryKey, useGenerateMoodboard, useHealthCheck } from '@workspace/api-client-react';
 import type { Moodboard, MoodboardTile } from '@workspace/api-client-react';
 import { ArrowRight, Check, Clipboard, Download, History, LayoutDashboard, LogOut, Menu, RefreshCw, SlidersHorizontal, UserRound, X } from 'lucide-react';
-import velvetTexture from '@assets/velvet-maroon-texture.png';
 import { Link } from 'wouter';
 
 const STYLE_OPTIONS = ['quiet luxury', 'raw & tactile', 'cinematic', 'sun-washed', 'editorial', 'strange & tender'];
@@ -831,14 +830,14 @@ export default function StudioPage() {
 
   if (board) {
     return (
-      <main className="grain min-h-[100dvh] bg-[#5c1a03] text-[#c2dfdb]" style={{ backgroundImage: `linear-gradient(rgba(92,26,3,.82), rgba(92,26,3,.82)), url(${velvetTexture})`, backgroundSize: 'cover', backgroundAttachment: 'fixed' }}>
+      <main className="grain min-h-[100dvh] bg-[#5c1a03] text-[#c2dfdb]">
         <StudioHeader healthLabel={healthLabel} userName={user?.firstName || 'maker'} signOut={() => signOut({ redirectUrl: import.meta.env.BASE_URL || '/' })} />
         <MoodboardEditor board={board} boardType={boardType ?? 'moodboard'} layoutStyle={layoutStyle} onReset={reset} onBoardChange={setBoard} />
       </main>
     );
   }
   return (
-    <main className="grain min-h-[100dvh] bg-[#5c1a03] text-[#c2dfdb]" style={{ backgroundImage: `linear-gradient(rgba(92,26,3,.82), rgba(92,26,3,.82)), url(${velvetTexture})`, backgroundSize: 'cover', backgroundAttachment: 'fixed' }}>
+    <main className="grain min-h-[100dvh] bg-[#5c1a03] text-[#c2dfdb]">
       <StudioHeader healthLabel={healthLabel} userName={user?.firstName || 'maker'} signOut={() => signOut({ redirectUrl: import.meta.env.BASE_URL || '/' })} />
       <section className="flex min-h-[calc(100dvh-80px)] flex-col items-center justify-center px-5 py-12 sm:px-8">
         <div className="mb-8 w-full max-w-[700px]">

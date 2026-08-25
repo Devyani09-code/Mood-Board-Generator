@@ -4,7 +4,7 @@ import { Link } from 'wouter';
 
 export default function HomePage() {
   return (
-    <main className="grain min-h-[100dvh] overflow-hidden bg-[#5c1a03] text-[#c2dfdb]" style={{ backgroundImage: `linear-gradient(rgba(92,26,3,.84), rgba(92,26,3,.84)), url(${velvetTexture})`, backgroundSize: 'cover', backgroundAttachment: 'fixed' }}>
+    <main className="grain min-h-[100dvh] overflow-hidden bg-[#5c1a03] text-[#c2dfdb]">
       <section className="relative min-h-screen px-6 pb-20 pt-7 sm:px-10 lg:px-16">
         <div className="mx-auto max-w-[1400px]">
           <header className="flex items-center justify-between border-b border-[#c2dfdb]/20 pb-5">
