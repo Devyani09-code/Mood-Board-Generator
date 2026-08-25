@@ -31,7 +31,7 @@ export default function HomePage() {
                 <Link href="/sign-up" className="group flex items-center gap-3 rounded-full bg-[#fef7e5] px-6 py-3.5 text-[11px] font-bold uppercase tracking-[.15em] text-[#390404] transition-all hover:-translate-y-0.5 hover:bg-[#390404] hover:text-[#fef7e5]" data-testid="link-start-ritual">
                   Let's Begin!! <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
                 </Link>
-                <a href="#ritual" className="flex items-center gap-2 px-2 py-3 text-[11px] font-bold uppercase tracking-[.15em] text-[#fef7e5] transition-colors hover:text-[#bd5d20]" data-testid="link-see-how">
+                <a href="#ritual" className="flex items-center gap-2 px-2 py-3 text-[11px] font-bold uppercase tracking-[.15em] text-[#fef7e5] transition-colors hover:text-[#D8E6C3]" data-testid="link-see-how">
                   See how it works <ArrowDown size={14} />
                 </a>
               </div>
@@ -56,7 +56,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-[1400px]">
           <div className="grid gap-14 lg:grid-cols-[.55fr_1fr] lg:gap-24">
             <div>
-              <span className="eyebrow text-[#bd5d20]">A gentler starting point</span>
+              <span className="eyebrow text-[#788240]">A gentler starting point</span>
               <h2 className="serif mt-6 max-w-[440px] text-5xl leading-[.95] tracking-[-.04em] sm:text-6xl"><em>Not a brief.<br />A clear direction.</em></h2>
             </div>
             <div className="grid gap-0 sm:grid-cols-3">
@@ -66,7 +66,7 @@ export default function HomePage() {
                 ['03', 'Build your board', 'The chosen direction becomes a distinct visual language, refined with purpose and consistency.'],
               ].map(([number, title, copy], index) => (
                 <div key={number} className={`border-t border-[#390404]/25 py-6 sm:border-l sm:border-t-0 sm:pl-6 ${index > 0 ? 'mt-4 sm:mt-0' : ''}`} data-testid={`card-ritual-step-${number}`}>
-                  <span className="text-[11px] tracking-[.18em] text-[#bd5d20]">{number}</span>
+                  <span className="text-[11px] tracking-[.18em] text-[#788240]">{number}</span>
                   <h3 className="serif mt-10 text-2xl">{title}</h3>
                   <p className="mt-3 max-w-[210px] text-[13px] leading-6 text-[#390404]/65">{copy}</p>
                 </div>
@@ -78,7 +78,7 @@ export default function HomePage() {
 
       <footer className="flex flex-col justify-between gap-4 border-t border-[#c1dbe8]/20 bg-[#390404] px-6 py-7 text-[10px] font-bold uppercase tracking-[.16em] text-[#c1dbe8] sm:flex-row sm:px-10 lg:px-16">
         <span>© 2025 Morrow  studio</span>
-        <span className="text-[#bd5d20]">for ideas in their early light</span>
+        <span className="text-[#D8E6C3]">for ideas in their early light</span>
       </footer>
     </main>
   );
