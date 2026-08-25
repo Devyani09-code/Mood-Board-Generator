@@ -615,7 +615,7 @@ function MoodboardEditor({ board, boardType, layoutStyle, onReset, onBoardChange
         </div>
       </div>
       <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_310px]">
-        <section className="studio-grid overflow-x-auto border border-[#390404]/15 bg-[#fef7e5]/45 p-3 sm:p-5" data-testid="panel-moodboard-canvas">
+        <section className="studio-grid overflow-x-auto border border-[#fef7e5]/15 bg-[#390404]/45 p-3 sm:p-5" data-testid="panel-moodboard-canvas">
           <div className="relative" style={{ width: CANVAS_WIDTH, height: canvasHeight, maxWidth: 'none' }}>
               {board.layout.map((tile, index) => frames[index] && (
                 <FreeformTile
@@ -642,12 +642,12 @@ function MoodboardEditor({ board, boardType, layoutStyle, onReset, onBoardChange
           </div>
         </section>
         <aside className="space-y-5">
-          <div className="border border-[#390404]/25 bg-[#fef7e5]/75 p-5">
+          <div className="border border-[#390404]/25 bg-[#390404]/75 p-5">
             <div className="flex items-center gap-2 text-[#788240]"><SlidersHorizontal size={16} strokeWidth={1.5} /><span className="eyebrow">Edit the board</span></div>
-            <p className="mt-4 text-[13px] leading-6 text-[#390404]">Drag any tile to move it. Drag its bottom-right corner to resize freely. Click a tile to replace its image or delete it.</p>
+            <p className="mt-4 text-[13px] leading-6 text-[#fef7e5]">Drag any tile to move it. Drag its bottom-right corner to resize freely. Click a tile to replace its image or delete it.</p>
           </div>
           <div className="border-t border-[#390404]/20 pt-4">
-            <p className="text-[11px] leading-5 text-[#390404]">Direction: <span className="text-[#390404]" data-testid="text-moodboard-direction">{board.direction}</span></p>
+            <p className="text-[14px] leading-5 text-[#390404]">Direction: <span className="text-[#390404]" data-testid="text-moodboard-direction">{board.direction}</span></p>
             <button type="button" onClick={onReset} className="mt-4 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.14em] text-[#390404] transition-colors hover:text-[#788240]" data-testid="button-new-brief"><RefreshCw size={14} /> Start another brief</button>
           </div>
         </aside>
@@ -860,9 +860,9 @@ function StudioHeader({ healthLabel, userName, signOut }: { healthLabel: string;
         <span className="hidden text-[11px] font-bold uppercase tracking-[.2em] sm:block">Morrow / studio</span>
       </Link>
       <div className="flex items-center gap-4">
-        <span className="flex items-center gap-2 text-[10px] uppercase tracking-[.12em] text-[#c1dbe8]" data-testid="status-studio-health"><span className={`status-pulse h-1.5 w-1.5 rounded-full ${healthLabel === 'quiet mode' ? 'bg-[#788240]' : 'bg-[#567f75]'}`} />{healthLabel}</span>
+        <span className="flex items-center gap-2 text-[10px] uppercase tracking-[.12em] text-[#390404]" data-testid="status-studio-health"><span className={`status-pulse h-1.5 w-1.5 rounded-full ${healthLabel === 'quiet mode' ? 'bg-[#788240]' : 'bg-[#567f75]'}`} />{healthLabel}</span>
         <span className="hidden text-[11px] text-[#c1dbe8] sm:block" data-testid="text-user-name">for {userName}</span>
-        <button type="button" onClick={signOut} className="flex items-center gap-2 border-l border-[#c1dbe8]/20 pl-4 text-[10px] font-bold uppercase tracking-[.12em] text-[#c1dbe8] transition-colors hover:text-[#788240]" data-testid="button-sign-out"><LogOut size={14} /> <span className="hidden sm:inline">Leave studio</span></button>
+        <button type="button" onClick={signOut} className="flex items-center gap-2 border-l border-[#390404 ]/20 pl-4 text-[10px] font-bold uppercase tracking-[.12em] text-[#390404] transition-colors hover:text-[#788240]" data-testid="button-sign-out"><LogOut size={14} /> <span className="hidden sm:inline">Leave studio</span></button>
       </div>
     </header>
   );
