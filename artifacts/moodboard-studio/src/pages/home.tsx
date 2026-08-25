@@ -28,7 +28,7 @@ export default function HomePage() {
                 Morrow transforms early ideas into considered visual identities. Bring the starting point. Leave with a clear creative direction and a visual language built to stand apart
               </p>
               <div className="reveal reveal-delay-3 mt-10 flex flex-wrap items-center gap-4">
-                <Link href="/sign-up" className="group flex items-center gap-3 rounded-full border border-[#c2dfdb]/40 bg-[#5c1a03] px-6 py-3.5 text-[11px] font-bold uppercase tracking-[.15em] text-[#fef7e5] transition-all hover:-translate-y-0.5 hover:bg-[#bca106] hover:text-[#5c1a03] hover:border-[#bca106]" data-testid="link-start-ritual">
+                <Link href="/sign-up" className="group flex items-center gap-3 rounded-full bg-[#fef7e5] px-6 py-3.5 text-[11px] font-bold uppercase tracking-[.15em] text-[#5c1a03] transition-all hover:-translate-y-0.5 hover:bg-[#bca106]" data-testid="link-start-ritual">
                   Let's Begin!! <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
                 </Link>
                 <a href="#ritual" className="flex items-center gap-2 px-2 py-3 text-[11px] font-bold uppercase tracking-[.15em] text-[#c2dfdb] transition-colors hover:text-[#bca106]" data-testid="link-see-how">
@@ -52,7 +52,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="ritual" className="relative border-t border-[#c2dfdb]/20 bg-[#5c1a03] px-6 py-24 text-[#c2dfdb] sm:px-10 lg:px-16">
+      <section id="ritual" className="relative border-t border-[#5c1a03]/20 bg-[#fef7e5] px-6 py-24 text-[#5c1a03] sm:px-10 lg:px-16">
         <div className="mx-auto max-w-[1400px]">
           <div className="grid gap-14 lg:grid-cols-[.55fr_1fr] lg:gap-24">
             <div>
@@ -65,10 +65,10 @@ export default function HomePage() {
                 ['02', 'Establish the direction', 'We explore references, perspectives, and possibilities to identify a clear creative route.'],
                 ['03', 'Build your board', 'The chosen direction becomes a distinct visual language, refined with purpose and consistency.'],
               ].map(([number, title, copy], index) => (
-                <div key={number} className={`border-t border-[#c2dfdb]/25 py-6 sm:border-l sm:border-t-0 sm:pl-6 ${index > 0 ? 'mt-4 sm:mt-0' : ''}`} data-testid={`card-ritual-step-${number}`}>
+                <div key={number} className={`border-t border-[#5c1a03]/25 py-6 sm:border-l sm:border-t-0 sm:pl-6 ${index > 0 ? 'mt-4 sm:mt-0' : ''}`} data-testid={`card-ritual-step-${number}`}>
                   <span className="text-[11px] tracking-[.18em] text-[#bca106]">{number}</span>
                   <h3 className="serif mt-10 text-2xl">{title}</h3>
-                  <p className="mt-3 max-w-[210px] text-[13px] leading-6 text-[#c2dfdb]/65">{copy}</p>
+                  <p className="mt-3 max-w-[210px] text-[13px] leading-6 text-[#5c1a03]/65">{copy}</p>
                 </div>
               ))}
             </div>
