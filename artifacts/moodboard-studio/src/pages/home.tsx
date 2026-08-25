@@ -4,10 +4,10 @@ import { Link } from 'wouter';
 
 export default function HomePage() {
   return (
-    <main className="grain min-h-[100dvh] overflow-hidden bg-[#390404] text-[#CCE5FF]">
+    <main className="grain min-h-[100dvh] overflow-hidden bg-[#390404] text-[#b7d1ea]">
       <section className="relative min-h-screen px-6 pb-20 pt-7 sm:px-10 lg:px-16">
         <div className="mx-auto max-w-[1400px]">
-          <header className="flex items-center justify-between border-b border-[#CCE5FF]/20 pb-5">
+          <header className="flex items-center justify-between border-b border-[#b7d1ea]/20 pb-5">
             <Link href="/" className="group flex items-center gap-3" data-testid="link-home-logo">
               <span className="flex h-10 w-10 items-center justify-center rounded-[12px] border border-[#c0d6ed]/30 bg-[#390404] text-[#fef7e5] shadow-sm">
                 <span className="serif text-[27px] leading-none">M</span>
