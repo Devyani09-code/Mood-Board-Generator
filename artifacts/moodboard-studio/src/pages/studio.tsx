@@ -104,21 +104,21 @@ function BriefCard({
   return (
     <div className={`flashcard ${isExiting ? 'exit' : isEntering ? 'entering' : ''} relative w-full max-w-[620px]`} data-testid={`card-brief-step-${step}`}>
       <div className="absolute inset-x-5 -bottom-3 top-4 rotate-[2deg] border border-[#390404]/20 bg-[#fef7e5]/80" />
-      <div className="absolute inset-x-2 -bottom-1 top-2 rotate-[-1.2deg] border border-[#390404]/20 bg-[#fef7e5]/70" />
-      <div className="relative border border-[#390404]/30 bg-[#fef7e5]/95 p-7 shadow-[0_22px_50px_rgba(38,61,73,.18)] sm:p-12">
+      <div className="absolute inset-x-2 -bottom-1 top-2 rotate-[-1.2deg] border border-[#13273f]/20 bg-[#fef7e5]/70" />
+      <div className="relative border border-[#13273f]/30 bg-[#fef7e5]/95 p-7 shadow-[0_22px_50px_rgba(38,61,73,.18)] sm:p-12">
         <div className="flex items-center justify-between border-b border-[#390404]/20 pb-4">
           <span className="eyebrow text-[#788240]">{step === 0 ? 'A note before we begin' : `Fragment 0${step}`}</span>
-          <span className="text-[11px] font-bold text-[#390404]">{step + 1} / 5</span>
+          <span className="text-[11px] font-bold text-[#13273f]">{step + 1} / 5</span>
         </div>
         {step === 0 && (
             <div className="py-10 sm:py-12">
-            <h1 className="serif italic max-w-[530px] text-[clamp(2.8rem,6vw,5rem)] leading-[.9] tracking-[-.06em] text-[#390404]">Let the first thought be <em>unfinished.</em></h1>
-            <p className="mt-7 max-w-[430px] text-[14px] leading-7 text-[#390404]">We will turn a hunch into a visual direction. There is no right answer here, only what keeps catching your eye.</p>
+            <h1 className="serif italic max-w-[530px] text-[clamp(2.8rem,6vw,5rem)] leading-[.9] tracking-[-.06em] text-[#13273f]">Let the first thought be <em>unfinished.</em></h1>
+            <p className="mt-7 max-w-[430px] text-[14px] leading-7 text-[#13273f]">We will turn a hunch into a visual direction. There is no right answer here, only what keeps catching your eye.</p>
           </div>
         )}
         {step === 1 && (
           <div className="py-10 sm:py-12">
-            <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#390404]">What are you <em>building?</em></h2>
+            <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#13273f]">What are you <em>building?</em></h2>
             <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#390404]">Choose the kind of board that fits what you need right now.</p>
             <div className="mt-9 grid gap-3 sm:grid-cols-2">
               {BOARD_TYPE_OPTIONS.map((option) => {
@@ -126,7 +126,7 @@ function BriefCard({
                 return (
                   <button type="button" key={option.value} onClick={() => setBoardType(option.value)} className={`rounded-lg border p-4 text-left transition-all ${selected ? 'border-[#390404] bg-[#390404] text-[#fef7e5]' : 'border-[#390404]/30 text-[#390404] hover:-translate-y-0.5 hover:border-[#788240]'}`} data-testid={`button-board-type-${option.value}`} aria-pressed={selected}>
                     <span className="flex items-center gap-2 text-[13px] font-bold">{selected && <Check size={14} />}{option.label}</span>
-                    <span className={`mt-1.5 block text-[11px] leading-5 ${selected ? 'text-[#fef7e5]/75' : 'text-[#390404]/80'}`}>{option.copy}</span>
+                    <span className={`mt-1.5 block text-[11px] leading-5 ${selected ? 'text-[#fef7e5]/75' : 'text-[#13273f]/80'}`}>{option.copy}</span>
                   </button>
                 );
               })}
@@ -135,18 +135,18 @@ function BriefCard({
         )}
         {step === 2 && (
           <div className="py-10 sm:py-12">
-            <label htmlFor="purpose" className="serif italic block max-w-[560px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#390404]">{isBrand ? <>Describe your <em>brand.</em></> : <>What are you <em>making?</em></>}</label>
-            <p className="mt-5 max-w-[360px] text-[13px] leading-6 text-[#390404]">{isBrand ? 'What does it do, who is it for, what does it stand for?' : 'A sentence, a secret, a working title. Follow the thread rather than polishing it.'}</p>
+            <label htmlFor="purpose" className="serif italic block max-w-[560px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#13273f]">{isBrand ? <>Describe your <em>brand.</em></> : <>What are you <em>making?</em></>}</label>
+            <p className="mt-5 max-w-[360px] text-[13px] leading-6 text-[#13273f]">{isBrand ? 'What does it do, who is it for, what does it stand for?' : 'A sentence, a secret, a working title. Follow the thread rather than polishing it.'}</p>
             <textarea id="purpose" value={purpose} onChange={(event) => setPurpose(event.target.value)} placeholder={isBrand ? 'Our brand is...' : 'I want to make...'} rows={3} className="mt-9 w-full resize-none border-0 border-b border-[#390404]/35 bg-transparent px-0 py-3 text-[18px] leading-7 text-[#390404] outline-none placeholder:text-[#390404]/50 focus:border-[#788240]" data-testid="input-purpose" />
           </div>
         )}
         {step === 3 && isBrand && (
           <div className="py-10 sm:py-12">
             <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#390404]">Insert the <em>logo.</em></h2>
-            <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#390404]">Describe it, attach an image, or both.</p>
+            <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#13273f]">Describe it, attach an image, or both.</p>
             <textarea value={logoDescription} onChange={(event) => setLogoDescription(event.target.value)} placeholder="Describe the logo..." rows={3} className="mt-8 w-full resize-none border-0 border-b border-[#390404]/35 bg-transparent px-0 py-3 text-[16px] leading-7 text-[#390404] outline-none placeholder:text-[#390404]/50 focus:border-[#788240]" data-testid="input-logo-description" />
             <div className="mt-6 flex items-center gap-4">
-              <label className="cursor-pointer rounded-full border border-[#390404]/30 px-4 py-2.5 text-[11px] font-bold uppercase tracking-[.14em] text-[#390404] transition-colors hover:border-[#788240] hover:text-[#788240]" data-testid="input-logo-image">
+              <label className="cursor-pointer rounded-full border border-[#13273f]/30 px-4 py-2.5 text-[11px] font-bold uppercase tracking-[.14em] text-[#13273f] transition-colors hover:border-[#788240] hover:text-[#788240]" data-testid="input-logo-image">
                 Attach image
                 <input type="file" accept="image/*" className="hidden" onChange={(event) => handleLogoFile(event.target.files?.[0])} />
               </label>
@@ -316,7 +316,7 @@ function FreeformFrame({ frame, onMove, onResize, onClick, children, testId }: {
 
   return (
     <div
-      className="group absolute overflow-hidden border border-[#390404]/25 bg-[#fef7e5] cursor-move select-none"
+      className="group absolute overflow-hidden border border-[#13273f]/25 bg-[#fef7e5] cursor-move select-none"
       style={{ left: frame.x, top: frame.y, width: frame.w, height: frame.h }}
       data-testid={testId}
       onPointerDown={(event) => {
@@ -449,7 +449,7 @@ function drawPaletteCell(ctx: CanvasRenderingContext2D, board: Moodboard, x: num
     const sy = y + 40 + sr * (swatchSize + swatchGap + 20);
     ctx.fillStyle = color.hex;
     ctx.fillRect(sx, sy, swatchSize, swatchSize);
-    ctx.fillStyle = '#390404';
+    ctx.fillStyle = '#13273f';
     ctx.font = 'bold 10px Arial';
     ctx.fillText(color.name, sx + swatchSize + 8, sy + 12);
     ctx.font = '9px Arial';
@@ -466,11 +466,11 @@ function drawPaletteCell(ctx: CanvasRenderingContext2D, board: Moodboard, x: num
 function drawHeader(ctx: CanvasRenderingContext2D, board: Moodboard, padding: number, width: number) {
   ctx.fillStyle = '#390404';
   ctx.fillRect(0, 0, width, ctx.canvas.height);
-  ctx.fillStyle = '#390404';
+  ctx.fillStyle = '#13273f';
   ctx.font = 'bold 40px Georgia, serif';
   ctx.fillText(board.title, padding, padding + 42);
   ctx.font = '16px Arial';
-  ctx.fillStyle = '#390404';
+  ctx.fillStyle = '#13273f';
   wrapCanvasText(ctx, board.tagline, padding, padding + 78, width - padding * 2, 22, 2);
 }
 
@@ -522,15 +522,15 @@ function TileArt({ tile }: { tile: MoodboardTile }) {
 
 function PaletteTileCard({ board, copied, onCopyColor, sizeClass, extraClass }: { board: Moodboard; copied: string; onCopyColor: (hex: string) => void; sizeClass: string; extraClass: string }) {
   return (
-    <article className={`relative overflow-hidden border border-[#390404]/25 bg-[#fef7e5] p-4 ${sizeClass} ${extraClass}`} data-testid="card-palette-tile">
-      <div className="flex items-center justify-between"><span className="eyebrow text-[#788240]">Palette / {board.palette.length} tones</span><SlidersHorizontal size={14} className="text-[#390404]" /></div>
+    <article className={`relative overflow-hidden border border-[#13273f]/25 bg-[#fef7e5] p-4 ${sizeClass} ${extraClass}`} data-testid="card-palette-tile">
+      <div className="flex items-center justify-between"><span className="eyebrow text-[#788240]">Palette / {board.palette.length} tones</span><SlidersHorizontal size={14} className="text-[#13273f]" /></div>
       <div className="mt-4 grid grid-cols-2 gap-2.5 overflow-y-auto">
         {board.palette.map((color) => (
           <button type="button" key={color.hex} onClick={() => onCopyColor(color.hex)} className="group flex items-center gap-2 text-left" data-testid={`button-copy-color-${color.hex.slice(1)}`}>
-            <span className="h-7 w-7 shrink-0 border border-[#390404]/20" style={{ backgroundColor: color.hex }} />
+            <span className="h-7 w-7 shrink-0 border border-[#13273f]/20" style={{ backgroundColor: color.hex }} />
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-[11px] font-semibold text-[#390404]">{color.name}</span>
-              <span className="block text-[9px] uppercase tracking-[.08em] text-[#390404] group-hover:text-[#788240]">{copied === color.hex ? 'Copied' : color.hex}</span>
+              <span className="block truncate text-[11px] font-semibold text-[#13273f]">{color.name}</span>
+              <span className="block text-[9px] uppercase tracking-[.08em] text-[#13273f] group-hover:text-[#788240]">{copied === color.hex ? 'Copied' : color.hex}</span>
             </span>
           </button>
         ))}
@@ -604,18 +604,18 @@ function MoodboardEditor({ board, boardType, layoutStyle, onReset, onBoardChange
 
   return (
     <div className="mx-auto max-w-[1400px] px-5 py-7 sm:px-8 lg:px-12">
-      <div className="mb-8 flex flex-col gap-5 border-b border-[#390404]/20 pb-7 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mb-8 flex flex-col gap-5 border-b border-[#13273f]/20 pb-7 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <span className="eyebrow text-[#788240]">A living direction / {board.id.slice(0, 8)}</span>
           <p className="mt-3 max-w-[600px] text-[15px] leading-7 text-[#390404]" data-testid="text-moodboard-tagline">{board.tagline}</p>
         </div>
         <div className="flex shrink-0 gap-2">
-          <button type="button" onClick={copyBoardImage} disabled={exporting !== null} className="flex items-center gap-2 border border-[#390404]/30 px-3 py-2 text-[10px] font-bold uppercase tracking-[.13em] text-[#390404] transition-colors hover:border-[#788240] hover:text-[#788240] disabled:opacity-60" data-testid="button-copy-moodboard">{copied === 'board' ? <Check size={14} /> : <Clipboard size={14} />} {exporting === 'copy' ? 'Copying…' : copied === 'board' ? 'Copied' : 'Copy'}</button>
-          <button type="button" onClick={download} disabled={exporting !== null} className="flex items-center gap-2 border border-[#390404]/30 px-3 py-2 text-[10px] font-bold uppercase tracking-[.13em] text-[#390404] transition-colors hover:border-[#788240] hover:text-[#788240] disabled:opacity-60" data-testid="button-download-moodboard"><Download size={14} /> {exporting === 'download' ? 'Preparing…' : 'Download'}</button>
+          <button type="button" onClick={copyBoardImage} disabled={exporting !== null} className="flex items-center gap-2 border border-[#13273f]/30 px-3 py-2 text-[10px] font-bold uppercase tracking-[.13em] text-[#390404] transition-colors hover:border-[#788240] hover:text-[#788240] disabled:opacity-60" data-testid="button-copy-moodboard">{copied === 'board' ? <Check size={14} /> : <Clipboard size={14} />} {exporting === 'copy' ? 'Copying…' : copied === 'board' ? 'Copied' : 'Copy'}</button>
+          <button type="button" onClick={download} disabled={exporting !== null} className="flex items-center gap-2 border border-[#13273f]/30 px-3 py-2 text-[10px] font-bold uppercase tracking-[.13em] text-[#390404] transition-colors hover:border-[#788240] hover:text-[#788240] disabled:opacity-60" data-testid="button-download-moodboard"><Download size={14} /> {exporting === 'download' ? 'Preparing…' : 'Download'}</button>
         </div>
       </div>
       <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_310px]">
-        <section className="studio-grid overflow-x-auto border border-[#fef7e5] bg-[#390404] p-3 sm:p-5" data-testid="panel-moodboard-canvas">
+        <section className="studio-grid overflow-x-auto border border-[#fef7e5] bg-[#13273f] p-3 sm:p-5" data-testid="panel-moodboard-canvas">
           <div className="relative" style={{ width: CANVAS_WIDTH, height: canvasHeight, maxWidth: 'none' }}>
               {board.layout.map((tile, index) => frames[index] && (
                 <FreeformTile
@@ -642,13 +642,13 @@ function MoodboardEditor({ board, boardType, layoutStyle, onReset, onBoardChange
           </div>
         </section>
         <aside className="space-y-5">
-          <div className="border border-[#390404] bg-[#390404] p-5">
+          <div className="border border-[#13273f] bg-[#13273f] p-5">
             <div className="flex items-center gap-2 text-[#788240]"><SlidersHorizontal size={16} strokeWidth={1.5} /><span className="eyebrow">Edit the board</span></div>
             <p className="mt-4 text-[13px] leading-6 text-[#788240]">Drag any tile to move it. Drag its bottom-right corner to resize freely. Click a tile to replace its image or delete it.</p>
           </div>
           <div className="border-t border-[#390404]/20 pt-4">
-            <p className="text-[14px] leading-5 text-[#390404]">Direction: <span className="text-[#390404]" data-testid="text-moodboard-direction">{board.direction}</span></p>
-            <button type="button" onClick={onReset} className="mt-4 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.14em] text-[#390404] transition-colors hover:text-[#788240]" data-testid="button-new-brief"><RefreshCw size={14} /> Start another brief</button>
+            <p className="text-[14px] leading-5 text-[#13273f]">Direction: <span className="text-[#13273f]" data-testid="text-moodboard-direction">{board.direction}</span></p>
+            <button type="button" onClick={onReset} className="mt-4 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.14em] text-[#13273f] transition-colors hover:text-[#788240]" data-testid="button-new-brief"><RefreshCw size={14} /> Start another brief</button>
           </div>
         </aside>
       </div>
@@ -679,7 +679,7 @@ function StudioSidebar({
       <aside className={`studio-sidebar ${isOpen ? 'studio-sidebar-open' : ''}`} aria-label="Studio navigation">
         <div className="flex items-center justify-between lg:hidden">
           <span className="eyebrow text-[#788240]">Your studio</span>
-          <button type="button" onClick={onClose} className="p-2 text-[#390404]" aria-label="Close sidebar" data-testid="button-sidebar-close"><X size={17} /></button>
+          <button type="button" onClick={onClose} className="p-2 text-[#13273f]" aria-label="Close sidebar" data-testid="button-sidebar-close"><X size={17} /></button>
         </div>
         <div className="hidden lg:block">
           <span className="eyebrow text-[#788240]">Your studio</span>
@@ -698,8 +698,8 @@ function StudioSidebar({
           ))}
         </nav>
         {history.length > 0 && (
-          <div className="mt-8 border-t border-[#390404]/15 pt-5">
-            <span className="eyebrow text-[#390404]/70">Recent threads</span>
+          <div className="mt-8 border-t border-[#13273f]/15 pt-5">
+            <span className="eyebrow text-[#13273f]/70">Recent threads</span>
             <div className="mt-3 space-y-1.5">
               {history.slice(0, 3).map((item) => (
                 <button type="button" key={item.id} onClick={() => { onOpenBoard(item); onClose(); }} className="studio-history-link" data-testid={`button-sidebar-board-${item.id}`}>
@@ -719,13 +719,13 @@ function HistoryPanel({ history, onOpen }: { history: Moodboard[]; onOpen: (boar
   return (
     <section className="mx-auto max-w-[1100px] px-5 py-10 sm:px-8 lg:px-12" data-testid="panel-previous-moodboards">
       <span className="eyebrow text-[#788240]">The shelf / {history.length} saved directions</span>
-      <h1 className="serif mt-4 max-w-[700px] text-[clamp(3rem,6vw,6rem)] italic leading-[.86] tracking-[-.06em] text-[#390404]">Previous <em>moodboards.</em></h1>
+      <h1 className="serif mt-4 max-w-[700px] text-[clamp(3rem,6vw,6rem)] italic leading-[.86] tracking-[-.06em] text-[#13273f]">Previous <em>moodboards.</em></h1>
       {history.length === 0 ? (
-        <div className="mt-10 border border-dashed border-[#390404]/30 bg-[#fef7e5]/55 p-8 text-[13px] leading-6 text-[#390404]" data-testid="empty-previous-moodboards">Your first direction will live here after you develop it.</div>
+        <div className="mt-10 border border-dashed border-[#13273f]/30 bg-[#fef7e5]/55 p-8 text-[13px] leading-6 text-[#13273f]" data-testid="empty-previous-moodboards">Your first direction will live here after you develop it.</div>
       ) : (
         <div className="mt-10 grid gap-4 md:grid-cols-2">
           {history.map((item, index) => (
-            <button type="button" key={item.id} onClick={() => onOpen(item)} className="card-lift border border-[#390404]/25 bg-[#fef7e5]/80 p-5 text-left" data-testid={`card-previous-moodboard-${index}`}>
+            <button type="button" key={item.id} onClick={() => onOpen(item)} className="card-lift border border-[#13273f]/25 bg-[#fef7e5]/80 p-5 text-left" data-testid={`card-previous-moodboard-${index}`}>
               <div className="flex items-start justify-between gap-4">
                 <span className="eyebrow text-[#788240]">{String(index + 1).padStart(2, '0')} / direction</span>
                 <span className="text-[10px] uppercase tracking-[.12em] text-[#390404]">{item.palette.length} tones</span>
@@ -750,16 +750,16 @@ function ProfilePanel({ user, boardCount }: { user: ReturnType<typeof useUser>['
       <span className="eyebrow text-[#788240]">A little about you</span>
       <h1 className="serif mt-4 text-[clamp(3rem,6vw,5.8rem)] italic leading-[.86] tracking-[-.06em] text-[#390404]">Your <em>profile.</em></h1>
       <div className="mt-10 border border-[#390404]/25 bg-[#fef7e5]/80 p-6 sm:p-8">
-        <div className="flex items-center gap-4 border-b border-[#390404]/15 pb-6">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#390404] serif text-2xl italic text-[#fef7e5]" data-testid="text-profile-initial">{(user?.firstName?.[0] || user?.username?.[0] || 'M').toUpperCase()}</div>
+        <div className="flex items-center gap-4 border-b border-[#13273f]/15 pb-6">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#13273f] serif text-2xl italic text-[#fef7e5]" data-testid="text-profile-initial">{(user?.firstName?.[0] || user?.username?.[0] || 'M').toUpperCase()}</div>
           <div>
-            <p className="serif text-2xl italic text-[#390404]" data-testid="text-profile-name">{user?.fullName || user?.username || 'Maker'}</p>
-            <p className="mt-1 text-[12px] text-[#390404]" data-testid="text-profile-email">{email}</p>
+            <p className="serif text-2xl italic text-[#13273f]" data-testid="text-profile-name">{user?.fullName || user?.username || 'Maker'}</p>
+            <p className="mt-1 text-[12px] text-[#13273f]" data-testid="text-profile-email">{email}</p>
           </div>
         </div>
         <div className="grid gap-5 pt-6 sm:grid-cols-2">
-          <div><span className="eyebrow text-[#390404]/70">Directions developed</span><p className="mt-2 serif text-3xl italic text-[#390404]" data-testid="text-profile-board-count">{boardCount}</p></div>
-          <div><span className="eyebrow text-[#390404]/70">Studio mode</span><p className="mt-2 serif text-3xl italic text-[#390404]">Private</p></div>
+          <div><span className="eyebrow text-[#13273f]/70">Directions developed</span><p className="mt-2 serif text-3xl italic text-[#13273f]" data-testid="text-profile-board-count">{boardCount}</p></div>
+          <div><span className="eyebrow text-[#13273f]/70">Studio mode</span><p className="mt-2 serif text-3xl italic text-[#13273f]">Private</p></div>
         </div>
       </div>
     </section>
@@ -830,14 +830,14 @@ export default function StudioPage() {
 
   if (board) {
     return (
-      <main className="grain min-h-[100dvh] bg-[#fef7e5] text-[#390404]">
+      <main className="grain min-h-[100dvh] bg-[#fef7e5] text-[#13273f]">
         <StudioHeader healthLabel={healthLabel} userName={user?.firstName || 'maker'} signOut={() => signOut({ redirectUrl: import.meta.env.BASE_URL || '/' })} />
         <MoodboardEditor board={board} boardType={boardType ?? 'moodboard'} layoutStyle={layoutStyle} onReset={reset} onBoardChange={setBoard} />
       </main>
     );
   }
   return (
-    <main className="grain min-h-[100dvh] bg-[#390404] text-[#fef7e5]">
+    <main className="grain min-h-[100dvh] bg-[#13273f] text-[#fef7e5]">
       <StudioHeader healthLabel={healthLabel} userName={user?.firstName || 'maker'} signOut={() => signOut({ redirectUrl: import.meta.env.BASE_URL || '/' })} />
       <section className="flex min-h-[calc(100dvh-80px)] flex-col items-center justify-center px-5 py-12 sm:px-8">
         <div className="mb-8 w-full max-w-[700px]">
