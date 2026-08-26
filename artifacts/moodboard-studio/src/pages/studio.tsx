@@ -119,12 +119,12 @@ function BriefCard({
         {step === 1 && (
           <div className="py-10 sm:py-12">
             <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#13273f]">What are you <em>building?</em></h2>
-            <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#390404]">Choose the kind of board that fits what you need right now.</p>
+            <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#13273f]">Choose the kind of board that fits what you need right now.</p>
             <div className="mt-9 grid gap-3 sm:grid-cols-2">
               {BOARD_TYPE_OPTIONS.map((option) => {
                 const selected = boardType === option.value;
                 return (
-                  <button type="button" key={option.value} onClick={() => setBoardType(option.value)} className={`rounded-lg border p-4 text-left transition-all ${selected ? 'border-[#390404] bg-[#390404] text-[#fef7e5]' : 'border-[#390404]/30 text-[#390404] hover:-translate-y-0.5 hover:border-[#788240]'}`} data-testid={`button-board-type-${option.value}`} aria-pressed={selected}>
+                  <button type="button" key={option.value} onClick={() => setBoardType(option.value)} className={`rounded-lg border p-4 text-left transition-all ${selected ? 'border-[#13273f] bg-[#13273f] text-[#fef7e5]' : 'border-[#13273f]/30 text-[#13273f] hover:-translate-y-0.5 hover:border-[#788240]'}`} data-testid={`button-board-type-${option.value}`} aria-pressed={selected}>
                     <span className="flex items-center gap-2 text-[13px] font-bold">{selected && <Check size={14} />}{option.label}</span>
                     <span className={`mt-1.5 block text-[11px] leading-5 ${selected ? 'text-[#fef7e5]/75' : 'text-[#13273f]/80'}`}>{option.copy}</span>
                   </button>
@@ -137,14 +137,14 @@ function BriefCard({
           <div className="py-10 sm:py-12">
             <label htmlFor="purpose" className="serif italic block max-w-[560px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#13273f]">{isBrand ? <>Describe your <em>brand.</em></> : <>What are you <em>making?</em></>}</label>
             <p className="mt-5 max-w-[360px] text-[13px] leading-6 text-[#13273f]">{isBrand ? 'What does it do, who is it for, what does it stand for?' : 'A sentence, a secret, a working title. Follow the thread rather than polishing it.'}</p>
-            <textarea id="purpose" value={purpose} onChange={(event) => setPurpose(event.target.value)} placeholder={isBrand ? 'Our brand is...' : 'I want to make...'} rows={3} className="mt-9 w-full resize-none border-0 border-b border-[#390404]/35 bg-transparent px-0 py-3 text-[18px] leading-7 text-[#390404] outline-none placeholder:text-[#390404]/50 focus:border-[#788240]" data-testid="input-purpose" />
+            <textarea id="purpose" value={purpose} onChange={(event) => setPurpose(event.target.value)} placeholder={isBrand ? 'Our brand is...' : 'I want to make...'} rows={3} className="mt-9 w-full resize-none border-0 border-b border-[#13273f]/35 bg-transparent px-0 py-3 text-[18px] leading-7 text-[#13273f] outline-none placeholder:text-[#13273f]/50 focus:border-[#788240]" data-testid="input-purpose" />
           </div>
         )}
         {step === 3 && isBrand && (
           <div className="py-10 sm:py-12">
-            <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#390404]">Insert the <em>logo.</em></h2>
+            <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#13273f]">Insert the <em>logo.</em></h2>
             <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#13273f]">Describe it, attach an image, or both.</p>
-            <textarea value={logoDescription} onChange={(event) => setLogoDescription(event.target.value)} placeholder="Describe the logo..." rows={3} className="mt-8 w-full resize-none border-0 border-b border-[#390404]/35 bg-transparent px-0 py-3 text-[16px] leading-7 text-[#390404] outline-none placeholder:text-[#390404]/50 focus:border-[#788240]" data-testid="input-logo-description" />
+            <textarea value={logoDescription} onChange={(event) => setLogoDescription(event.target.value)} placeholder="Describe the logo..." rows={3} className="mt-8 w-full resize-none border-0 border-b border-[#13273f]/35 bg-transparent px-0 py-3 text-[16px] leading-7 text-[#13273f] outline-none placeholder:text-[#13273f]/50 focus:border-[#788240]" data-testid="input-logo-description" />
             <div className="mt-6 flex items-center gap-4">
               <label className="cursor-pointer rounded-full border border-[#13273f]/30 px-4 py-2.5 text-[11px] font-bold uppercase tracking-[.14em] text-[#13273f] transition-colors hover:border-[#788240] hover:text-[#788240]" data-testid="input-logo-image">
                 Attach image
@@ -152,7 +152,7 @@ function BriefCard({
               </label>
               {logoImageDataUrl && (
                 <span className="flex items-center gap-2 text-[12px] text-[#13273f]">
-                  <img src={logoImageDataUrl} alt="Logo preview" className="h-10 w-10 rounded border border-[#390404]/25 object-cover" />
+                  <img src={logoImageDataUrl} alt="Logo preview" className="h-10 w-10 rounded border border-[#13273f]/25 object-cover" />
                   <button type="button" onClick={() => setLogoImageDataUrl(null)} className="underline hover:text-[#788240]">remove</button>
                 </span>
               )}
@@ -162,20 +162,20 @@ function BriefCard({
         {step === 3 && !isBrand && (
           <div className="py-10 sm:py-12">
             <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#13273f]">Pick a <em>layout.</em></h2>
-            <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#390404]">How should the board be composed?</p>
+            <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#13273f]">How should the board be composed?</p>
             <div className="mt-9 flex flex-wrap gap-2.5">
               {LAYOUT_OPTIONS.map((option) => {
                 const selected = layoutStyle === option;
                 return (
-                  <button type="button" key={option} onClick={() => setLayoutStyle(option)} className={`rounded-full border px-4 py-2.5 text-[12px] transition-all ${selected ? 'border-[#390404] bg-[#390404] text-[#fef7e5]' : 'border-[#390404]/30 text-[#390404] hover:-translate-y-0.5 hover:border-[#788240] hover:text-[#788240]'}`} data-testid={`button-layout-${option.replaceAll(' ', '-').toLowerCase()}`} aria-pressed={selected}>
+                  <button type="button" key={option} onClick={() => setLayoutStyle(option)} className={`rounded-full border px-4 py-2.5 text-[12px] transition-all ${selected ? 'border-[#13273f] bg-[#13273f] text-[#fef7e5]' : 'border-[#13273f]/30 text-[#13273f] hover:-translate-y-0.5 hover:border-[#788240] hover:text-[#788240]'}`} data-testid={`button-layout-${option.replaceAll(' ', '-').toLowerCase()}`} aria-pressed={selected}>
                     {selected && <Check size={13} className="mr-1.5 inline" />}{option}
                   </button>
                 );
               })}
             </div>
             <div className="mt-8 max-w-[260px] border-t border-[#13273f]/15 pt-6">
-              <label htmlFor="image-count" className="block text-[11px] font-bold uppercase tracking-[.14em] text-[#390404]">Number of images</label>
-              <select id="image-count" value={imageCount} onChange={(event) => setImageCount(Number(event.target.value))} className="mt-3 w-full appearance-none border border-[#390404]/30 bg-[#fef7e5]/40 px-4 py-2.5 text-[13px] text-[#390404] outline-none focus:border-[#788240]" data-testid="select-image-count">
+              <label htmlFor="image-count" className="block text-[11px] font-bold uppercase tracking-[.14em] text-[#13273f]">Number of images</label>
+              <select id="image-count" value={imageCount} onChange={(event) => setImageCount(Number(event.target.value))} className="mt-3 w-full appearance-none border border-[#13273f]/30 bg-[#fef7e5]/40 px-4 py-2.5 text-[13px] text-[#13273f] outline-none focus:border-[#788240]" data-testid="select-image-count">
                 {IMAGE_COUNT_OPTIONS.map((count) => <option key={count} value={count}>{count} images</option>)}
               </select>
             </div>
@@ -183,8 +183,8 @@ function BriefCard({
         )}
         {step === 4 && (
           <div className="py-10 sm:py-12">
-            <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#390404]">{isBrand ? <>The brand <em>ethos.</em></> : <>What is the <em>weather?</em></>}</h2>
-            <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#390404]">{isBrand ? 'Which words already describe it? You can hold more than one.' : 'Choose the instincts that already belong to the idea. You can hold more than one.'}</p>
+            <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#13273f]">{isBrand ? <>The brand <em>ethos.</em></> : <>What is the <em>weather?</em></>}</h2>
+            <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#13273f]">{isBrand ? 'Which words already describe it? You can hold more than one.' : 'Choose the instincts that already belong to the idea. You can hold more than one.'}</p>
             <div className="mt-9 flex flex-wrap gap-2.5">
               {(isBrand ? BRAND_ETHOS_OPTIONS : STYLE_OPTIONS).map((style) => {
                 const selected = styles.includes(style);
@@ -387,7 +387,7 @@ function FreeformTile({ tile, index, frame, onMove, onResize, onImageChange, onD
     <FreeformFrame frame={frame} onMove={onMove} onResize={onResize} onClick={() => setOpen((v) => !v)} testId={`card-moodboard-tile-${index}`}>
       <TileArt tile={tile} />
       {open && (
-        <div data-no-drag className="absolute inset-0 z-30 flex flex-col justify-between gap-2 bg-[#390404]/95 p-3 text-[#fef7e5]" onClick={(event) => event.stopPropagation()}>
+        <div data-no-drag className="absolute inset-0 z-30 flex flex-col justify-between gap-2 bg-[#13273f]/95 p-3 text-[#fef7e5]" onClick={(event) => event.stopPropagation()}>
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-[.12em]">Edit tile</span>
             <button type="button" onClick={() => setOpen(false)} data-testid={`button-close-edit-${index}`}><X size={14} /></button>
