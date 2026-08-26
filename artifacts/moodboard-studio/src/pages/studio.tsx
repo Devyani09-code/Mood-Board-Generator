@@ -841,7 +841,7 @@ export default function StudioPage() {
       <StudioHeader healthLabel={healthLabel} userName={user?.firstName || 'maker'} signOut={() => signOut({ redirectUrl: import.meta.env.BASE_URL || '/' })} />
       <section className="flex min-h-[calc(100dvh-80px)] flex-col items-center justify-center px-5 py-12 sm:px-8">
         <div className="mb-8 w-full max-w-[700px]">
-          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[.16em] text-[#c1dbe8]">
+          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[.16em] text-[#bf5114]">
             <span>New visual direction</span><span data-testid="text-brief-progress">{Math.round(((step + 1) / 5) * 100)}%</span>
           </div>
           <div className="mt-3 h-[2px] w-full bg-[#c1dbe8]/15"><div className="h-full bg-[#788240] transition-all duration-500" style={{ width: `${((step + 1) / 5) * 100}%` }} /></div>
@@ -856,13 +856,13 @@ function StudioHeader({ healthLabel, userName, signOut }: { healthLabel: string;
   return (
     <header className="flex items-center justify-between border-b border-[#c1dbe8]/20 px-5 py-5 sm:px-8 lg:px-12">
       <Link href="/studio" className="flex items-center gap-3" data-testid="link-studio-logo">
-        <span className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#c1dbe8]/30 bg-[#390404] text-[#fef7e5]"><span className="serif text-2xl">M</span></span>
-        <span className="hidden text-[11px] font-bold uppercase tracking-[.2em] sm:block">Morrow / studio</span>
+        <span className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#bf5114]/30 bg-[#13273f] text-[#fef7e5]"><span className="serif text-2xl">M</span></span>
+        <span className="hidden text-[11px] font-bold uppercase tracking-[.2em] sm:block">Morrow  studio</span>
       </Link>
       <div className="flex items-center gap-4">
-        <span className="flex items-center gap-2 text-[10px] uppercase tracking-[.12em] text-[#390404]" data-testid="status-studio-health"><span className={`status-pulse h-1.5 w-1.5 rounded-full ${healthLabel === 'quiet mode' ? 'bg-[#788240]' : 'bg-[#567f75]'}`} />{healthLabel}</span>
-        <span className="hidden text-[11px] text-[#c1dbe8] sm:block" data-testid="text-user-name">for {userName}</span>
-        <button type="button" onClick={signOut} className="flex items-center gap-2 border-l border-[#13273f]/20 pl-4 text-[10px] font-bold uppercase tracking-[.12em] text-[#390404] transition-colors hover:text-[#788240]" data-testid="button-sign-out"><LogOut size={14} /> <span className="hidden sm:inline">Leave studio</span></button>
+        {/* <span className="flex items-center gap-2 text-[10px] uppercase tracking-[.12em] text-[#390404]" data-testid="status-studio-health"><span className={`status-pulse h-1.5 w-1.5 rounded-full ${healthLabel === 'quiet mode' ? 'bg-[#788240]' : 'bg-[#567f75]'}`} />{healthLabel}</span>
+        <span className="hidden text-[11px] text-[#c1dbe8] sm:block" data-testid="text-user-name">for {userName}</span> */}
+        <button type="button" onClick={signOut} className="flex items-center gap-2 border-l border-[#13273f]/20 pl-4 text-[10px] font-bold uppercase tracking-[.12em] text-[#fef7e5] transition-colors hover:text-[#788240]" data-testid="button-sign-out"><LogOut size={14} /> <span className="hidden sm:inline">Leave studio</span></button>
       </div>
     </header>
   );
