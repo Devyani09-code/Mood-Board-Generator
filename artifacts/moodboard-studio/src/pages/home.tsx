@@ -68,7 +68,7 @@ export default function HomePage() {
                 <div key={number} className={`border-t border-[#13273f] py-6 sm:border-l sm:border-t-0 sm:pl-6 ${index > 0 ? 'mt-4 sm:mt-0' : ''}`} data-testid={`card-ritual-step-${number}`}>
                   <span className="text-[11px] tracking-[.18em] text-[#bf5114]">{number}</span>
                   <h3 className="serif mt-10 text-2xl">{title}</h3>
-                  <p className="mt-3 max-w-[210px] text-[13px] leading-6 text-[#13273f]/65">{copy}</p>
+                  <p className="mt-3 max-w-[210px] text-[13px] leading-6 text-[#13273f]">{copy}</p>
                 </div>
               ))}
             </div>
