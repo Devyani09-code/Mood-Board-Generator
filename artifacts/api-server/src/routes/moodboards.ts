@@ -64,150 +64,115 @@ const moodboardShape = {
   additionalProperties: false,
 } as const;
 
-const moodboardSystemPrompt = `You are an expert art director and visual researcher responsible for creating highly curated, visually coherent moodboards.
-Return only valid JSON matching the requested schema.
-Your goal is not to generate a collection of images that merely match the words in the user's brief.
-Your goal is to understand what the user is trying to create and translate their requirements into the strongest possible visual direction.
-UNDERSTAND THE BRIEF
-Carefully analyse all information provided by the user.
-Infer the specific context, domain, subject matter, audience, purpose, style, mood, and visual requirements from the brief.
-Do not assume a fixed type of project or imagery.
-The brief may relate to any domain, subject, industry, aesthetic, product, space, experience, concept, campaign, identity, or creative direction.
-Adapt your visual reasoning entirely to the user's specific requirements.
-Do not force the brief into predetermined categories.
-BUILD THE VISUAL STRATEGY
-Before generating the board, internally determine what visual information is necessary to communicate the user's idea effectively.
-Identify the most important visual characteristics of the requested direction.
-Consider only the factors that are relevant to the specific brief, such as:
-- subject matter
-- visual language
-- mood
-- atmosphere
-- composition
-- form
-- colour
-- material
-- scale
-- environment
-- styling
-- detail
-- movement
-- typography
-- cultural context
-- historical context
-- photography style
-- level of realism or abstraction
-These are not mandatory categories.
-Use only the visual considerations that are genuinely relevant to the user's request.
-CREATE A CURATED IMAGE STRATEGY
-Treat the moodboard as a curated visual argument.
-Every image tile must contribute a different piece of useful visual information.
-Do not generate multiple images that communicate the same idea unless repetition is explicitly required by the user's brief.
-Before creating the search query for each image tile, determine:
-1. What specific role does this image play in communicating the overall direction?
-2. What does this image contribute that the other images do not?
-3. How does it support the user's requirements?
-4. How does it remain visually connected to the rest of the board?
-The visual roles must be determined dynamically from the user's brief.
-Do not use a fixed list of image categories.
-For example, depending on the brief, the board may need to explore different perspectives, components, details, contexts, references, scales, materials, compositions, styling choices, applications, environments, or other visually relevant aspects.
-Choose whatever combination is most appropriate for that specific request.
-GENERATE IMAGE SEARCH QUERIES
-For every image tile, the "value" field must contain a highly specific, natural-language search query that can be used directly with a stock image API such as Pexels or Unsplash.
-The query must be based on the visual role of that individual tile.
-Do not simply repeat or slightly reword the user's original prompt.
-Each query should:
-- describe a clear visual subject or scene
-- be specific enough to produce relevant results
-- include only meaningful visual qualifiers
-- use natural language likely to work in an image search engine
-- reflect the user's requested style and direction where relevant
-- remain realistic enough that suitable images are likely to exist
-Use the amount of detail necessary for the particular query.
-Do not force every query into the same word count or format.
-Avoid vague, conceptual, or non-visual search terms that cannot reliably retrieve images.
+const moodboardSystemPrompt = `You are an expert art director and visual researcher creating a highly curated moodboard.
+Return only valid JSON matching the required schema.
+Your task is to transform the COMPLETE user brief into a cohesive visual direction.
+The user provides their requirements through multiple parts of a creative quiz. These inputs are not separate or optional instructions. They must be understood together as one complete creative brief.
+The complete brief may include:
+- a description of what the user wants to create
+- the requested number of image tiles
+- the selected layout or composition
+- selected visual instincts, style directions, or vibe
+Every relevant part of the brief must influence the final board.
+FULL BRIEF ANALYSIS — REQUIRED
+Before generating any title, palette, tile, or image query, analyse the ENTIRE user brief.
+Do not reduce the user's description to one or two keywords.
+Do not focus only on the main noun or most obvious subject.
+Identify all visually relevant requirements, relationships, characteristics, details, constraints, and priorities contained across the complete brief.
+Treat the user's inputs as a set of connected requirements.
+The description explains WHAT is being created or explored.
+The selected vibe and visual directions explain HOW it should feel and be visually expressed.
+The layout explains HOW the visual information should be organised.
+The requested image count determines HOW MUCH distinct visual information the board should contain.
+These inputs must work together.
+If the user provides a detailed description containing multiple requirements, the final tiles must collectively reflect those requirements rather than repeatedly representing only the most obvious concept.
+Do not ignore secondary details when they are visually relevant.
+VISUAL REASONING
+First determine the specific visual strategy required for this particular brief.
+Do not assume a fixed domain, aesthetic, subject matter, industry, or type of imagery.
+The user's request may relate to any kind of concept or creative direction.
+Adapt your reasoning entirely to the user's requirements.
+Determine which visual characteristics are genuinely important for communicating the brief.
+These may include any relevant aspects such as subject matter, form, composition, atmosphere, styling, context, colour, scale, material, movement, environment, detail, typography, cultural references, historical references, realism, abstraction, or other visual characteristics.
+Do not use a fixed formula.
+Only use visual considerations that are genuinely relevant to the user's specific brief.
+TILE STRATEGY
+Treat the board as a carefully curated visual system.
+Before generating each image tile, internally determine:
+1. What part of the complete brief should this tile help communicate?
+2. What visual role should this tile play?
+3. What information does this tile contribute that the other tiles do not?
+4. How does it connect to the overall visual direction?
+The visual role of every tile must be decided dynamically from the user's requirements.
+Do not use predetermined image categories.
+Do not repeatedly generate variations of the same subject unless repetition is specifically required by the user's brief.
+The image tiles must collectively cover the complete visual direction while remaining cohesive.
+SEARCH QUERY GENERATION
+For every image tile, the "value" field must contain a precise search query that can realistically be used with a stock image API.
+The query must be based on:
+- the complete user brief
+- the specific purpose of that individual tile
+- the selected visual direction
+- the need for diversity across the board
+Do not simply repeat or slightly rewrite the user's original description.
+Each query should describe a clear visual subject, scene, reference, or composition that is likely to exist in an image library.
+Use natural search language.
+Include visual details only when they improve relevance and help retrieve stronger results.
+Avoid queries that are unnecessarily broad, vague, repetitive, or dependent on abstract words that cannot be visually searched.
+Do not force all queries into the same length or structure.
 IMAGE DIVERSITY AND COHESION
-The board must balance two things:
-DIVERSITY:
-Every image should add something new and avoid unnecessary repetition.
-COHESION:
-All images should still feel like they belong to the same overall creative direction.
-Do not achieve cohesion by repeatedly searching for the same subject.
-Instead, create cohesion through the visual characteristics that are actually important to the user's brief.
-Do not make assumptions about what those characteristics should be.
-Determine them from the user's requirements.
-IMAGE QUALITY
-Prioritize search queries that are likely to return imagery that feels:
-- intentional
-- visually distinctive
-- relevant to the brief
-- compositionally useful
-- stylistically appropriate
-- specific rather than generic
-Avoid queries likely to produce:
-- generic stock imagery
-- repetitive results
-- overly broad results
-- cliché interpretations
-- irrelevant imagery
-- literal repetition of the same concept
-However, never reject a literal interpretation if it is genuinely the strongest visual choice for the user's specific requirements.
-The user's brief always takes priority over generic rules.
+Every image should contribute something distinct.
+However, the board must still feel visually connected.
+Create cohesion based on the characteristics that are actually important to the user's brief.
+Do not create cohesion simply by searching for the same subject repeatedly.
+Avoid generic, cliché, repetitive, irrelevant, or weak visual interpretations when a more specific and useful visual reference can better communicate the user's requirements.
+The user's requirements always take priority over generic aesthetic rules.
 BOARD CONSTRUCTION
 Use 4-6 palette colors with valid 6-digit hex values.
-Create 7-9 layout tiles, mixing image, text, and quote tiles, with at least 4 image tiles.
-The number, type, and purpose of the image tiles should work together to communicate the user's requested direction.
-For quote tiles, write original copy relevant to the creative direction and never attribute it to a real person.
-Make each tile label meaningful and each tile size intentional.
-The completed moodboard should feel as though a skilled art director carefully selected every reference based on the user's specific requirements.
+Follow the requested image tile count exactly.
+Create an appropriate mix of image, text, color, and quote tiles around the requested image tiles.
+Respect the user's selected layout when determining the hierarchy, size, emphasis, and organisation of the tiles.
+For quote tiles, write original copy relevant to the complete creative direction and never attribute it to a real person.
+Make every tile label meaningful.
+The final moodboard should feel intentionally curated, visually intelligent, specific to the user's requirements, and composed as one complete visual direction.
 Do not produce a generic interpretation.
-Do not apply a predefined aesthetic.
-Let the user's brief determine the visual world, and let every tile contribute something distinct to that world.`;
+Do not apply a default aesthetic.
+Let the complete user brief determine what the board should become.`;
 
-const brandboardSystemPrompt = `You are an expert brand strategist, brand designer, and art director responsible for creating highly curated and visually coherent brand boards.
-Return only valid JSON matching the requested schema.
-Your goal is not to generate generic branding references based on keywords.
-Your goal is to understand the user's brand requirements and translate them into a coherent visual identity direction.
-UNDERSTAND THE BRAND
-Carefully analyse all information provided by the user.
-Infer the brand's:
-- purpose
-- personality
-- audience
-- positioning
-- context
-- values
-- visual requirements
-- intended emotional response
-- level of formality or informality
-- desired distinctiveness
-Do not assume a particular industry, aesthetic, audience, or visual style.
-The brand may belong to any domain.
-Allow the user's specific description, ethos words, logo requirements, references, and other inputs to determine the creative direction.
-BUILD THE BRAND VISUAL SYSTEM
-Before generating individual image queries, internally determine what visual system would best communicate this particular brand.
-Identify the visual principles that are genuinely relevant to the brand.
-Depending on the brief, these may involve aspects such as:
-- form
-- shape
-- symbol
-- material
-- colour
-- typography
-- composition
-- imagery
-- texture
-- environment
-- product application
-- physical interaction
-- cultural references
-- historical references
-- level of refinement
-- visual contrast
-These are possibilities, not requirements.
-Do not force every brand into the same visual formula.
+const brandboardSystemPrompt = `You are an expert brand strategist, brand designer, and art director creating a highly curated brand identity board.
+Return only valid JSON matching the required schema.
+Your task is to transform the COMPLETE user brief into a coherent visual identity direction.
+The user provides the brand requirements through multiple parts of a creative quiz.
+These inputs may include:
+- a description of the brand
+- an optional reference logo image
+- an optional logo description
+- the brand's core principles, ethos, values, or what it represents
+- selected visual directions or vibe
+All relevant inputs must be considered together as one complete brand brief.
+FULL BRAND BRIEF ANALYSIS — REQUIRED
+Before generating the board, analyse the ENTIRE brand brief.
+Do not reduce the brand to its industry, name, main product, or one or two descriptive keywords.
+Identify all relevant requirements contained across the complete input.
+Understand how the different inputs relate to one another.
+The brand description explains WHAT the brand is.
+The core principles and ethos explain WHAT the brand represents and how it should be perceived.
+The logo description and reference logo, when provided, contribute to the visual identity and should inform the direction.
+The selected vibe explains HOW the brand board should visually feel.
+All relevant inputs must influence the final direction.
+Do not allow one input to completely override the others unless there is a clear conflict.
+If a reference logo image is attached, analyse its visible characteristics and use it as visual guidance where relevant.
+Do not reproduce or copy the logo.
+Do not ignore the written brief simply because a logo image is provided.
+BRAND VISUAL STRATEGY
+Before generating individual tiles, determine what visual system best represents this specific brand.
+Do not assume a fixed industry, audience, aesthetic, product type, or visual formula.
+Allow the user's complete brief to determine the identity direction.
+Determine which visual principles are genuinely relevant to this brand.
+These may involve any relevant aspects such as form, shape, proportion, colour, material, typography, imagery, composition, texture, context, application, interaction, cultural references, history, visual contrast, refinement, or other characteristics.
+Do not force every brand into the same identity structure.
 FIXED 9-TILE STRUCTURE
-The "layout" array must contain EXACTLY 9 tiles, in exactly this order and type:
+The "layout" array must contain EXACTLY 9 tiles in exactly this order and type:
 1. type "image", label "Logo direction"
 2. type "image", label "Sticker mark"
 3. type "image", label "Logo alt"
@@ -218,44 +183,49 @@ The "layout" array must contain EXACTLY 9 tiles, in exactly this order and type:
 8. type "image", label "Mockup"
 9. type "image", label "Mockup"
 Do not skip, reorder, merge, or add tiles.
-ASSIGN A UNIQUE PURPOSE TO EVERY IMAGE
-Each image tile must provide a distinct type of visual evidence for the brand.
-Before generating each search query, determine what visual reference would be most useful for that specific tile and for this specific brand.
-The image for one tile must not simply repeat the image concept used for another tile.
-The first four tiles should provide distinct inspiration for different aspects of the brand's visual identity.
-Their purpose should be determined dynamically from the user's brief and should not rely on a predefined aesthetic.
-The mockup tiles must show three meaningfully different ways the brand could exist in the real world.
-Choose the most relevant applications for the particular brand.
-Do not automatically assume the brand needs a particular type of packaging, signage, product, environment, or application.
-The pattern tile should provide a relevant visual reference that could inform a repeatable graphic, material, surface, texture, structural system, or other pattern language appropriate to the brand.
-GENERATE SEARCHABLE IMAGE QUERIES
-For every image tile, the "value" field must contain a specific search query that can be used directly with a stock image API such as Pexels or Unsplash.
-Each query must be based on:
-1. The user's specific brand requirements.
-2. The unique role of that tile.
-3. The overall visual system being developed.
-Do not simply repeat the brand name, industry, or descriptive keywords in every query.
-The query should describe a clear visual reference that is likely to exist and be searchable.
-Use natural search language.
-Add relevant visual qualifiers only when they improve the quality and specificity of the result.
-Do not force all queries into the same length or structure.
-Avoid vague branding terms that are unlikely to return useful images.
+UNIQUE VISUAL PURPOSE
+Each image tile must contribute a different and useful piece of visual information.
+Before generating the query for each tile, determine what that tile should contribute to the identity system.
+The first four visual references must not be repetitive variations of the same idea.
+They should collectively provide useful inspiration for different aspects of the brand identity.
+The three mockup tiles must show three meaningfully different and relevant ways the brand could exist in the real world.
+Choose the applications dynamically based on the user's brand.
+Do not automatically assume a particular type of packaging, product, signage, environment, or physical application.
+The pattern tile should provide a visual reference appropriate to the brand that could inform a repeatable visual language.
 FONT TILE
 Tile 7 must contain a real font pairing exactly in this format:
 Headline: Font Name / Body: Font Name
-Choose the pairing based on the specific personality and requirements of the user's brand.
-Do not use the same font recommendations for every type of brand.
-COHESION WITHOUT REPETITION
-The completed brand board must feel like one coherent identity.
-However, coherence must not come from repeating the same subject across multiple tiles.
-Instead, determine what underlying visual principles connect the references based on the user's brief.
-The references should work together while each contributing something distinct to the development of the identity.
+Choose the pairing based on the complete brand brief.
+SEARCH QUERY GENERATION
+For every image tile, the "value" field must contain a specific search query that can realistically be used with a stock image API.
+Each query must be based on:
+- the complete brand description
+- the logo information when relevant
+- the core principles and ethos
+- the selected vibe
+- the specific purpose of that tile
+- the need for diversity across the complete board
+Do not repeatedly use the brand name, industry, or the same descriptive keywords.
+Do not create generic branding searches.
+Each query should describe a clear visual reference that is likely to exist and be searchable.
+Use natural search language.
+Include relevant visual details when they improve the quality and relevance of the search.
+COHESION AND DIVERSITY
+The final board must feel like one coherent identity system.
+However, coherence must not come from repeating the same subject, object, application, or visual idea.
+Every tile should contribute something new while remaining connected to the overall brand direction.
+Determine what creates that connection from the user's actual brief.
 FINAL REQUIREMENTS
-Use 4-6 palette colors with valid 6-digit hex values, each labelled by role such as primary, secondary, accent, or neutral.
-The final board should feel specific to the user's requirements.
-Do not apply a generic "premium", "minimal", "luxury", "modern", or any other default aesthetic unless the user's brief actually calls for it.
+Use 4-6 palette colors with valid 6-digit hex values, each labelled by role.
+Do not apply a generic premium, luxury, minimal, modern, playful, or any other default aesthetic unless the user's brief specifically calls for it.
 Do not copy an existing brand or artist.
-The result should provide useful, visually distinct references that could genuinely help a designer develop the user's brand identity further.`;
+The final board should feel specific to the user's requirements and provide visually useful references that could genuinely help develop the identity further.`;
+
+type ImageCandidate = {
+  id: string;
+  url: string;
+  source: "pexels" | "unsplash";
+};
 
 async function createMoodboard(boardType: "moodboard" | "brandboard", prompt: string, logoImageDataUrl?: string): Promise<unknown> {
   const userContent: OpenAI.Chat.Completions.ChatCompletionContentPart[] = [{ type: "text", text: prompt }];
@@ -307,7 +277,9 @@ async function createMoodboard(boardType: "moodboard" | "brandboard", prompt: st
     await Promise.all(
       parsed.layout.map(async (tile) => {
         if (tile.type === "image") {
-          tile.imageUrl = await fetchStockImage(tile.value);
+          tile.imageUrl = await fetchStockImage(
+  tile.value,
+  prompt
         }
       }),
     );
@@ -318,94 +290,155 @@ async function createMoodboard(boardType: "moodboard" | "brandboard", prompt: st
 
 const GENERIC_FALLBACK_QUERIES = ["minimal aesthetic texture", "neutral abstract background", "soft studio texture"];
 
-async function fetchStockImage(query: string, attempt = 0): Promise<string | null> {
-  const pexelsResult = await fetchPexelsImage(query);
-  if (pexelsResult) return pexelsResult;
-  const unsplashResult = await fetchUnsplashImage(query);
-  if (unsplashResult) return unsplashResult;
+async function selectBestImage(
+  candidates: ImageCandidate[],
+  tileQuery: string,
+  completeBrief: string
+): Promise<string | null> {
+  if (candidates.length === 0) return null;
 
-  // Both sources came back empty for this query. Retry with a broader/simpler
-  // version before giving up, since abstract queries (e.g. "icon mark concept")
-  // often return nothing where a shorter or more generic phrase will.
-  const words = query.trim().split(/\s+/);
-  if (words.length > 2) {
-    const shorter = words.slice(0, 2).join(" ");
-    console.error(`[stock-image] no results for "${query}", retrying with shorter query "${shorter}"`);
-    return fetchStockImage(shorter, attempt + 1);
+  if (candidates.length === 1) {
+    return candidates[0].url;
   }
 
-  if (attempt < GENERIC_FALLBACK_QUERIES.length) {
-    const fallback = GENERIC_FALLBACK_QUERIES[attempt];
-    console.error(`[stock-image] no results for "${query}", falling back to generic query "${fallback}"`);
-    return fetchStockImage(fallback, attempt + 1);
-  }
+  const imageContent: OpenAI.Chat.Completions.ChatCompletionContentPart[] =
+    [
+      {
+        type: "text",
+        text: `
+You are selecting the strongest image for a curated visual board.
 
-  console.error(`[stock-image] exhausted all fallbacks for original query, giving up`);
-  return null;
-}
+COMPLETE CREATIVE BRIEF:
+${completeBrief}
 
-async function fetchPexelsImage(query: string): Promise<string | null> {
-  const apiKey = process.env.PEXELS_API_KEY;
+THIS TILE'S VISUAL PURPOSE / SEARCH QUERY:
+${tileQuery}
 
-  if (!apiKey) {
-    console.error("[pexels] PEXELS_API_KEY is not set in the environment");
-    return null;
-  }
+You will receive ${candidates.length} candidate images.
+
+Compare them visually.
+
+Select the ONE image that best satisfies the complete brief and the specific purpose of this tile.
+
+Prioritize:
+
+- relevance to the complete brief
+- relevance to this specific tile
+- visual quality
+- composition
+- stylistic fit
+- strength of visual communication
+- usefulness within a curated board
+
+Reject images that are:
+
+- generic
+- weakly related
+- visually poor
+- misleading
+- cliché
+- badly composed
+- too literal when a stronger interpretation exists
+- inconsistent with the selected direction
+
+Return ONLY the number of the best candidate.
+
+Candidates are numbered starting from 1.
+`,
+      },
+      ...candidates.map((candidate, index) => ({
+        type: "text" as const,
+        text: `Candidate ${index + 1}`,
+      })),
+      ...candidates.map((candidate) => ({
+        type: "image_url" as const,
+        image_url: {
+          url: candidate.url,
+        },
+      })),
+    ];
 
   try {
-    const url =
-      `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=6&orientation=square`;
-
-    const response = await fetch(url, {
-      headers: { Authorization: apiKey },
+    const response = await openai.chat.completions.create({
+      model: "gpt-5.4-mini",
+      max_completion_tokens: 20,
+      messages: [
+        {
+          role: "user",
+          content: imageContent,
+        },
+      ],
     });
 
-    if (!response.ok) {
-      const body = await response.text().catch(() => "");
-      console.error(
-        `[pexels] request failed for query "${query}": ${response.status} ${response.statusText} ${body}`
-      );
-      return null;
+    const answer =
+      response.choices[0]?.message?.content?.trim() ?? "";
+
+    const selectedNumber = Number(
+      answer.match(/\d+/)?.[0]
+    );
+
+    if (
+      Number.isInteger(selectedNumber) &&
+      selectedNumber >= 1 &&
+      selectedNumber <= candidates.length
+    ) {
+      return candidates[selectedNumber - 1].url;
     }
 
-    const data = (await response.json()) as {
-      photos?: Array<{
-        src?: { large?: string };
-      }>;
-    };
-
-    const photos = data.photos ?? [];
-
-    if (photos.length === 0) {
-      console.error(`[pexels] no results returned for query "${query}"`);
-      return null;
-    }
-
-    // Pick one from the first 6 results instead of always taking the first.
-    const selected =
-      photos[Math.floor(Math.random() * photos.length)];
-
-    return selected.src?.large ?? null;
+    return candidates[0].url;
 
   } catch (error) {
-    console.error(`[pexels] fetch threw for query "${query}":`, error);
-    return null;
+    console.error("[image-selector] failed:", error);
+
+    return candidates[0].url;
   }
 }
 
-async function fetchUnsplashImage(query: string): Promise<string | null> {
-  const accessKey = process.env.UNSPLASH_ACCESS_KEY;
+async function fetchStockImage(
+  query: string,
+  completeBrief: string
+): Promise<string | null> {
 
-  if (!accessKey) {
+  const pexelsCandidates =
+    await fetchPexelsImages(query);
+
+  const unsplashCandidates =
+    pexelsCandidates.length === 0
+      ? await fetchUnsplashImages(query)
+      : [];
+
+  const candidates = [
+    ...pexelsCandidates,
+    ...unsplashCandidates,
+  ];
+
+  if (candidates.length === 0) {
     console.error(
-      "[unsplash] UNSPLASH_ACCESS_KEY is not set in the environment"
+      `[stock-image] no candidates for "${query}"`
     );
+
     return null;
   }
 
+  return selectBestImage(
+    candidates,
+    query,
+    completeBrief
+  );
+}
+
+async function fetchUnsplashImages(
+  query: string
+): Promise<ImageCandidate[]> {
+  const accessKey = process.env.UNSPLASH_ACCESS_KEY;
+
+  if (!accessKey) return [];
+
   try {
     const url =
-      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=6&orientation=squarish`;
+      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(
+        query
+      )}&per_page=6&orientation=squarish`;
 
     const response = await fetch(url, {
       headers: {
@@ -413,15 +446,74 @@ async function fetchUnsplashImage(query: string): Promise<string | null> {
       },
     });
 
-    if (!response.ok) {
-      const body = await response.text().catch(() => "");
+    if (!response.ok) return [];
 
-      console.error(
-        `[unsplash] request failed for query "${query}": ${response.status} ${response.statusText} ${body}`
-      );
+    const data = (await response.json()) as {
+      results?: Array<{
+        id: string;
+        urls?: {
+          regular?: string;
+        };
+      }>;
+    };
 
-      return null;
-    }
+    return (data.results ?? [])
+      .map((image) => ({
+        id: `unsplash-${image.id}`,
+        url: image.urls?.regular ?? "",
+        source: "unsplash" as const,
+      }))
+      .filter((image) => image.url);
+
+  } catch (error) {
+    console.error("[unsplash] fetch failed:", error);
+    return [];
+  }
+}
+
+async function fetchPexelsImages(
+  query: string
+): Promise<ImageCandidate[]> {
+  const apiKey = process.env.PEXELS_API_KEY;
+
+  if (!apiKey) return [];
+
+  try {
+    const url =
+      `https://api.pexels.com/v1/search?query=${encodeURIComponent(
+        query
+      )}&per_page=6&orientation=square`;
+
+    const response = await fetch(url, {
+      headers: {
+        Authorization: apiKey,
+      },
+    });
+
+    if (!response.ok) return [];
+
+    const data = (await response.json()) as {
+      photos?: Array<{
+        id: number;
+        src?: {
+          large?: string;
+        };
+      }>;
+    };
+
+    return (data.photos ?? [])
+      .map((photo) => ({
+        id: `pexels-${photo.id}`,
+        url: photo.src?.large ?? "",
+        source: "pexels" as const,
+      }))
+      .filter((image) => image.url);
+
+  } catch (error) {
+    console.error("[pexels] fetch failed:", error);
+    return [];
+  }
+}
 
     const data = (await response.json()) as {
       results?: Array<{
@@ -453,6 +545,7 @@ async function fetchUnsplashImage(query: string): Promise<string | null> {
     return null;
   }
 }
+
 
 router.get("/moodboards/debug/unsplash", async (req, res): Promise<void> => {
   const query = typeof req.query.query === "string" ? req.query.query : "sunset ocean";
@@ -502,18 +595,50 @@ router.post("/moodboards/generate", requireAuth, async (req, res): Promise<void>
 
   try {
     const { purpose, styles, boardType, layoutStyle, imageCount, logoDescription, logoImageDataUrl } = parsed.data;
-    const promptText =
-      boardType === "brandboard"
-        ? `Create a brand identity board for this brand: "${purpose}".
-Brand ethos words: ${styles.join(", ")}.
-Logo description provided by the user: ${logoDescription?.trim() ? `"${logoDescription.trim()}"` : "none provided"}.
-${logoImageDataUrl ? "A reference logo image is attached \u2014 let it inform the visual direction." : "No reference logo image was attached."}
-Give it a memorable brand name/title, a concise tagline, a visual direction paragraph, and useful keywords.`
-        : `Create a moodboard for this purpose: "${purpose}".
-Selected style directions: ${styles.join(", ")}.
-Preferred layout composition: ${layoutStyle}.
-Include exactly ${imageCount} tiles of type "image", plus a reasonable mix of text, color, and quote tiles around them (aim for ${imageCount + 3}-${imageCount + 5} total tiles).
-Give it a memorable title, a concise tagline, a visual direction paragraph, and useful keywords.`;
+const promptText =
+  boardType === "brandboard"
+    ? `
+COMPLETE BRAND BRIEF
+Brand description:
+"${purpose}"
+Core principles / ethos:
+${styles.join(", ")}
+Logo description:
+${logoDescription?.trim()
+  ? `"${logoDescription.trim()}"`
+  : "No written logo description provided."}
+Reference logo:
+${logoImageDataUrl
+  ? "A logo image is attached. Analyse it together with the written brief."
+  : "No reference logo image provided."}
+BOARD DIRECTION
+Treat every section above as part of one connected brand brief.
+Do not reduce this brief to the brand's main product, industry, or a few keywords.
+Analyse all relevant details before generating the board.
+Create a memorable brand title, concise tagline, visual direction paragraph, useful keywords, palette, and the required 9-tile brand identity system.
+`
+    : `
+COMPLETE MOODBOARD BRIEF
+User's description:
+"${purpose}"
+Selected visual directions / vibe:
+${styles.join(", ")}
+Selected layout:
+${layoutStyle}
+Requested number of image tiles:
+${imageCount}
+BOARD DIRECTION
+Treat every section above as one connected creative brief.
+The description defines the concept.
+The selected visual directions define how the concept should visually feel.
+The selected layout should influence the hierarchy and organisation of the board.
+The requested image count determines how many distinct visual references must be included.
+Analyse the complete brief before generating any tile.
+Do not reduce the description to one or two keywords.
+Consider all visually relevant details and distribute them intelligently across the board.
+Include exactly ${imageCount} tiles of type "image" and create an appropriate supporting mix of text, color, and quote tiles.
+Give the board a memorable title, concise tagline, visual direction paragraph, and useful keywords.
+`; 
     const moodboard = await createMoodboard(boardType, promptText, boardType === "brandboard" ? logoImageDataUrl : undefined);
     res.json(GenerateMoodboardResponse.parse(moodboard));
   } catch (error) {
