@@ -4,41 +4,41 @@ import { Link } from 'wouter';
 
 export default function HomePage() {
   return (
-    <main className="grain min-h-[100dvh] overflow-hidden bg-[#13273f] text-[#e9d4c3]">
+    <main className="grain min-h-[100dvh] overflow-hidden bg-[#13273f] text-[#fef7e5]">
       <section className="relative min-h-screen px-6 pb-20 pt-7 sm:px-10 lg:px-16">
         <div className="mx-auto max-w-[1400px]">
-          <header className="flex items-center justify-between border-b border-[#e9d4c3]/20 pb-5">
+          <header className="flex items-center justify-between border-b border-[#fef7e5]/20 pb-5">
             <Link href="/" className="group flex items-center gap-3" data-testid="link-home-logo">
-              <span className="flex h-10 w-10 items-center justify-center rounded-[12px] border border-[#e9d4c3]/30 bg-[#13273f] text-[#fef7e5] shadow-sm">
+              <span className="flex h-10 w-10 items-center justify-center rounded-[12px] border border-[#fef7e5]/30 bg-[#13273f] text-[#fef7e5] shadow-sm">
                 <span className="serif text-[27px] leading-none">M</span>
               </span>
               <span className="text-[11px] font-bold uppercase tracking-[.22em]">Morrow studio</span>
             </Link>
             <nav className="flex items-center gap-5 text-[11px] font-bold uppercase tracking-[.16em] sm:gap-8">
-              <Link href="/sign-in" className="rounded-full border border-[#b7e1da]/30 px-4 py-2 transition-all hover:border-[#c0d6ed] hover:bg-[#e9d4c3] hover:text-[#13273f]" data-testid="link-sign-in">Sign in</Link>
+              <Link href="/sign-in" className="rounded-full border border-[#b7e1da]/30 px-4 py-2 transition-all hover:border-[#c0d6ed] hover:bg-[#fef7e5] hover:text-[#13273f]" data-testid="link-sign-in">Sign in</Link>
             </nav>
           </header>
 
           <div className="grid items-end gap-12 pt-20 lg:grid-cols-[1.05fr_.95fr] lg:gap-20 lg:pt-28">
             <div className="relative z-10 max-w-[720px]">
-              <h1 className="reveal reveal-delay-1 serif mt-8 max-w-[760px] text-[clamp(4rem,9vw,9.2rem)] leading-[.84] tracking-[-.065em] text-[#e9d4c3]">
+              <h1 className="reveal reveal-delay-1 serif mt-8 max-w-[760px] text-[clamp(4rem,9vw,9.2rem)] leading-[.84] tracking-[-.065em] text-[#fef7e5]">
                 Stage<br /><em>your</em> ideas.
               </h1>
-              <p className="reveal reveal-delay-2 mt-9 max-w-[470px] text-[15px] leading-7 text-[#e9d4c3] sm:text-[17px]">
+              <p className="reveal reveal-delay-2 mt-9 max-w-[470px] text-[15px] leading-7 text-[#fef7e5] sm:text-[17px]">
                 Morrow transforms early ideas into considered visual identities. Bring the starting point. Leave with a clear creative direction and a visual language built to stand apart
               </p>
               <div className="reveal reveal-delay-3 mt-10 flex flex-wrap items-center gap-4">
-                <Link href="/sign-up" className="group flex items-center gap-3 rounded-full bg-[#bf5114] px-6 py-3.5 text-[11px] font-bold uppercase tracking-[.15em] text-[#13273f] transition-all hover:-translate-y-0.5 hover:bg-[#4e0000] hover:text-[#e9d4c3]" data-testid="link-start-ritual">
+                <Link href="/sign-up" className="group flex items-center gap-3 rounded-full bg-[#bf5114] px-6 py-3.5 text-[11px] font-bold uppercase tracking-[.15em] text-[#13273f] transition-all hover:-translate-y-0.5 hover:bg-[#4e0000] hover:text-[#fef7e5]" data-testid="link-start-ritual">
                   Let's Begin!! <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
                 </Link>
-                <a href="#ritual" className="flex items-center gap-2 px-2 py-3 text-[11px] font-bold uppercase tracking-[.15em] text-[#e9d4c3] transition-colors hover:text-[#bf5114]" data-testid="link-see-how">
+                <a href="#ritual" className="flex items-center gap-2 px-2 py-3 text-[11px] font-bold uppercase tracking-[.15em] text-[#fef7e5] transition-colors hover:text-[#bf5114]" data-testid="link-see-how">
                   See how it works <ArrowDown size={14} />
                 </a>
               </div>
             </div>
 
             <div className="reveal reveal-delay-2 relative mx-auto w-full max-w-[510px] lg:mb-[-54px]">
-              <div className="absolute -left-8 top-12 hidden h-16 w-16 rounded-full border border-[#e9d4c3]/20 lg:block" />
+              <div className="absolute -left-8 top-12 hidden h-16 w-16 rounded-full border border-[#fef7e5]/20 lg:block" />
               <div className="relative rotate-[3.5deg] overflow-hidden border-[10px] border-[#e1e2d9]/70 bg-[#8295a0] shadow-[18px_25px_0_rgba(92,26,3,.12),0_32px_50px_rgba(92,26,3,.22)]">
                 <img src={velvetTexture} alt="Deep maroon velvet texture" className="block aspect-square w-full object-cover opacity-90" data-testid="img-paper-texture" />
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#13273f]/20 p-8 text-center text-[#fef7e5]">
@@ -52,7 +52,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="ritual" className="relative border-t border-[#13273f]/20 bg-[#e9d4c3] px-6 py-24 text-[#4e0000] sm:px-10 lg:px-16">
+      <section id="ritual" className="relative border-t border-[#13273f]/20 bg-[#fef7e5] px-6 py-24 text-[#4e0000] sm:px-10 lg:px-16">
         <div className="mx-auto max-w-[1400px]">
           <div className="grid gap-14 lg:grid-cols-[.55fr_1fr] lg:gap-24">
             <div>
@@ -76,7 +76,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <footer className="flex flex-col justify-between gap-4 border-t border-[#e9d4c3]/20 bg-[#13273f] px-6 py-7 text-[10px] font-bold uppercase tracking-[.16em] text-[#e9d4c3] sm:flex-row sm:px-10 lg:px-16">
+      <footer className="flex flex-col justify-between gap-4 border-t border-[#fef7e5]/20 bg-[#13273f] px-6 py-7 text-[10px] font-bold uppercase tracking-[.16em] text-[#fef7e5] sm:flex-row sm:px-10 lg:px-16">
         <span>© 2025 Morrow  studio</span>
         <span className="text-[#788240]">for ideas in their early light</span>
       </footer>
