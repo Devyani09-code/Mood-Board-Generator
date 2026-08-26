@@ -103,30 +103,30 @@ function BriefCard({
 
   return (
     <div className={`flashcard ${isExiting ? 'exit' : isEntering ? 'entering' : ''} relative w-full max-w-[620px]`} data-testid={`card-brief-step-${step}`}>
-      <div className="absolute inset-x-5 -bottom-3 top-4 rotate-[2deg] border border-[#5c1a03]/20 bg-[#fef7e5]/80" />
-      <div className="absolute inset-x-2 -bottom-1 top-2 rotate-[-1.2deg] border border-[#5c1a03]/20 bg-[#fef7e5]/70" />
-      <div className="relative border border-[#5c1a03]/30 bg-[#fef7e5]/95 p-7 shadow-[0_22px_50px_rgba(38,61,73,.18)] sm:p-12">
-        <div className="flex items-center justify-between border-b border-[#5c1a03]/20 pb-4">
-          <span className="eyebrow text-[#bca106]">{step === 0 ? 'A note before we begin' : `Fragment 0${step}`}</span>
-          <span className="text-[11px] font-bold text-[#5c1a03]">{step + 1} / 5</span>
+      <div className="absolute inset-x-5 -bottom-3 top-4 rotate-[2deg] border border-[#390404]/20 bg-[#fef7e5]/80" />
+      <div className="absolute inset-x-2 -bottom-1 top-2 rotate-[-1.2deg] border border-[#390404]/20 bg-[#fef7e5]/70" />
+      <div className="relative border border-[#390404]/30 bg-[#fef7e5]/95 p-7 shadow-[0_22px_50px_rgba(38,61,73,.18)] sm:p-12">
+        <div className="flex items-center justify-between border-b border-[#390404]/20 pb-4">
+          <span className="eyebrow text-[#788240]">{step === 0 ? 'A note before we begin' : `Fragment 0${step}`}</span>
+          <span className="text-[11px] font-bold text-[#390404]">{step + 1} / 5</span>
         </div>
         {step === 0 && (
             <div className="py-10 sm:py-12">
-            <h1 className="serif italic max-w-[530px] text-[clamp(2.8rem,6vw,5rem)] leading-[.9] tracking-[-.06em] text-[#5c1a03]">Let the first thought be <em>unfinished.</em></h1>
-            <p className="mt-7 max-w-[430px] text-[14px] leading-7 text-[#5c1a03]">We will turn a hunch into a visual direction. There is no right answer here, only what keeps catching your eye.</p>
+            <h1 className="serif italic max-w-[530px] text-[clamp(2.8rem,6vw,5rem)] leading-[.9] tracking-[-.06em] text-[#390404]">Let the first thought be <em>unfinished.</em></h1>
+            <p className="mt-7 max-w-[430px] text-[14px] leading-7 text-[#390404]">We will turn a hunch into a visual direction. There is no right answer here, only what keeps catching your eye.</p>
           </div>
         )}
         {step === 1 && (
           <div className="py-10 sm:py-12">
-            <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#5c1a03]">What are you <em>building?</em></h2>
-            <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#5c1a03]">Choose the kind of board that fits what you need right now.</p>
+            <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#390404]">What are you <em>building?</em></h2>
+            <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#390404]">Choose the kind of board that fits what you need right now.</p>
             <div className="mt-9 grid gap-3 sm:grid-cols-2">
               {BOARD_TYPE_OPTIONS.map((option) => {
                 const selected = boardType === option.value;
                 return (
-                  <button type="button" key={option.value} onClick={() => setBoardType(option.value)} className={`rounded-lg border p-4 text-left transition-all ${selected ? 'border-[#5c1a03] bg-[#5c1a03] text-[#fef7e5]' : 'border-[#5c1a03]/30 text-[#5c1a03] hover:-translate-y-0.5 hover:border-[#bca106]'}`} data-testid={`button-board-type-${option.value}`} aria-pressed={selected}>
+                  <button type="button" key={option.value} onClick={() => setBoardType(option.value)} className={`rounded-lg border p-4 text-left transition-all ${selected ? 'border-[#390404] bg-[#390404] text-[#fef7e5]' : 'border-[#390404]/30 text-[#390404] hover:-translate-y-0.5 hover:border-[#788240]'}`} data-testid={`button-board-type-${option.value}`} aria-pressed={selected}>
                     <span className="flex items-center gap-2 text-[13px] font-bold">{selected && <Check size={14} />}{option.label}</span>
-                    <span className={`mt-1.5 block text-[11px] leading-5 ${selected ? 'text-[#fef7e5]/75' : 'text-[#5c1a03]/80'}`}>{option.copy}</span>
+                    <span className={`mt-1.5 block text-[11px] leading-5 ${selected ? 'text-[#fef7e5]/75' : 'text-[#390404]/80'}`}>{option.copy}</span>
                   </button>
                 );
               })}
@@ -135,25 +135,25 @@ function BriefCard({
         )}
         {step === 2 && (
           <div className="py-10 sm:py-12">
-            <label htmlFor="purpose" className="serif italic block max-w-[560px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#5c1a03]">{isBrand ? <>Describe your <em>brand.</em></> : <>What are you <em>making?</em></>}</label>
-            <p className="mt-5 max-w-[360px] text-[13px] leading-6 text-[#5c1a03]">{isBrand ? 'What does it do, who is it for, what does it stand for?' : 'A sentence, a secret, a working title. Follow the thread rather than polishing it.'}</p>
-            <textarea id="purpose" value={purpose} onChange={(event) => setPurpose(event.target.value)} placeholder={isBrand ? 'Our brand is...' : 'I want to make...'} rows={3} className="mt-9 w-full resize-none border-0 border-b border-[#5c1a03]/35 bg-transparent px-0 py-3 text-[18px] leading-7 text-[#5c1a03] outline-none placeholder:text-[#5c1a03]/50 focus:border-[#bca106]" data-testid="input-purpose" />
+            <label htmlFor="purpose" className="serif italic block max-w-[560px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#390404]">{isBrand ? <>Describe your <em>brand.</em></> : <>What are you <em>making?</em></>}</label>
+            <p className="mt-5 max-w-[360px] text-[13px] leading-6 text-[#390404]">{isBrand ? 'What does it do, who is it for, what does it stand for?' : 'A sentence, a secret, a working title. Follow the thread rather than polishing it.'}</p>
+            <textarea id="purpose" value={purpose} onChange={(event) => setPurpose(event.target.value)} placeholder={isBrand ? 'Our brand is...' : 'I want to make...'} rows={3} className="mt-9 w-full resize-none border-0 border-b border-[#390404]/35 bg-transparent px-0 py-3 text-[18px] leading-7 text-[#390404] outline-none placeholder:text-[#390404]/50 focus:border-[#788240]" data-testid="input-purpose" />
           </div>
         )}
         {step === 3 && isBrand && (
           <div className="py-10 sm:py-12">
-            <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#5c1a03]">Insert the <em>logo.</em></h2>
-            <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#5c1a03]">Describe it, attach an image, or both.</p>
-            <textarea value={logoDescription} onChange={(event) => setLogoDescription(event.target.value)} placeholder="Describe the logo..." rows={3} className="mt-8 w-full resize-none border-0 border-b border-[#5c1a03]/35 bg-transparent px-0 py-3 text-[16px] leading-7 text-[#5c1a03] outline-none placeholder:text-[#5c1a03]/50 focus:border-[#bca106]" data-testid="input-logo-description" />
+            <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#390404]">Insert the <em>logo.</em></h2>
+            <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#390404]">Describe it, attach an image, or both.</p>
+            <textarea value={logoDescription} onChange={(event) => setLogoDescription(event.target.value)} placeholder="Describe the logo..." rows={3} className="mt-8 w-full resize-none border-0 border-b border-[#390404]/35 bg-transparent px-0 py-3 text-[16px] leading-7 text-[#390404] outline-none placeholder:text-[#390404]/50 focus:border-[#788240]" data-testid="input-logo-description" />
             <div className="mt-6 flex items-center gap-4">
-              <label className="cursor-pointer rounded-full border border-[#5c1a03]/30 px-4 py-2.5 text-[11px] font-bold uppercase tracking-[.14em] text-[#5c1a03] transition-colors hover:border-[#bca106] hover:text-[#bca106]" data-testid="input-logo-image">
+              <label className="cursor-pointer rounded-full border border-[#390404]/30 px-4 py-2.5 text-[11px] font-bold uppercase tracking-[.14em] text-[#390404] transition-colors hover:border-[#788240] hover:text-[#788240]" data-testid="input-logo-image">
                 Attach image
                 <input type="file" accept="image/*" className="hidden" onChange={(event) => handleLogoFile(event.target.files?.[0])} />
               </label>
               {logoImageDataUrl && (
-                <span className="flex items-center gap-2 text-[12px] text-[#5c1a03]">
-                  <img src={logoImageDataUrl} alt="Logo preview" className="h-10 w-10 rounded border border-[#5c1a03]/25 object-cover" />
-                  <button type="button" onClick={() => setLogoImageDataUrl(null)} className="underline hover:text-[#bca106]">remove</button>
+                <span className="flex items-center gap-2 text-[12px] text-[#390404]">
+                  <img src={logoImageDataUrl} alt="Logo preview" className="h-10 w-10 rounded border border-[#390404]/25 object-cover" />
+                  <button type="button" onClick={() => setLogoImageDataUrl(null)} className="underline hover:text-[#788240]">remove</button>
                 </span>
               )}
             </div>
@@ -161,21 +161,21 @@ function BriefCard({
         )}
         {step === 3 && !isBrand && (
           <div className="py-10 sm:py-12">
-            <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#5c1a03]">Pick a <em>layout.</em></h2>
-            <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#5c1a03]">How should the board be composed?</p>
+            <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#390404]">Pick a <em>layout.</em></h2>
+            <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#390404]">How should the board be composed?</p>
             <div className="mt-9 flex flex-wrap gap-2.5">
               {LAYOUT_OPTIONS.map((option) => {
                 const selected = layoutStyle === option;
                 return (
-                  <button type="button" key={option} onClick={() => setLayoutStyle(option)} className={`rounded-full border px-4 py-2.5 text-[12px] transition-all ${selected ? 'border-[#5c1a03] bg-[#5c1a03] text-[#fef7e5]' : 'border-[#5c1a03]/30 text-[#5c1a03] hover:-translate-y-0.5 hover:border-[#bca106] hover:text-[#bca106]'}`} data-testid={`button-layout-${option.replaceAll(' ', '-').toLowerCase()}`} aria-pressed={selected}>
+                  <button type="button" key={option} onClick={() => setLayoutStyle(option)} className={`rounded-full border px-4 py-2.5 text-[12px] transition-all ${selected ? 'border-[#390404] bg-[#390404] text-[#fef7e5]' : 'border-[#390404]/30 text-[#390404] hover:-translate-y-0.5 hover:border-[#788240] hover:text-[#788240]'}`} data-testid={`button-layout-${option.replaceAll(' ', '-').toLowerCase()}`} aria-pressed={selected}>
                     {selected && <Check size={13} className="mr-1.5 inline" />}{option}
                   </button>
                 );
               })}
             </div>
-            <div className="mt-8 max-w-[260px] border-t border-[#5c1a03]/15 pt-6">
-              <label htmlFor="image-count" className="block text-[11px] font-bold uppercase tracking-[.14em] text-[#5c1a03]">Number of images</label>
-              <select id="image-count" value={imageCount} onChange={(event) => setImageCount(Number(event.target.value))} className="mt-3 w-full appearance-none border border-[#5c1a03]/30 bg-[#fef7e5]/40 px-4 py-2.5 text-[13px] text-[#5c1a03] outline-none focus:border-[#bca106]" data-testid="select-image-count">
+            <div className="mt-8 max-w-[260px] border-t border-[#390404]/15 pt-6">
+              <label htmlFor="image-count" className="block text-[11px] font-bold uppercase tracking-[.14em] text-[#390404]">Number of images</label>
+              <select id="image-count" value={imageCount} onChange={(event) => setImageCount(Number(event.target.value))} className="mt-3 w-full appearance-none border border-[#390404]/30 bg-[#fef7e5]/40 px-4 py-2.5 text-[13px] text-[#390404] outline-none focus:border-[#788240]" data-testid="select-image-count">
                 {IMAGE_COUNT_OPTIONS.map((count) => <option key={count} value={count}>{count} images</option>)}
               </select>
             </div>
@@ -183,13 +183,13 @@ function BriefCard({
         )}
         {step === 4 && (
           <div className="py-10 sm:py-12">
-            <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#5c1a03]">{isBrand ? <>The brand <em>ethos.</em></> : <>What is the <em>weather?</em></>}</h2>
-            <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#5c1a03]">{isBrand ? 'Which words already describe it? You can hold more than one.' : 'Choose the instincts that already belong to the idea. You can hold more than one.'}</p>
+            <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#390404]">{isBrand ? <>The brand <em>ethos.</em></> : <>What is the <em>weather?</em></>}</h2>
+            <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#390404]">{isBrand ? 'Which words already describe it? You can hold more than one.' : 'Choose the instincts that already belong to the idea. You can hold more than one.'}</p>
             <div className="mt-9 flex flex-wrap gap-2.5">
               {(isBrand ? BRAND_ETHOS_OPTIONS : STYLE_OPTIONS).map((style) => {
                 const selected = styles.includes(style);
                 return (
-                  <button type="button" key={style} onClick={() => toggleStyle(style)} className={`rounded-full border px-4 py-2.5 text-[12px] transition-all ${selected ? 'border-[#5c1a03] bg-[#5c1a03] text-[#fef7e5]' : 'border-[#5c1a03]/30 text-[#5c1a03] hover:-translate-y-0.5 hover:border-[#bca106] hover:text-[#bca106]'}`} data-testid={`button-style-${style.replaceAll(' ', '-')}`} aria-pressed={selected}>
+                  <button type="button" key={style} onClick={() => toggleStyle(style)} className={`rounded-full border px-4 py-2.5 text-[12px] transition-all ${selected ? 'border-[#390404] bg-[#390404] text-[#fef7e5]' : 'border-[#390404]/30 text-[#390404] hover:-translate-y-0.5 hover:border-[#788240] hover:text-[#788240]'}`} data-testid={`button-style-${style.replaceAll(' ', '-')}`} aria-pressed={selected}>
                   {selected && <Check size={13} className="mr-1.5 inline" />}{style}
                 </button>
                 );
@@ -199,9 +199,9 @@ function BriefCard({
         )}
         {notice && <p className="mb-5 text-[12px] font-medium text-[#a25242]" data-testid="status-brief-validation">{notice}</p>}
         {Boolean(error) && <p className="mb-5 border-l-2 border-[#a25242] pl-3 text-[12px] leading-5 text-[#a25242]" data-testid="status-generation-error">{getErrorMessage(error)}</p>}
-        <div className="flex items-center justify-between border-t border-[#5c1a03]/20 pt-5">
-          <span className="hidden text-[11px] uppercase tracking-[.14em] text-[#5c1a03]/70 sm:block">{step === 0 ? 'Take a breath' : step === 4 ? 'Trust your eye' : 'Keep it close'}</span>
-          <button type="button" onClick={step === 4 ? onGenerate : advance} disabled={isGenerating} className="group ml-auto flex items-center gap-3 rounded-full bg-[#5c1a03] px-5 py-3 text-[11px] font-bold uppercase tracking-[.15em] text-[#fef7e5] transition-all hover:bg-[#bca106] disabled:cursor-wait disabled:opacity-60" data-testid={step === 4 ? 'button-generate-moodboard' : 'button-advance-brief'}>
+        <div className="flex items-center justify-between border-t border-[#390404]/20 pt-5">
+          <span className="hidden text-[11px] uppercase tracking-[.14em] text-[#390404]/70 sm:block">{step === 0 ? 'Take a breath' : step === 4 ? 'Trust your eye' : 'Keep it close'}</span>
+          <button type="button" onClick={step === 4 ? onGenerate : advance} disabled={isGenerating} className="group ml-auto flex items-center gap-3 rounded-full bg-[#390404] px-5 py-3 text-[11px] font-bold uppercase tracking-[.15em] text-[#fef7e5] transition-all hover:bg-[#788240] disabled:cursor-wait disabled:opacity-60" data-testid={step === 4 ? 'button-generate-moodboard' : 'button-advance-brief'}>
             {isGenerating ? 'Developing the board' : step === 4 ? 'Develop my board' : 'Continue'} {isGenerating ? <span className="loading-dashes" aria-hidden="true"><i /><i /><i /></span> : <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />}
           </button>
         </div>
@@ -316,7 +316,7 @@ function FreeformFrame({ frame, onMove, onResize, onClick, children, testId }: {
 
   return (
     <div
-      className="group absolute overflow-hidden border border-[#5c1a03]/25 bg-[#fef7e5] cursor-move select-none"
+      className="group absolute overflow-hidden border border-[#390404]/25 bg-[#fef7e5] cursor-move select-none"
       style={{ left: frame.x, top: frame.y, width: frame.w, height: frame.h }}
       data-testid={testId}
       onPointerDown={(event) => {
@@ -342,7 +342,7 @@ function FreeformFrame({ frame, onMove, onResize, onClick, children, testId }: {
       {children}
       <div
         data-resize-handle="true"
-        className="absolute bottom-0 right-0 z-20 h-5 w-5 cursor-nwse-resize border-l-2 border-t-2 border-[#fef7e5] bg-[#5c1a03] opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+        className="absolute bottom-0 right-0 z-20 h-5 w-5 cursor-nwse-resize border-l-2 border-t-2 border-[#fef7e5] bg-[#390404] opacity-0 transition-opacity duration-150 group-hover:opacity-100"
         data-testid={`${testId}-resize-handle`}
         onPointerDown={(event) => {
           event.stopPropagation();
@@ -387,7 +387,7 @@ function FreeformTile({ tile, index, frame, onMove, onResize, onImageChange, onD
     <FreeformFrame frame={frame} onMove={onMove} onResize={onResize} onClick={() => setOpen((v) => !v)} testId={`card-moodboard-tile-${index}`}>
       <TileArt tile={tile} />
       {open && (
-        <div data-no-drag className="absolute inset-0 z-30 flex flex-col justify-between gap-2 bg-[#5c1a03]/95 p-3 text-[#fef7e5]" onClick={(event) => event.stopPropagation()}>
+        <div data-no-drag className="absolute inset-0 z-30 flex flex-col justify-between gap-2 bg-[#390404]/95 p-3 text-[#fef7e5]" onClick={(event) => event.stopPropagation()}>
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-[.12em]">Edit tile</span>
             <button type="button" onClick={() => setOpen(false)} data-testid={`button-close-edit-${index}`}><X size={14} /></button>
@@ -426,7 +426,7 @@ async function drawTileCell(ctx: CanvasRenderingContext2D, tile: MoodboardTile, 
   } else {
     ctx.fillStyle = '#fef7e5';
     ctx.fillRect(x, y, w, h);
-    ctx.fillStyle = '#5c1a03';
+    ctx.fillStyle = '#390404';
     ctx.font = tile.type === 'quote' ? 'italic 19px Georgia, serif' : '15px Arial';
     wrapCanvasText(ctx, tile.value, x + 18, y + 40, w - 36, tile.type === 'quote' ? 26 : 22, 7);
   }
@@ -449,11 +449,11 @@ function drawPaletteCell(ctx: CanvasRenderingContext2D, board: Moodboard, x: num
     const sy = y + 40 + sr * (swatchSize + swatchGap + 20);
     ctx.fillStyle = color.hex;
     ctx.fillRect(sx, sy, swatchSize, swatchSize);
-    ctx.fillStyle = '#5c1a03';
+    ctx.fillStyle = '#390404';
     ctx.font = 'bold 10px Arial';
     ctx.fillText(color.name, sx + swatchSize + 8, sy + 12);
     ctx.font = '9px Arial';
-    ctx.fillStyle = '#5c1a03';
+    ctx.fillStyle = '#390404';
     ctx.fillText(color.hex, sx + swatchSize + 8, sy + 24);
   });
   ctx.fillStyle = 'rgba(38,61,73,0.88)';
@@ -464,13 +464,13 @@ function drawPaletteCell(ctx: CanvasRenderingContext2D, board: Moodboard, x: num
 }
 
 function drawHeader(ctx: CanvasRenderingContext2D, board: Moodboard, padding: number, width: number) {
-  ctx.fillStyle = '#5c1a03';
+  ctx.fillStyle = '#390404';
   ctx.fillRect(0, 0, width, ctx.canvas.height);
-  ctx.fillStyle = '#5c1a03';
+  ctx.fillStyle = '#390404';
   ctx.font = 'bold 40px Georgia, serif';
   ctx.fillText(board.title, padding, padding + 42);
   ctx.font = '16px Arial';
-  ctx.fillStyle = '#5c1a03';
+  ctx.fillStyle = '#390404';
   wrapCanvasText(ctx, board.tagline, padding, padding + 78, width - padding * 2, 22, 2);
 }
 
@@ -516,21 +516,21 @@ function TileArt({ tile }: { tile: MoodboardTile }) {
     }
     return <div className="tile-image-art h-full min-h-[170px] w-full overflow-hidden" />;
   }
-  if (tile.type === 'quote') return <div className="flex h-full min-h-[120px] items-center justify-center bg-[#5c1a03] p-6 text-center text-[#fef7e5]"><span className="serif text-2xl leading-tight">“{tile.value}”</span></div>;
-  return <div className="flex h-full min-h-[100px] items-end bg-[#d9c6a0] p-5"><span className="serif text-2xl leading-tight text-[#5c1a03]">{tile.value}</span></div>;
+  if (tile.type === 'quote') return <div className="flex h-full min-h-[120px] items-center justify-center bg-[#390404] p-6 text-center text-[#fef7e5]"><span className="serif text-2xl leading-tight">“{tile.value}”</span></div>;
+  return <div className="flex h-full min-h-[100px] items-end bg-[#d9c6a0] p-5"><span className="serif text-2xl leading-tight text-[#390404]">{tile.value}</span></div>;
 }
 
 function PaletteTileCard({ board, copied, onCopyColor, sizeClass, extraClass }: { board: Moodboard; copied: string; onCopyColor: (hex: string) => void; sizeClass: string; extraClass: string }) {
   return (
-    <article className={`relative overflow-hidden border border-[#5c1a03]/25 bg-[#fef7e5] p-4 ${sizeClass} ${extraClass}`} data-testid="card-palette-tile">
-      <div className="flex items-center justify-between"><span className="eyebrow text-[#bca106]">Palette / {board.palette.length} tones</span><SlidersHorizontal size={14} className="text-[#5c1a03]" /></div>
+    <article className={`relative overflow-hidden border border-[#390404]/25 bg-[#fef7e5] p-4 ${sizeClass} ${extraClass}`} data-testid="card-palette-tile">
+      <div className="flex items-center justify-between"><span className="eyebrow text-[#788240]">Palette / {board.palette.length} tones</span><SlidersHorizontal size={14} className="text-[#390404]" /></div>
       <div className="mt-4 grid grid-cols-2 gap-2.5 overflow-y-auto">
         {board.palette.map((color) => (
           <button type="button" key={color.hex} onClick={() => onCopyColor(color.hex)} className="group flex items-center gap-2 text-left" data-testid={`button-copy-color-${color.hex.slice(1)}`}>
-            <span className="h-7 w-7 shrink-0 border border-[#5c1a03]/20" style={{ backgroundColor: color.hex }} />
+            <span className="h-7 w-7 shrink-0 border border-[#390404]/20" style={{ backgroundColor: color.hex }} />
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-[11px] font-semibold text-[#5c1a03]">{color.name}</span>
-              <span className="block text-[9px] uppercase tracking-[.08em] text-[#5c1a03] group-hover:text-[#bca106]">{copied === color.hex ? 'Copied' : color.hex}</span>
+              <span className="block truncate text-[11px] font-semibold text-[#390404]">{color.name}</span>
+              <span className="block text-[9px] uppercase tracking-[.08em] text-[#390404] group-hover:text-[#788240]">{copied === color.hex ? 'Copied' : color.hex}</span>
             </span>
           </button>
         ))}
@@ -604,18 +604,18 @@ function MoodboardEditor({ board, boardType, layoutStyle, onReset, onBoardChange
 
   return (
     <div className="mx-auto max-w-[1400px] px-5 py-7 sm:px-8 lg:px-12">
-      <div className="mb-8 flex flex-col gap-5 border-b border-[#5c1a03]/20 pb-7 sm:flex-row sm:items-end sm:justify-between">
+      <div className="mb-8 flex flex-col gap-5 border-b border-[#390404]/20 pb-7 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <span className="eyebrow text-[#bca106]">A living direction / {board.id.slice(0, 8)}</span>
-          <p className="mt-3 max-w-[600px] text-[15px] leading-7 text-[#5c1a03]" data-testid="text-moodboard-tagline">{board.tagline}</p>
+          <span className="eyebrow text-[#788240]">A living direction / {board.id.slice(0, 8)}</span>
+          <p className="mt-3 max-w-[600px] text-[15px] leading-7 text-[#390404]" data-testid="text-moodboard-tagline">{board.tagline}</p>
         </div>
         <div className="flex shrink-0 gap-2">
-          <button type="button" onClick={copyBoardImage} disabled={exporting !== null} className="flex items-center gap-2 border border-[#5c1a03]/30 px-3 py-2 text-[10px] font-bold uppercase tracking-[.13em] text-[#5c1a03] transition-colors hover:border-[#bca106] hover:text-[#bca106] disabled:opacity-60" data-testid="button-copy-moodboard">{copied === 'board' ? <Check size={14} /> : <Clipboard size={14} />} {exporting === 'copy' ? 'Copying…' : copied === 'board' ? 'Copied' : 'Copy'}</button>
-          <button type="button" onClick={download} disabled={exporting !== null} className="flex items-center gap-2 border border-[#5c1a03]/30 px-3 py-2 text-[10px] font-bold uppercase tracking-[.13em] text-[#5c1a03] transition-colors hover:border-[#bca106] hover:text-[#bca106] disabled:opacity-60" data-testid="button-download-moodboard"><Download size={14} /> {exporting === 'download' ? 'Preparing…' : 'Download'}</button>
+          <button type="button" onClick={copyBoardImage} disabled={exporting !== null} className="flex items-center gap-2 border border-[#390404]/30 px-3 py-2 text-[10px] font-bold uppercase tracking-[.13em] text-[#390404] transition-colors hover:border-[#788240] hover:text-[#788240] disabled:opacity-60" data-testid="button-copy-moodboard">{copied === 'board' ? <Check size={14} /> : <Clipboard size={14} />} {exporting === 'copy' ? 'Copying…' : copied === 'board' ? 'Copied' : 'Copy'}</button>
+          <button type="button" onClick={download} disabled={exporting !== null} className="flex items-center gap-2 border border-[#390404]/30 px-3 py-2 text-[10px] font-bold uppercase tracking-[.13em] text-[#390404] transition-colors hover:border-[#788240] hover:text-[#788240] disabled:opacity-60" data-testid="button-download-moodboard"><Download size={14} /> {exporting === 'download' ? 'Preparing…' : 'Download'}</button>
         </div>
       </div>
       <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_310px]">
-        <section className="studio-grid overflow-x-auto border border-[#5c1a03]/15 bg-[#390404] p-3 sm:p-5" data-testid="panel-moodboard-canvas">
+        <section className="studio-grid overflow-x-auto border border-[#fef7e5] bg-[#390404] p-3 sm:p-5" data-testid="panel-moodboard-canvas">
           <div className="relative" style={{ width: CANVAS_WIDTH, height: canvasHeight, maxWidth: 'none' }}>
               {board.layout.map((tile, index) => frames[index] && (
                 <FreeformTile
@@ -642,13 +642,13 @@ function MoodboardEditor({ board, boardType, layoutStyle, onReset, onBoardChange
           </div>
         </section>
         <aside className="space-y-5">
-          <div className="border border-[#5c1a03]/25 bg-[#390404] p-5">
+          <div className="border border-[#390404] bg-[#390404] p-5">
             <div className="flex items-center gap-2 text-[#788240]"><SlidersHorizontal size={16} strokeWidth={1.5} /><span className="eyebrow">Edit the board</span></div>
             <p className="mt-4 text-[13px] leading-6 text-[#788240]">Drag any tile to move it. Drag its bottom-right corner to resize freely. Click a tile to replace its image or delete it.</p>
           </div>
-          <div className="border-t border-[#5c1a03]/20 pt-4">
-            <p className="text-[11px] leading-5 text-[#5c1a03]">Direction: <span className="text-[#5c1a03]" data-testid="text-moodboard-direction">{board.direction}</span></p>
-            <button type="button" onClick={onReset} className="mt-4 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.14em] text-[#5c1a03] transition-colors hover:text-[#bca106]" data-testid="button-new-brief"><RefreshCw size={14} /> Start another brief</button>
+          <div className="border-t border-[#390404]/20 pt-4">
+            <p className="text-[14px] leading-5 text-[#390404]">Direction: <span className="text-[#390404]" data-testid="text-moodboard-direction">{board.direction}</span></p>
+            <button type="button" onClick={onReset} className="mt-4 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.14em] text-[#390404] transition-colors hover:text-[#788240]" data-testid="button-new-brief"><RefreshCw size={14} /> Start another brief</button>
           </div>
         </aside>
       </div>
@@ -678,12 +678,12 @@ function StudioSidebar({
       {isOpen && <button type="button" className="studio-sidebar-backdrop lg:hidden" onClick={onClose} aria-label="Close sidebar" data-testid="button-close-sidebar" />}
       <aside className={`studio-sidebar ${isOpen ? 'studio-sidebar-open' : ''}`} aria-label="Studio navigation">
         <div className="flex items-center justify-between lg:hidden">
-          <span className="eyebrow text-[#bca106]">Your studio</span>
-          <button type="button" onClick={onClose} className="p-2 text-[#5c1a03]" aria-label="Close sidebar" data-testid="button-sidebar-close"><X size={17} /></button>
+          <span className="eyebrow text-[#788240]">Your studio</span>
+          <button type="button" onClick={onClose} className="p-2 text-[#390404]" aria-label="Close sidebar" data-testid="button-sidebar-close"><X size={17} /></button>
         </div>
         <div className="hidden lg:block">
-          <span className="eyebrow text-[#bca106]">Your studio</span>
-          <p className="mt-3 serif text-2xl italic text-[#5c1a03]">Keep the thread.</p>
+          <span className="eyebrow text-[#788240]">Your studio</span>
+          <p className="mt-3 serif text-2xl italic text-[#390404]">Keep the thread.</p>
         </div>
         <nav className="mt-6 space-y-1" aria-label="Studio sections">
           {[
@@ -698,8 +698,8 @@ function StudioSidebar({
           ))}
         </nav>
         {history.length > 0 && (
-          <div className="mt-8 border-t border-[#5c1a03]/15 pt-5">
-            <span className="eyebrow text-[#5c1a03]/70">Recent threads</span>
+          <div className="mt-8 border-t border-[#390404]/15 pt-5">
+            <span className="eyebrow text-[#390404]/70">Recent threads</span>
             <div className="mt-3 space-y-1.5">
               {history.slice(0, 3).map((item) => (
                 <button type="button" key={item.id} onClick={() => { onOpenBoard(item); onClose(); }} className="studio-history-link" data-testid={`button-sidebar-board-${item.id}`}>
@@ -718,22 +718,22 @@ function StudioSidebar({
 function HistoryPanel({ history, onOpen }: { history: Moodboard[]; onOpen: (board: Moodboard) => void }) {
   return (
     <section className="mx-auto max-w-[1100px] px-5 py-10 sm:px-8 lg:px-12" data-testid="panel-previous-moodboards">
-      <span className="eyebrow text-[#bca106]">The shelf / {history.length} saved directions</span>
-      <h1 className="serif mt-4 max-w-[700px] text-[clamp(3rem,6vw,6rem)] italic leading-[.86] tracking-[-.06em] text-[#5c1a03]">Previous <em>moodboards.</em></h1>
+      <span className="eyebrow text-[#788240]">The shelf / {history.length} saved directions</span>
+      <h1 className="serif mt-4 max-w-[700px] text-[clamp(3rem,6vw,6rem)] italic leading-[.86] tracking-[-.06em] text-[#390404]">Previous <em>moodboards.</em></h1>
       {history.length === 0 ? (
-        <div className="mt-10 border border-dashed border-[#5c1a03]/30 bg-[#fef7e5]/55 p-8 text-[13px] leading-6 text-[#5c1a03]" data-testid="empty-previous-moodboards">Your first direction will live here after you develop it.</div>
+        <div className="mt-10 border border-dashed border-[#390404]/30 bg-[#fef7e5]/55 p-8 text-[13px] leading-6 text-[#390404]" data-testid="empty-previous-moodboards">Your first direction will live here after you develop it.</div>
       ) : (
         <div className="mt-10 grid gap-4 md:grid-cols-2">
           {history.map((item, index) => (
-            <button type="button" key={item.id} onClick={() => onOpen(item)} className="card-lift border border-[#5c1a03]/25 bg-[#fef7e5]/80 p-5 text-left" data-testid={`card-previous-moodboard-${index}`}>
+            <button type="button" key={item.id} onClick={() => onOpen(item)} className="card-lift border border-[#390404]/25 bg-[#fef7e5]/80 p-5 text-left" data-testid={`card-previous-moodboard-${index}`}>
               <div className="flex items-start justify-between gap-4">
-                <span className="eyebrow text-[#bca106]">{String(index + 1).padStart(2, '0')} / direction</span>
-                <span className="text-[10px] uppercase tracking-[.12em] text-[#5c1a03]">{item.palette.length} tones</span>
+                <span className="eyebrow text-[#788240]">{String(index + 1).padStart(2, '0')} / direction</span>
+                <span className="text-[10px] uppercase tracking-[.12em] text-[#390404]">{item.palette.length} tones</span>
               </div>
-              <h2 className="serif mt-9 text-3xl italic leading-none text-[#5c1a03]">{item.title}</h2>
-              <p className="mt-3 line-clamp-2 text-[13px] leading-6 text-[#5c1a03]">{item.tagline}</p>
+              <h2 className="serif mt-9 text-3xl italic leading-none text-[#390404]">{item.title}</h2>
+              <p className="mt-3 line-clamp-2 text-[13px] leading-6 text-[#390404]">{item.tagline}</p>
               <div className="mt-6 flex gap-1.5">
-                {item.palette.slice(0, 5).map((color) => <span key={color.hex} className="h-5 w-5 border border-[#5c1a03]/15" style={{ backgroundColor: color.hex }} aria-label={color.name} />)}
+                {item.palette.slice(0, 5).map((color) => <span key={color.hex} className="h-5 w-5 border border-[#390404]/15" style={{ backgroundColor: color.hex }} aria-label={color.name} />)}
               </div>
             </button>
           ))}
@@ -747,19 +747,19 @@ function ProfilePanel({ user, boardCount }: { user: ReturnType<typeof useUser>['
   const email = user?.primaryEmailAddress?.emailAddress || 'No email on file';
   return (
     <section className="mx-auto max-w-[760px] px-5 py-10 sm:px-8 lg:px-12" data-testid="panel-profile">
-      <span className="eyebrow text-[#bca106]">A little about you</span>
-      <h1 className="serif mt-4 text-[clamp(3rem,6vw,5.8rem)] italic leading-[.86] tracking-[-.06em] text-[#5c1a03]">Your <em>profile.</em></h1>
-      <div className="mt-10 border border-[#5c1a03]/25 bg-[#fef7e5]/80 p-6 sm:p-8">
-        <div className="flex items-center gap-4 border-b border-[#5c1a03]/15 pb-6">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#5c1a03] serif text-2xl italic text-[#fef7e5]" data-testid="text-profile-initial">{(user?.firstName?.[0] || user?.username?.[0] || 'M').toUpperCase()}</div>
+      <span className="eyebrow text-[#788240]">A little about you</span>
+      <h1 className="serif mt-4 text-[clamp(3rem,6vw,5.8rem)] italic leading-[.86] tracking-[-.06em] text-[#390404]">Your <em>profile.</em></h1>
+      <div className="mt-10 border border-[#390404]/25 bg-[#fef7e5]/80 p-6 sm:p-8">
+        <div className="flex items-center gap-4 border-b border-[#390404]/15 pb-6">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#390404] serif text-2xl italic text-[#fef7e5]" data-testid="text-profile-initial">{(user?.firstName?.[0] || user?.username?.[0] || 'M').toUpperCase()}</div>
           <div>
-            <p className="serif text-2xl italic text-[#5c1a03]" data-testid="text-profile-name">{user?.fullName || user?.username || 'Maker'}</p>
-            <p className="mt-1 text-[12px] text-[#5c1a03]" data-testid="text-profile-email">{email}</p>
+            <p className="serif text-2xl italic text-[#390404]" data-testid="text-profile-name">{user?.fullName || user?.username || 'Maker'}</p>
+            <p className="mt-1 text-[12px] text-[#390404]" data-testid="text-profile-email">{email}</p>
           </div>
         </div>
         <div className="grid gap-5 pt-6 sm:grid-cols-2">
-          <div><span className="eyebrow text-[#5c1a03]/70">Directions developed</span><p className="mt-2 serif text-3xl italic text-[#5c1a03]" data-testid="text-profile-board-count">{boardCount}</p></div>
-          <div><span className="eyebrow text-[#5c1a03]/70">Studio mode</span><p className="mt-2 serif text-3xl italic text-[#5c1a03]">Private</p></div>
+          <div><span className="eyebrow text-[#390404]/70">Directions developed</span><p className="mt-2 serif text-3xl italic text-[#390404]" data-testid="text-profile-board-count">{boardCount}</p></div>
+          <div><span className="eyebrow text-[#390404]/70">Studio mode</span><p className="mt-2 serif text-3xl italic text-[#390404]">Private</p></div>
         </div>
       </div>
     </section>
@@ -773,7 +773,7 @@ export default function StudioPage() {
   // TEMPORARY DIAGNOSTIC — remove once Unsplash fetching is confirmed working.
   useEffect(() => {
     (async () => {
-      console.log('%c[DIAGNOSTIC] starting checks...', 'color: #bca106; font-weight: bold;');
+      console.log('%c[DIAGNOSTIC] starting checks...', 'color: #788240; font-weight: bold;');
       try {
         const healthRes = await fetch('/api/healthz');
         console.log('[DIAGNOSTIC] /api/healthz status:', healthRes.status, 'ok:', healthRes.ok);
@@ -794,7 +794,7 @@ export default function StudioPage() {
       } catch (err) {
         console.error('[DIAGNOSTIC] /api/moodboards/debug/unsplash request threw:', err);
       }
-      console.log('%c[DIAGNOSTIC] done \u2014 send Claude everything above.', 'color: #bca106; font-weight: bold;');
+      console.log('%c[DIAGNOSTIC] done \u2014 send Claude everything above.', 'color: #788240; font-weight: bold;');
     })();
   }, []);
 
@@ -830,21 +830,21 @@ export default function StudioPage() {
 
   if (board) {
     return (
-      <main className="grain min-h-[100dvh] bg-[#fef7e5] text-[#c2dfdb]">
+      <main className="grain min-h-[100dvh] bg-[#fef7e5] text-[#390404]">
         <StudioHeader healthLabel={healthLabel} userName={user?.firstName || 'maker'} signOut={() => signOut({ redirectUrl: import.meta.env.BASE_URL || '/' })} />
         <MoodboardEditor board={board} boardType={boardType ?? 'moodboard'} layoutStyle={layoutStyle} onReset={reset} onBoardChange={setBoard} />
       </main>
     );
   }
   return (
-    <main className="grain min-h-[100dvh] bg-[#fef7e5] text-[#c2dfdb]">
+    <main className="grain min-h-[100dvh] bg-[#fef7e5] text-[#390404]">
       <StudioHeader healthLabel={healthLabel} userName={user?.firstName || 'maker'} signOut={() => signOut({ redirectUrl: import.meta.env.BASE_URL || '/' })} />
       <section className="flex min-h-[calc(100dvh-80px)] flex-col items-center justify-center px-5 py-12 sm:px-8">
         <div className="mb-8 w-full max-w-[700px]">
-          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[.16em] text-[#c2dfdb]">
+          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[.16em] text-[#c1dbe8]">
             <span>New visual direction</span><span data-testid="text-brief-progress">{Math.round(((step + 1) / 5) * 100)}%</span>
           </div>
-          <div className="mt-3 h-[2px] w-full bg-[#c2dfdb]/15"><div className="h-full bg-[#bca106] transition-all duration-500" style={{ width: `${((step + 1) / 5) * 100}%` }} /></div>
+          <div className="mt-3 h-[2px] w-full bg-[#c1dbe8]/15"><div className="h-full bg-[#788240] transition-all duration-500" style={{ width: `${((step + 1) / 5) * 100}%` }} /></div>
         </div>
         <BriefCard step={step} boardType={boardType} setBoardType={setBoardType} purpose={purpose} setPurpose={setPurpose} logoDescription={logoDescription} setLogoDescription={setLogoDescription} logoImageDataUrl={logoImageDataUrl} setLogoImageDataUrl={setLogoImageDataUrl} layoutStyle={layoutStyle} setLayoutStyle={setLayoutStyle} imageCount={imageCount} setImageCount={setImageCount} styles={styles} toggleStyle={toggleStyle} onAdvance={advance} onGenerate={submit} isExiting={isExiting} isGenerating={generate.isPending} error={generate.error} />
       </section>
@@ -854,15 +854,15 @@ export default function StudioPage() {
 
 function StudioHeader({ healthLabel, userName, signOut }: { healthLabel: string; userName: string; signOut: () => void }) {
   return (
-    <header className="flex items-center justify-between border-b border-[#c2dfdb]/20 px-5 py-5 sm:px-8 lg:px-12">
+    <header className="flex items-center justify-between border-b border-[#c1dbe8]/20 px-5 py-5 sm:px-8 lg:px-12">
       <Link href="/studio" className="flex items-center gap-3" data-testid="link-studio-logo">
-        <span className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#c2dfdb]/30 bg-[#5c1a03] text-[#fef7e5]"><span className="serif text-2xl">M</span></span>
+        <span className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#c1dbe8]/30 bg-[#390404] text-[#fef7e5]"><span className="serif text-2xl">M</span></span>
         <span className="hidden text-[11px] font-bold uppercase tracking-[.2em] sm:block">Morrow / studio</span>
       </Link>
       <div className="flex items-center gap-4">
-        <span className="flex items-center gap-2 text-[10px] uppercase tracking-[.12em] text-[#c2dfdb]" data-testid="status-studio-health"><span className={`status-pulse h-1.5 w-1.5 rounded-full ${healthLabel === 'quiet mode' ? 'bg-[#bca106]' : 'bg-[#567f75]'}`} />{healthLabel}</span>
-        <span className="hidden text-[11px] text-[#c2dfdb] sm:block" data-testid="text-user-name">for {userName}</span>
-        <button type="button" onClick={signOut} className="flex items-center gap-2 border-l border-[#c2dfdb]/20 pl-4 text-[10px] font-bold uppercase tracking-[.12em] text-[#c2dfdb] transition-colors hover:text-[#bca106]" data-testid="button-sign-out"><LogOut size={14} /> <span className="hidden sm:inline">Leave studio</span></button>
+        <span className="flex items-center gap-2 text-[10px] uppercase tracking-[.12em] text-[#390404]" data-testid="status-studio-health"><span className={`status-pulse h-1.5 w-1.5 rounded-full ${healthLabel === 'quiet mode' ? 'bg-[#788240]' : 'bg-[#567f75]'}`} />{healthLabel}</span>
+        <span className="hidden text-[11px] text-[#c1dbe8] sm:block" data-testid="text-user-name">for {userName}</span>
+        <button type="button" onClick={signOut} className="flex items-center gap-2 border-l border-[#390404 ]/20 pl-4 text-[10px] font-bold uppercase tracking-[.12em] text-[#390404] transition-colors hover:text-[#788240]" data-testid="button-sign-out"><LogOut size={14} /> <span className="hidden sm:inline">Leave studio</span></button>
       </div>
     </header>
   );
