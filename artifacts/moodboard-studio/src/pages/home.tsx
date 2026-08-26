@@ -1,5 +1,5 @@
 import { ArrowDown, ArrowRight, BookOpen, CircleDot, MoveUpRight, ScanLine, Sparkles } from 'lucide-react';
-import velvetTexture from '@assets/velvet-maroon-texture.png';
+import velvetTexture from '@assets/download.jpg';
 import { Link } from 'wouter';
 
 export default function HomePage() {
