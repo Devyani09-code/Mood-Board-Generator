@@ -10,7 +10,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import HomePage from '@/pages/home';
 import NotFound from '@/pages/not-found';
 import StudioPage from '@/pages/studio';
-import velvetTexture from '@assets/velvet-maroon-texture.png';
+import velvetTexture from '@assets/download.jpg';
 
 const queryClient = new QueryClient();
 const clerkPubKey = publishableKeyFromHost(window.location.hostname, import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
