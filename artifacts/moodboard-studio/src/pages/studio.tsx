@@ -151,7 +151,7 @@ function BriefCard({
                 <input type="file" accept="image/*" className="hidden" onChange={(event) => handleLogoFile(event.target.files?.[0])} />
               </label>
               {logoImageDataUrl && (
-                <span className="flex items-center gap-2 text-[12px] text-[#390404]">
+                <span className="flex items-center gap-2 text-[12px] text-[#13273f]">
                   <img src={logoImageDataUrl} alt="Logo preview" className="h-10 w-10 rounded border border-[#390404]/25 object-cover" />
                   <button type="button" onClick={() => setLogoImageDataUrl(null)} className="underline hover:text-[#788240]">remove</button>
                 </span>
@@ -161,7 +161,7 @@ function BriefCard({
         )}
         {step === 3 && !isBrand && (
           <div className="py-10 sm:py-12">
-            <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#390404]">Pick a <em>layout.</em></h2>
+            <h2 className="serif italic max-w-[530px] text-[clamp(2.35rem,5.5vw,4.5rem)] leading-[.95] tracking-[-.06em] text-[#13273f]">Pick a <em>layout.</em></h2>
             <p className="mt-5 max-w-[390px] text-[13px] leading-6 text-[#390404]">How should the board be composed?</p>
             <div className="mt-9 flex flex-wrap gap-2.5">
               {LAYOUT_OPTIONS.map((option) => {
@@ -173,7 +173,7 @@ function BriefCard({
                 );
               })}
             </div>
-            <div className="mt-8 max-w-[260px] border-t border-[#390404]/15 pt-6">
+            <div className="mt-8 max-w-[260px] border-t border-[#13273f]/15 pt-6">
               <label htmlFor="image-count" className="block text-[11px] font-bold uppercase tracking-[.14em] text-[#390404]">Number of images</label>
               <select id="image-count" value={imageCount} onChange={(event) => setImageCount(Number(event.target.value))} className="mt-3 w-full appearance-none border border-[#390404]/30 bg-[#fef7e5]/40 px-4 py-2.5 text-[13px] text-[#390404] outline-none focus:border-[#788240]" data-testid="select-image-count">
                 {IMAGE_COUNT_OPTIONS.map((count) => <option key={count} value={count}>{count} images</option>)}
@@ -189,7 +189,7 @@ function BriefCard({
               {(isBrand ? BRAND_ETHOS_OPTIONS : STYLE_OPTIONS).map((style) => {
                 const selected = styles.includes(style);
                 return (
-                  <button type="button" key={style} onClick={() => toggleStyle(style)} className={`rounded-full border px-4 py-2.5 text-[12px] transition-all ${selected ? 'border-[#390404] bg-[#390404] text-[#fef7e5]' : 'border-[#390404]/30 text-[#390404] hover:-translate-y-0.5 hover:border-[#788240] hover:text-[#788240]'}`} data-testid={`button-style-${style.replaceAll(' ', '-')}`} aria-pressed={selected}>
+                  <button type="button" key={style} onClick={() => toggleStyle(style)} className={`rounded-full border px-4 py-2.5 text-[12px] transition-all ${selected ? 'border-[#13273f] bg-[#13273f] text-[#fef7e5]' : 'border-[#13273f]/30 text-[#13273f] hover:-translate-y-0.5 hover:border-[#788240] hover:text-[#788240]'}`} data-testid={`button-style-${style.replaceAll(' ', '-')}`} aria-pressed={selected}>
                   {selected && <Check size={13} className="mr-1.5 inline" />}{style}
                 </button>
                 );
@@ -199,9 +199,9 @@ function BriefCard({
         )}
         {notice && <p className="mb-5 text-[12px] font-medium text-[#a25242]" data-testid="status-brief-validation">{notice}</p>}
         {Boolean(error) && <p className="mb-5 border-l-2 border-[#a25242] pl-3 text-[12px] leading-5 text-[#a25242]" data-testid="status-generation-error">{getErrorMessage(error)}</p>}
-        <div className="flex items-center justify-between border-t border-[#390404]/20 pt-5">
-          <span className="hidden text-[11px] uppercase tracking-[.14em] text-[#390404]/70 sm:block">{step === 0 ? 'Take a breath' : step === 4 ? 'Trust your eye' : 'Keep it close'}</span>
-          <button type="button" onClick={step === 4 ? onGenerate : advance} disabled={isGenerating} className="group ml-auto flex items-center gap-3 rounded-full bg-[#390404] px-5 py-3 text-[11px] font-bold uppercase tracking-[.15em] text-[#fef7e5] transition-all hover:bg-[#788240] disabled:cursor-wait disabled:opacity-60" data-testid={step === 4 ? 'button-generate-moodboard' : 'button-advance-brief'}>
+        <div className="flex items-center justify-between border-t border-[#13273f]/20 pt-5">
+          <span className="hidden text-[11px] uppercase tracking-[.14em] text-[#13273f]/70 sm:block">{step === 0 ? 'Take a breath' : step === 4 ? 'Trust your eye' : 'Keep it close'}</span>
+          <button type="button" onClick={step === 4 ? onGenerate : advance} disabled={isGenerating} className="group ml-auto flex items-center gap-3 rounded-full bg-[#13273f] px-5 py-3 text-[11px] font-bold uppercase tracking-[.15em] text-[#fef7e5] transition-all hover:bg-[#788240] disabled:cursor-wait disabled:opacity-60" data-testid={step === 4 ? 'button-generate-moodboard' : 'button-advance-brief'}>
             {isGenerating ? 'Developing the board' : step === 4 ? 'Develop my board' : 'Continue'} {isGenerating ? <span className="loading-dashes" aria-hidden="true"><i /><i /><i /></span> : <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />}
           </button>
         </div>
@@ -342,7 +342,7 @@ function FreeformFrame({ frame, onMove, onResize, onClick, children, testId }: {
       {children}
       <div
         data-resize-handle="true"
-        className="absolute bottom-0 right-0 z-20 h-5 w-5 cursor-nwse-resize border-l-2 border-t-2 border-[#fef7e5] bg-[#390404] opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+        className="absolute bottom-0 right-0 z-20 h-5 w-5 cursor-nwse-resize border-l-2 border-t-2 border-[#fef7e5] bg-[#13273f] opacity-0 transition-opacity duration-150 group-hover:opacity-100"
         data-testid={`${testId}-resize-handle`}
         onPointerDown={(event) => {
           event.stopPropagation();
