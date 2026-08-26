@@ -65,7 +65,7 @@ export default function HomePage() {
                 ['02', 'Establish the direction', 'We explore references, perspectives, and possibilities to identify a clear creative route.'],
                 ['03', 'Build your board', 'The chosen direction becomes a distinct visual language, refined with purpose and consistency.'],
               ].map(([number, title, copy], index) => (
-                <div key={number} className={`border-t border-[#13273f]/25 py-6 sm:border-l sm:border-t-0 sm:pl-6 ${index > 0 ? 'mt-4 sm:mt-0' : ''}`} data-testid={`card-ritual-step-${number}`}>
+                <div key={number} className={`border-t border-[#13273f] py-6 sm:border-l sm:border-t-0 sm:pl-6 ${index > 0 ? 'mt-4 sm:mt-0' : ''}`} data-testid={`card-ritual-step-${number}`}>
                   <span className="text-[11px] tracking-[.18em] text-[#bf5114]">{number}</span>
                   <h3 className="serif mt-10 text-2xl">{title}</h3>
                   <p className="mt-3 max-w-[210px] text-[13px] leading-6 text-[#13273f]/65">{copy}</p>
