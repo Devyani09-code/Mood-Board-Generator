@@ -224,6 +224,19 @@ type ImageCandidate = {
   source: "cosmos" | "pexels";
 };
 
+/**
+ * Races a promise against a hard deadline. If the deadline wins, `fallback`
+ * is returned instead of letting one slow tile eat the whole request's time
+ * budget. This is what keeps a single hung Cosmos/Pexels/OpenAI call from
+ * turning into a platform-level 502.
+ */
+function withDeadline<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((resolve) => setTimeout(() => resolve(fallback), ms)),
+  ]);
+}
+
 async function createMoodboard(boardType: "moodboard" | "brandboard", prompt: string, logoImageDataUrl?: string): Promise<unknown> {
   const userContent: OpenAI.Chat.Completions.ChatCompletionContentPart[] = [{ type: "text", text: prompt }];
 
@@ -278,10 +291,14 @@ async function createMoodboard(boardType: "moodboard" | "brandboard", prompt: st
       }
     }
 
+    // Hard cap per tile: whatever cosmos-timeout -> pexels-fallback -> vision-select
+    // pipeline does internally, no single tile is allowed to hold up the whole
+    // /generate request for more than 15s. If it blows the deadline it just
+    // resolves to null (no image), same as any other fetch failure.
     await Promise.all(parsed.layout.map(async (tile) => {
       if (tile.type === "image") {
         try {
-          tile.imageUrl = await fetchStockImage(tile.value, prompt);
+          tile.imageUrl = await withDeadline(fetchStockImage(tile.value, prompt), 15000, null);
         } catch (error) {
           console.error(`[stock-image] failed for tile "${tile.label}":`, error);
           tile.imageUrl = null;
@@ -347,15 +364,25 @@ Candidates are numbered starting from 1.
 `,
     },
     ...candidates.map((candidate, index) => ({ type: "text" as const, text: `Candidate ${index + 1}` })),
-    ...candidates.map((candidate) => ({ type: "image_url" as const, image_url: { url: candidate.url } })),
+    // detail: "low" forces OpenAI to process each image at a small fixed
+    // resolution. For a "which of these best fits" comparison (not fine
+    // detail extraction) this is plenty, and it's the single biggest lever
+    // for cutting this call's latency + token cost.
+    ...candidates.map((candidate) => ({
+      type: "image_url" as const,
+      image_url: { url: candidate.url, detail: "low" as const },
+    })),
   ];
 
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      max_completion_tokens: 20,
-      messages: [{ role: "user", content: imageContent }],
-    });
+    const response = await openai.chat.completions.create(
+      {
+        model: "gpt-4o-mini",
+        max_completion_tokens: 20,
+        messages: [{ role: "user", content: imageContent }],
+      },
+      { timeout: 10000 },
+    );
 
     const answer = response.choices[0]?.message?.content?.trim() ?? "";
     const selectedNumber = Number(answer.match(/\d+/)?.[0]);
@@ -387,7 +414,8 @@ async function fetchStockImage(query: string, completeBrief: string = query): Pr
 }
 
 const COSMOS_SEARCH_ELEMENTS_URL = "https://api.parse.bot/scraper/518f0113-a227-49a8-95cf-31124444fa1e/search_elements";
-const COSMOS_MAX_CANDIDATES = 6;
+const COSMOS_MAX_CANDIDATES = 4;
+const EXTERNAL_FETCH_TIMEOUT_MS = 6000;
 
 async function fetchCosmosImages(query: string): Promise<ImageCandidate[]> {
   const apiKey = process.env.PARSE_API_KEY;
@@ -409,6 +437,9 @@ async function fetchCosmosImages(query: string): Promise<ImageCandidate[]> {
         order: "RELEVANT",
         content_type: "IMAGE",
       }),
+      // Fail fast instead of hanging — a stuck Cosmos call used to leave the
+      // request open until Replit's proxy killed it with a 502.
+      signal: AbortSignal.timeout(EXTERNAL_FETCH_TIMEOUT_MS),
     });
 
     if (!response.ok) {
@@ -458,12 +489,13 @@ async function fetchPexelsImages(query: string): Promise<ImageCandidate[]> {
   }
 
   try {
-    const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=6&orientation=square`;
+    const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=${COSMOS_MAX_CANDIDATES}&orientation=square`;
 
     const response = await fetch(url, {
       headers: {
         Authorization: apiKey,
       },
+      signal: AbortSignal.timeout(EXTERNAL_FETCH_TIMEOUT_MS),
     });
 
     if (!response.ok) {
@@ -476,6 +508,7 @@ async function fetchPexelsImages(query: string): Promise<ImageCandidate[]> {
       photos?: Array<{
         id: number;
         src?: {
+          medium?: string;
           large?: string;
         };
       }>;
@@ -484,7 +517,9 @@ async function fetchPexelsImages(query: string): Promise<ImageCandidate[]> {
     return (data.photos ?? [])
       .map((photo) => ({
         id: `pexels-${photo.id}`,
-        url: photo.src?.large ?? "",
+        // medium is plenty for a low-detail vision comparison and is
+        // meaningfully smaller/faster to fetch + upload than large.
+        url: photo.src?.medium ?? photo.src?.large ?? "",
         source: "pexels" as const,
       }))
       .filter((image) => image.url);
