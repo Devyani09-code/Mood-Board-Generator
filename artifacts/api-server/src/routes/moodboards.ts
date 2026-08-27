@@ -221,7 +221,7 @@ The final board should feel specific to the user's requirements and provide visu
 type ImageCandidate = {
   id: string;
   url: string;
-  source: "pexels" | "unsplash";
+  source: "cosmos" | "pexels";
 };
 
 async function createMoodboard(boardType: "moodboard" | "brandboard", prompt: string, logoImageDataUrl?: string): Promise<unknown> {
@@ -372,11 +372,11 @@ Candidates are numbered starting from 1.
 }
 
 async function fetchStockImage(query: string, completeBrief: string = query): Promise<string | null> {
-  const pexelsCandidates = await fetchPexelsImages(query);
+  const cosmosCandidates = await fetchCosmosImages(query);
 
-  const unsplashCandidates = pexelsCandidates.length === 0 ? await fetchUnsplashImages(query) : [];
+  const pexelsCandidates = cosmosCandidates.length === 0 ? await fetchPexelsImages(query) : [];
 
-  const candidates = [...pexelsCandidates, ...unsplashCandidates];
+  const candidates = [...cosmosCandidates, ...pexelsCandidates];
 
   if (candidates.length === 0) {
     console.error(`[stock-image] no candidates for "${query}"`);
@@ -386,47 +386,65 @@ async function fetchStockImage(query: string, completeBrief: string = query): Pr
   return selectBestImage(candidates, query, completeBrief);
 }
 
-async function fetchUnsplashImages(query: string): Promise<ImageCandidate[]> {
-  const accessKey = process.env.UNSPLASH_ACCESS_KEY;
+const COSMOS_SEARCH_ELEMENTS_URL = "https://api.parse.bot/scraper/518f0113-a227-49a8-95cf-31124444fa1e/search_elements";
+const COSMOS_MAX_CANDIDATES = 6;
 
-  if (!accessKey) {
-    console.warn("[unsplash] UNSPLASH_ACCESS_KEY is not set");
+async function fetchCosmosImages(query: string): Promise<ImageCandidate[]> {
+  const apiKey = process.env.PARSE_API_KEY;
+
+  if (!apiKey) {
+    console.warn("[cosmos] PARSE_API_KEY is not set");
     return [];
   }
 
   try {
-    const url = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=6&orientation=squarish`;
-
-    const response = await fetch(url, {
+    const response = await fetch(COSMOS_SEARCH_ELEMENTS_URL, {
+      method: "POST",
       headers: {
-        Authorization: `Client-ID ${accessKey}`,
+        "X-API-Key": apiKey,
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify({
+        query,
+        order: "RELEVANT",
+        content_type: "IMAGE",
+      }),
     });
 
     if (!response.ok) {
       const body = await response.text();
-      console.error(`[unsplash] request failed: ${response.status} ${response.statusText}`, body);
+      console.error(`[cosmos] request failed: ${response.status} ${response.statusText}`, body);
       return [];
     }
 
     const data = (await response.json()) as {
-      results?: Array<{
-        id: string;
-        urls?: {
-          regular?: string;
-        };
-      }>;
+      data?: {
+        items?: Array<{
+          id: number | string;
+          type?: string;
+          media?: {
+            url?: string;
+            __typename?: string;
+            notSafeForWorkStatus?: string;
+          };
+        }>;
+      };
+      status?: string;
     };
 
-    return (data.results ?? [])
-      .map((image) => ({
-        id: `unsplash-${image.id}`,
-        url: image.urls?.regular ?? "",
-        source: "unsplash" as const,
+    const items = data.data?.items ?? [];
+
+    return items
+      .filter((item) => item.media?.notSafeForWorkStatus !== "EXPLICIT")
+      .slice(0, COSMOS_MAX_CANDIDATES)
+      .map((item) => ({
+        id: `cosmos-${item.id}`,
+        url: item.media?.url ?? "",
+        source: "cosmos" as const,
       }))
       .filter((image) => image.url);
   } catch (error) {
-    console.error("[unsplash] fetch failed:", error);
+    console.error("[cosmos] fetch failed:", error);
     return [];
   }
 }
@@ -479,7 +497,7 @@ async function fetchPexelsImages(query: string): Promise<ImageCandidate[]> {
 router.get("/moodboards/debug/unsplash", async (req, res): Promise<void> => {
   const query = typeof req.query.query === "string" ? req.query.query : "sunset ocean";
   const pexelsKey = process.env.PEXELS_API_KEY;
-  const unsplashKey = process.env.UNSPLASH_ACCESS_KEY;
+  const parseKey = process.env.PARSE_API_KEY;
 
   const results: Record<string, unknown> = {};
 
@@ -516,9 +534,16 @@ router.get("/moodboards/debug/unsplash", async (req, res): Promise<void> => {
     };
   }
 
-  if (unsplashKey) {
+  if (parseKey) {
     try {
-      const r = await fetch(`https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=1&orientation=squarish`, { headers: { Authorization: `Client-ID ${unsplashKey}` } });
+      const r = await fetch(COSMOS_SEARCH_ELEMENTS_URL, {
+        method: "POST",
+        headers: {
+          "X-API-Key": parseKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ query, order: "RELEVANT", content_type: "IMAGE" }),
+      });
       const bodyText = await r.text();
       let body: unknown = bodyText;
 
@@ -528,24 +553,24 @@ router.get("/moodboards/debug/unsplash", async (req, res): Promise<void> => {
         // Keep raw text.
       }
 
-      results.unsplash = {
+      results.cosmos = {
         ok: r.ok,
         status: r.status,
         statusText: r.statusText,
-        keyPrefix: unsplashKey.slice(0, 6),
+        keyPrefix: parseKey.slice(0, 6),
         body,
       };
     } catch (error) {
-      results.unsplash = {
+      results.cosmos = {
         ok: false,
         reason: "fetch threw",
         error: error instanceof Error ? error.message : String(error),
       };
     }
   } else {
-    results.unsplash = {
+    results.cosmos = {
       ok: false,
-      reason: "UNSPLASH_ACCESS_KEY is not set in the environment",
+      reason: "PARSE_API_KEY is not set in the environment",
     };
   }
 
