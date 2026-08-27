@@ -90,7 +90,7 @@ Do not assume a fixed domain, aesthetic, subject matter, industry, or type of im
 The user's request may relate to any kind of concept or creative direction.
 Adapt your reasoning entirely to the user's requirements.
 Determine which visual characteristics are genuinely important for communicating the brief.
-These may include any relevant aspects such as subject matter, form, composition, atmosphere, styling, context, colour, scale, material, movement, environment, detail, typography, cultural references, historical references, realism, abstraction, or other visual characteristics.
+These may include any relevant aspects such as subject matter, form, composition, atmosphere, styling, context, colour, scale, material, movement, environment, detail, typography, cultural references.
 Do not use a fixed formula.
 Only use visual considerations that are genuinely relevant to the user's specific brief.
 TILE STRATEGY
@@ -166,7 +166,7 @@ Before generating individual tiles, determine what visual system best represents
 Do not assume a fixed industry, audience, aesthetic, product type, or visual formula.
 Allow the user's complete brief to determine the identity direction.
 Determine which visual principles are genuinely relevant to this brand.
-These may involve any relevant aspects such as form, shape, proportion, colour, material, typography, imagery, composition, texture, context, application, interaction, cultural references, history, visual contrast, refinement, or other characteristics.
+These may involve any relevant aspects such as form, shape, proportion, colour, material, typography, imagery, composition, texture, context, application, interaction, cultural references, history.
 Do not force every brand into the same identity structure.
 FIXED 9-TILE STRUCTURE
 The "layout" array must contain EXACTLY 9 tiles in exactly this order and type:
@@ -232,7 +232,7 @@ async function createMoodboard(boardType: "moodboard" | "brandboard", prompt: st
   }
 
   const response = await openai.chat.completions.create({
-    model: "gpt-5.4-mini",
+    model: "gpt-4o-mini",
     max_completion_tokens: 2400,
     response_format: {
       type: "json_schema",
@@ -352,7 +352,7 @@ Candidates are numbered starting from 1.
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-5.4-mini",
+      model: "gpt-4o-mini",
       max_completion_tokens: 20,
       messages: [{ role: "user", content: imageContent }],
     });
@@ -660,7 +660,7 @@ router.post("/moodboards/refine", requireAuth, async (req, res): Promise<void> =
       boardType,
       `Refine this existing ${boardType} for "${purpose}" using the selected styles: ${styles.join(", ")}. Preferred layout composition: ${layoutStyle}. Target image tile count: ${imageCount}.
 The user's requested change is: "${prompt}".
-This change must be clearly visible in the result: update the specific tiles it affects (their label, value, and/or accent color), and reflect it in the direction paragraph and keywords too. Do not return a board that is nearly identical to the input — a refinement with no noticeable difference is a failure.
+This change must be clearly visible in the result: update the specific tiles it affects (their label, value, and/or accent color), and reflect it in the direction paragraph and keywords too. Do not re-generate tiles unrelated to this request.
 Previous refinement requests, in order: ${promptHistory?.length ? promptHistory.map((item, index) => `${index + 1}. ${item}`).join(" | ") : "none yet"}.
 Keep tiles that are unrelated to this request as they are, but change what the request asks for.
 Existing moodboard JSON:
