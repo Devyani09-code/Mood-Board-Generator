@@ -279,16 +279,16 @@ async function createMoodboard(boardType: "moodboard" | "brandboard", prompt: st
         }
       }
     }
-    await Promise.all(
-      parsed.layout.map(async (tile) => {
-        if (tile.type === "image") {
-          tile.imageUrl = await fetchStockImage(
-  tile.value,
-  prompt
-            );
-        }
-      }),
-    );
+await Promise.all(
+  parsed.layout.map(async (tile) => {
+    if (tile.type === "image") {
+      tile.imageUrl = await fetchStockImage(
+        tile.value,
+        prompt
+      );
+    }
+  }),
+);
   }
 
   return parsed;
