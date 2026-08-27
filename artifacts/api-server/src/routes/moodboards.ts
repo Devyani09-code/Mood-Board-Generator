@@ -285,6 +285,7 @@ async function createMoodboard(boardType: "moodboard" | "brandboard", prompt: st
           tile.imageUrl = await fetchStockImage(
   tile.value,
   prompt
+            );
         }
       }),
     );
