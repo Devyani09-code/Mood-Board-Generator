@@ -1,11 +1,36 @@
+import crypto from "node:crypto";
 import { Router, type IRouter, type NextFunction, type Request, type Response } from "express";
 import { getAuth } from "@clerk/express";
-import OpenAI from "openai";
 import { GenerateMoodboardBody, GenerateMoodboardResponse, RefineMoodboardBody, RefineMoodboardResponse } from "@workspace/api-zod";
 
 const router: IRouter = Router();
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const styleKeywords: Record<string, string[]> = {
+  "quiet luxury": ["neutral tones", "marble texture", "soft daylight", "minimal interior", "cashmere", "still life", "muted palette", "linen fabric"],
+  "raw & tactile": ["concrete texture", "natural light", "linen", "clay", "rough surface", "handmade", "unfinished wood", "grain texture"],
+  "cinematic": ["dramatic lighting", "film still", "moody shadows", "backlit", "wide shot", "golden hour", "film grain", "silhouette"],
+  "sun-washed": ["warm light", "faded film", "desert tones", "golden hour", "sun flare", "bleached color", "summer haze", "dusty light"],
+  "editorial": ["fashion editorial", "studio portrait", "bold pose", "clean composition", "high contrast", "magazine style", "graphic shadow"],
+  "strange & tender": ["surreal", "soft grain", "intimate", "quiet moment", "dreamlike", "vulnerable", "unusual angle", "soft focus"],
+};
+
+function generateSearchQueries(selectedTags: string[], count: number): string[] {
+  const pool = selectedTags.flatMap((tag) => styleKeywords[tag] ?? []);
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  const queries: string[] = [];
+  for (let i = 0; i < count; i++) {
+    const a = shuffled[i % shuffled.length];
+    const b = shuffled[(i + 1) % shuffled.length];
+    queries.push(a === b ? a : `${a} ${b}`);
+  }
+  return queries;
+}
+
+const layoutTemplates: Record<string, (imageCount: number) => Array<"small" | "medium" | "large">> = {
+  "clean grid": (n) => Array(n).fill("medium"),
+  "asymmetric collage": (n) => Array.from({ length: n }, (_, i) => (i === 0 ? "large" : i % 3 === 0 ? "medium" : "small")),
+  "scrapbook stack": (n) => Array.from({ length: n }, (_, i) => (i % 2 === 0 ? "small" : "medium")),
+};
 
 const requireAuth = (req: Request, res: Response, next: NextFunction): void => {
   const auth = getAuth(req);
@@ -19,204 +44,139 @@ const requireAuth = (req: Request, res: Response, next: NextFunction): void => {
   next();
 };
 
-const moodboardShape = {
-  type: "object",
-  properties: {
-    id: { type: "string" },
-    title: { type: "string" },
-    tagline: { type: "string" },
-    palette: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          name: { type: "string" },
-          hex: { type: "string" },
-          role: { type: "string" },
-        },
-        required: ["name", "hex", "role"],
-        additionalProperties: false,
-      },
-    },
-    keywords: { type: "array", items: { type: "string" } },
-    direction: { type: "string" },
-    layout: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          type: { type: "string", enum: ["image", "text", "color", "quote"] },
-          label: { type: "string" },
-          value: { type: "string" },
-          accent: { type: ["string", "null"] },
-          size: { type: "string", enum: ["small", "medium", "large"] },
-          imageUrl: { type: ["string", "null"] },
-        },
-        required: ["type", "label", "value", "accent", "size", "imageUrl"],
-        additionalProperties: false,
-      },
-    },
-  },
-  required: ["id", "title", "tagline", "palette", "keywords", "direction", "layout"],
-  additionalProperties: false,
-} as const;
+const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
-const moodboardSystemPrompt = `You are an expert art director and visual researcher creating a highly curated moodboard.
-Return only valid JSON matching the required schema.
-Your task is to transform the COMPLETE user brief into a cohesive visual direction.
-The user provides their requirements through multiple parts of a creative quiz. These inputs are not separate or optional instructions. They must be understood together as one complete creative brief.
-The complete brief may include:
-- a description of what the user wants to create
-- the requested number of image tiles
-- the selected layout or composition
-- selected visual instincts, style directions, or vibe
-Every relevant part of the brief must influence the final board.
-FULL BRIEF ANALYSIS — REQUIRED
-Before generating any title, palette, tile, or image query, analyse the ENTIRE user brief.
-Do not reduce the user's description to one or two keywords.
-Do not focus only on the main noun or most obvious subject.
-Identify all visually relevant requirements, relationships, characteristics, details, constraints, and priorities contained across the complete brief.
-Treat the user's inputs as a set of connected requirements.
-The description explains WHAT is being created or explored.
-The selected vibe and visual directions explain HOW it should feel and be visually expressed.
-The layout explains HOW the visual information should be organised.
-The requested image count determines HOW MUCH distinct visual information the board should contain.
-These inputs must work together.
-If the user provides a detailed description containing multiple requirements, the final tiles must collectively reflect those requirements rather than repeatedly representing only the most obvious concept.
-Do not ignore secondary details when they are visually relevant.
-VISUAL REASONING
-First determine the specific visual strategy required for this particular brief.
-Do not assume a fixed domain, aesthetic, subject matter, industry, or type of imagery.
-The user's request may relate to any kind of concept or creative direction.
-Adapt your reasoning entirely to the user's requirements.
-Determine which visual characteristics are genuinely important for communicating the brief.
-These may include any relevant aspects such as subject matter, form, composition, atmosphere, styling, context, colour, scale, material, movement, environment, detail, typography, cultural references.
-Do not use a fixed formula.
-Only use visual considerations that are genuinely relevant to the user's specific brief.
-TILE STRATEGY
-Treat the board as a carefully curated visual system.
-Before generating each image tile, internally determine:
-1. What part of the complete brief should this tile help communicate?
-2. What visual role should this tile play?
-3. What information does this tile contribute that the other tiles do not?
-4. How does it connect to the overall visual direction?
-The visual role of every tile must be decided dynamically from the user's requirements.
-Do not use predetermined image categories.
-Do not repeatedly generate variations of the same subject unless repetition is specifically required by the user's brief.
-The image tiles must collectively cover the complete visual direction while remaining cohesive.
-SEARCH QUERY GENERATION
-For every image tile, the "value" field must contain a precise search query that can realistically be used with a stock image API.
-The query must be based on:
-- the complete user brief
-- the specific purpose of that individual tile
-- the selected visual direction
-- the need for diversity across the board
-Do not simply repeat or slightly rewrite the user's original description.
-Each query should describe a clear visual subject, scene, reference, or composition that is likely to exist in an image library.
-Use natural search language.
-Include visual details only when they improve relevance and help retrieve stronger results.
-Avoid queries that are unnecessarily broad, vague, repetitive, or dependent on abstract words that cannot be visually searched.
-Do not force all queries into the same length or structure.
-IMAGE DIVERSITY AND COHESION
-Every image should contribute something distinct.
-However, the board must still feel visually connected.
-Create cohesion based on the characteristics that are actually important to the user's brief.
-Do not create cohesion simply by searching for the same subject repeatedly.
-Avoid generic, cliché, repetitive, irrelevant, or weak visual interpretations when a more specific and useful visual reference can better communicate the user's requirements.
-The user's requirements always take priority over generic aesthetic rules.
-BOARD CONSTRUCTION
-Use 4-6 palette colors with valid 6-digit hex values.
-Follow the requested image tile count exactly.
-Create an appropriate mix of image, text, color, and quote tiles around the requested image tiles.
-Respect the user's selected layout when determining the hierarchy, size, emphasis, and organisation of the tiles.
-For quote tiles, write original copy relevant to the complete creative direction and never attribute it to a real person.
-Make every tile label meaningful.
-The final moodboard should feel intentionally curated, visually intelligent, specific to the user's requirements, and composed as one complete visual direction.
-Do not produce a generic interpretation.
-Do not apply a default aesthetic.
-Let the complete user brief determine what the board should become.`;
+type GeminiBoardOutput = {
+  queries: string[];
+  palette: Array<{ name: string; hex: string; role: string }>;
+};
 
-const brandboardSystemPrompt = `You are an expert brand strategist, brand designer, and art director creating a highly curated brand identity board.
-Return only valid JSON matching the required schema.
-Your task is to transform the COMPLETE user brief into a coherent visual identity direction.
-The user provides the brand requirements through multiple parts of a creative quiz.
-These inputs may include:
-- a description of the brand
-- an optional reference logo image
-- an optional logo description
-- the brand's core principles, ethos, values, or what it represents
-- selected visual directions or vibe
-All relevant inputs must be considered together as one complete brand brief.
-FULL BRAND BRIEF ANALYSIS — REQUIRED
-Before generating the board, analyse the ENTIRE brand brief.
-Do not reduce the brand to its industry, name, main product, or one or two descriptive keywords.
-Identify all relevant requirements contained across the complete input.
-Understand how the different inputs relate to one another.
-The brand description explains WHAT the brand is.
-The core principles and ethos explain WHAT the brand represents and how it should be perceived.
-The logo description and reference logo, when provided, contribute to the visual identity and should inform the direction.
-The selected vibe explains HOW the brand board should visually feel.
-All relevant inputs must influence the final direction.
-Do not allow one input to completely override the others unless there is a clear conflict.
-If a reference logo image is attached, analyse its visible characteristics and use it as visual guidance where relevant.
-Do not reproduce or copy the logo.
-Do not ignore the written brief simply because a logo image is provided.
-BRAND VISUAL STRATEGY
-Before generating individual tiles, determine what visual system best represents this specific brand.
-Do not assume a fixed industry, audience, aesthetic, product type, or visual formula.
-Allow the user's complete brief to determine the identity direction.
-Determine which visual principles are genuinely relevant to this brand.
-These may involve any relevant aspects such as form, shape, proportion, colour, material, typography, imagery, composition, texture, context, application, interaction, cultural references, history.
-Do not force every brand into the same identity structure.
-FIXED 9-TILE STRUCTURE
-The "layout" array must contain EXACTLY 9 tiles in exactly this order and type:
-1. type "image", label "Logo direction"
-2. type "image", label "Sticker mark"
-3. type "image", label "Logo alt"
-4. type "image", label "Icon mark"
-5. type "image", label "Mockup"
-6. type "image", label "Pattern"
-7. type "text", label "Fonts"
-8. type "image", label "Mockup"
-9. type "image", label "Mockup"
-Do not skip, reorder, merge, or add tiles.
-UNIQUE VISUAL PURPOSE
-Each image tile must contribute a different and useful piece of visual information.
-Before generating the query for each tile, determine what that tile should contribute to the identity system.
-The first four visual references must not be repetitive variations of the same idea.
-They should collectively provide useful inspiration for different aspects of the brand identity.
-The three mockup tiles must show three meaningfully different and relevant ways the brand could exist in the real world.
-Choose the applications dynamically based on the user's brand.
-Do not automatically assume a particular type of packaging, product, signage, environment, or physical application.
-The pattern tile should provide a visual reference appropriate to the brand that could inform a repeatable visual language.
-FONT TILE
-Tile 7 must contain a real font pairing exactly in this format:
-Headline: Font Name / Body: Font Name
-Choose the pairing based on the complete brand brief.
-SEARCH QUERY GENERATION
-For every image tile, the "value" field must contain a specific search query that can realistically be used with a stock image API.
-Each query must be based on:
-- the complete brand description
-- the logo information when relevant
-- the core principles and ethos
-- the selected vibe
-- the specific purpose of that tile
-- the need for diversity across the complete board
-Do not repeatedly use the brand name, industry, or the same descriptive keywords.
-Do not create generic branding searches.
-Each query should describe a clear visual reference that is likely to exist and be searchable.
-Use natural search language.
-Include relevant visual details when they improve the quality and relevance of the search.
-COHESION AND DIVERSITY
-The final board must feel like one coherent identity system.
-However, coherence must not come from repeating the same subject, object, application, or visual idea.
-Every tile should contribute something new while remaining connected to the overall brand direction.
-Determine what creates that connection from the user's actual brief.
-FINAL REQUIREMENTS
-Use 4-6 palette colors with valid 6-digit hex values, each labelled by role.
-Do not apply a generic premium, luxury, minimal, modern, playful, or any other default aesthetic unless the user's brief specifically calls for it.
-Do not copy an existing brand or artist.
-The final board should feel specific to the user's requirements and provide visually useful references that could genuinely help develop the identity further.`;
+async function generateQueriesAndPalette(purpose: string, styles: string[], imageCount: number): Promise<GeminiBoardOutput> {
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  const fallback: GeminiBoardOutput = {
+    queries: generateSearchQueries(styles, imageCount),
+    palette: [
+      { name: "Ivory", hex: "#F2ECE4", role: "background" },
+      { name: "Charcoal", hex: "#2E2A26", role: "primary" },
+      { name: "Clay", hex: "#B08968", role: "accent" },
+      { name: "Sand", hex: "#DCC7A1", role: "highlight" },
+    ],
+  };
+
+  if (!apiKey) {
+    console.warn("[gemini] GEMINI_API_KEY is not set");
+    return fallback;
+  }
+
+  const prompt = `You are helping build a visual moodboard.
+Brief: "${purpose}"
+Selected style tags: ${styles.join(", ")}
+
+Return ONLY valid JSON, no markdown, matching exactly this shape:
+{
+  "queries": string[], // ${imageCount} distinct, specific stock-photo search phrases (2-5 words each) that together visually cover the brief and style tags. Do not repeat the brief verbatim. Make them concrete and searchable.
+  "palette": [{ "name": string, "hex": string, "role": "background"|"primary"|"accent"|"highlight" }] // 4-6 colors, valid 6-digit hex, that fit the brief and style tags
+}`;
+
+  try {
+    const response = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { responseMimeType: "application/json" },
+      }),
+      signal: AbortSignal.timeout(EXTERNAL_FETCH_TIMEOUT_MS),
+    });
+
+    if (!response.ok) {
+      console.error(`[gemini] request failed: ${response.status} ${response.statusText}`, await response.text());
+      return fallback;
+    }
+
+    const data = await response.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const parsed = JSON.parse(text) as GeminiBoardOutput;
+
+    if (!Array.isArray(parsed.queries) || !Array.isArray(parsed.palette)) {
+      return fallback;
+    }
+
+    return parsed;
+  } catch (error) {
+    console.error("[gemini] failed:", error);
+    return fallback;
+  }
+}
+
+type GeminiBrandOutput = {
+  queries: string[];
+  palette: Array<{ name: string; hex: string; role: string }>;
+  fonts: string;
+};
+
+async function generateBrandContent(purpose: string, styles: string[], logoDescription?: string): Promise<GeminiBrandOutput> {
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  const fallback: GeminiBrandOutput = {
+    queries: generateSearchQueries(styles, 8),
+    palette: [
+      { name: "Ivory", hex: "#F2ECE4", role: "background" },
+      { name: "Charcoal", hex: "#2E2A26", role: "primary" },
+      { name: "Clay", hex: "#B08968", role: "accent" },
+      { name: "Sand", hex: "#DCC7A1", role: "highlight" },
+    ],
+    fonts: "Headline: Fraunces / Body: Inter",
+  };
+
+  if (!apiKey) {
+    console.warn("[gemini] GEMINI_API_KEY is not set");
+    return fallback;
+  }
+
+  const prompt = `You are helping build a brand identity board.
+Brand description: "${purpose}"
+Selected style tags: ${styles.join(", ")}
+${logoDescription?.trim() ? `Logo notes: "${logoDescription.trim()}"` : ""}
+
+Return ONLY valid JSON, no markdown, matching exactly this shape:
+{
+  "queries": string[], // 8 distinct, specific stock-photo search phrases (2-5 words each) covering: logo direction, sticker mark, logo alt, icon mark, mockup, pattern, mockup, mockup — in that order, each visually different
+  "palette": [{ "name": string, "hex": string, "role": "background"|"primary"|"accent"|"highlight" }], // 4-6 colors, valid 6-digit hex
+  "fonts": string // a real font pairing that fits the brand's vibe, exactly in the format "Headline: FontName / Body: FontName", using fonts genuinely available on Google Fonts or Adobe Fonts
+}`;
+
+  try {
+    const response = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { responseMimeType: "application/json" },
+      }),
+      signal: AbortSignal.timeout(EXTERNAL_FETCH_TIMEOUT_MS),
+    });
+
+    if (!response.ok) {
+      console.error(`[gemini] request failed: ${response.status} ${response.statusText}`, await response.text());
+      return fallback;
+    }
+
+    const data = await response.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const parsed = JSON.parse(text) as GeminiBrandOutput;
+
+    if (!Array.isArray(parsed.queries) || !Array.isArray(parsed.palette) || typeof parsed.fonts !== "string") {
+      return fallback;
+    }
+
+    return parsed;
+  } catch (error) {
+    console.error("[gemini] failed:", error);
+    return fallback;
+  }
+}
 
 type ImageCandidate = {
   id: string;
@@ -227,8 +187,7 @@ type ImageCandidate = {
 /**
  * Races a promise against a hard deadline. If the deadline wins, `fallback`
  * is returned instead of letting one slow tile eat the whole request's time
- * budget. This is what keeps a single hung Cosmos/Pexels/OpenAI call from
- * turning into a platform-level 502.
+ * budget.
  */
 function withDeadline<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
   return Promise.race([
@@ -237,172 +196,81 @@ function withDeadline<T>(promise: Promise<T>, ms: number, fallback: T): Promise<
   ]);
 }
 
-async function createMoodboard(boardType: "moodboard" | "brandboard", prompt: string, logoImageDataUrl?: string): Promise<unknown> {
-  const userContent: OpenAI.Chat.Completions.ChatCompletionContentPart[] = [{ type: "text", text: prompt }];
+async function buildMoodboardContent(purpose: string, styles: string[], layoutStyle: string, imageCount: number) {
+  const { queries, palette } = await generateQueriesAndPalette(purpose, styles, imageCount);
+  const sizes = (layoutTemplates[layoutStyle] ?? layoutTemplates["clean grid"])(imageCount);
 
-  if (boardType === "brandboard" && logoImageDataUrl) {
-    userContent.push({ type: "image_url", image_url: { url: logoImageDataUrl } });
-  }
+  const layout = queries.map((q, i) => ({
+    type: "image" as const,
+    label: `Reference ${i + 1}`,
+    value: q,
+    accent: null,
+    size: sizes[i],
+    imageUrl: null as string | null,
+  }));
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o-mini",
-    max_completion_tokens: 2400,
-    response_format: {
-      type: "json_schema",
-      json_schema: {
-        name: "moodboard",
-        strict: true,
-        schema: moodboardShape,
-      },
-    },
-    messages: [
-      { role: "system", content: boardType === "brandboard" ? brandboardSystemPrompt : moodboardSystemPrompt },
-      { role: "user", content: userContent },
-    ],
+  return {
+    id: crypto.randomUUID(),
+    title: purpose.split(" ").slice(0, 4).join(" "),
+    tagline: styles.join(" · "),
+    palette,
+    keywords: styles,
+    direction: `A board built around ${styles.join(", ")}, shaped by: "${purpose}".`,
+    layout,
+  };
+}
+
+async function buildBrandboardContent(purpose: string, styles: string[], logoDescription?: string) {
+  const { queries, palette, fonts } = await generateBrandContent(purpose, styles, logoDescription);
+  const labels = ["Logo direction", "Sticker mark", "Logo alt", "Icon mark", "Mockup", "Pattern", "Fonts", "Mockup", "Mockup"];
+
+  let qi = 0;
+  const layout = labels.map((label) => {
+    if (label === "Fonts") {
+      return { type: "text" as const, label, value: fonts, accent: null, size: "medium" as const, imageUrl: null };
+    }
+    return { type: "image" as const, label, value: queries[qi++], accent: null, size: "medium" as const, imageUrl: null };
   });
 
-  const content = response.choices[0]?.message?.content;
-
-  if (!content) {
-    throw new Error("AI returned an empty moodboard");
-  }
-
-  const parsed = JSON.parse(content) as { layout?: Array<{ type: string; label: string; value: string; accent?: string | null; size?: string; imageUrl?: string | null }> };
-
-  if (Array.isArray(parsed.layout)) {
-    if (boardType === "brandboard") {
-      if (parsed.layout.length > 9) {
-        parsed.layout = parsed.layout.slice(0, 9);
-      } else if (parsed.layout.length < 9) {
-        const fallbackLabels = ["Logo direction", "Sticker mark", "Logo alt", "Icon mark", "Mockup", "Pattern", "Fonts", "Mockup", "Mockup"];
-
-        while (parsed.layout.length < 9) {
-          const index = parsed.layout.length;
-
-          parsed.layout.push({
-            type: fallbackLabels[index] === "Fonts" ? "text" : "image",
-            label: fallbackLabels[index] ?? "Mockup",
-            value: fallbackLabels[index] === "Fonts" ? "Headline: Fraunces / Body: Inter" : "brand aesthetic reference",
-            accent: null,
-            size: "medium",
-            imageUrl: null,
-          });
-        }
-      }
-    }
-
-    // Hard cap per tile: whatever cosmos-timeout -> pexels-fallback -> vision-select
-    // pipeline does internally, no single tile is allowed to hold up the whole
-    // /generate request for more than 15s. If it blows the deadline it just
-    // resolves to null (no image), same as any other fetch failure.
-    await Promise.all(parsed.layout.map(async (tile) => {
-      if (tile.type === "image") {
-        try {
-          tile.imageUrl = await withDeadline(fetchStockImage(tile.value, prompt), 15000, null);
-        } catch (error) {
-          console.error(`[stock-image] failed for tile "${tile.label}":`, error);
-          tile.imageUrl = null;
-        }
-      }
-    }));
-  }
-
-  return parsed;
+  return {
+    id: crypto.randomUUID(),
+    title: purpose.split(" ").slice(0, 4).join(" "),
+    tagline: styles.join(" · "),
+    palette,
+    keywords: styles,
+    direction: `Identity system for: "${purpose}"${logoDescription ? `, informed by logo notes: "${logoDescription}"` : ""}.`,
+    layout,
+  };
 }
 
-const GENERIC_FALLBACK_QUERIES = ["minimal aesthetic texture", "neutral abstract background", "soft studio texture"];
+async function createMoodboard(boardType: "moodboard" | "brandboard", purpose: string, styles: string[], layoutStyle: string, imageCount: number, logoDescription?: string): Promise<unknown> {
+  const content = boardType === "brandboard"
+    ? await buildBrandboardContent(purpose, styles, logoDescription)
+    : await buildMoodboardContent(purpose, styles, layoutStyle, imageCount);
 
-async function selectBestImage(candidates: ImageCandidate[], tileQuery: string, completeBrief: string): Promise<string | null> {
+  await Promise.all(content.layout.map(async (tile) => {
+    if (tile.type === "image") {
+      try {
+        tile.imageUrl = await withDeadline(fetchStockImage(tile.value), 15000, null);
+      } catch (error) {
+        console.error(`[stock-image] failed for tile "${tile.label}":`, error);
+        tile.imageUrl = null;
+      }
+    }
+  }));
+
+  return content;
+}
+
+function selectBestImage(candidates: ImageCandidate[]): string | null {
   if (candidates.length === 0) return null;
-
-  if (candidates.length === 1) {
-    return candidates[0].url;
-  }
-
-  const imageContent: OpenAI.Chat.Completions.ChatCompletionContentPart[] = [
-    {
-      type: "text",
-      text: `
-You are selecting the strongest image for a curated visual board.
-
-COMPLETE CREATIVE BRIEF:
-${completeBrief}
-
-THIS TILE'S VISUAL PURPOSE / SEARCH QUERY:
-${tileQuery}
-
-You will receive ${candidates.length} candidate images.
-
-Compare them visually.
-
-Select the ONE image that best satisfies the complete brief and the specific purpose of this tile.
-
-Prioritize:
-
-- relevance to the complete brief
-- relevance to this specific tile
-- visual quality
-- composition
-- stylistic fit
-- strength of visual communication
-- usefulness within a curated board
-
-Reject images that are:
-
-- generic
-- weakly related
-- visually poor
-- misleading
-- cliché
-- badly composed
-- too literal when a stronger interpretation exists
-- inconsistent with the selected direction
-
-Return ONLY the number of the best candidate.
-
-Candidates are numbered starting from 1.
-`,
-    },
-    ...candidates.map((candidate, index) => ({ type: "text" as const, text: `Candidate ${index + 1}` })),
-    // detail: "low" forces OpenAI to process each image at a small fixed
-    // resolution. For a "which of these best fits" comparison (not fine
-    // detail extraction) this is plenty, and it's the single biggest lever
-    // for cutting this call's latency + token cost.
-    ...candidates.map((candidate) => ({
-      type: "image_url" as const,
-      image_url: { url: candidate.url, detail: "low" as const },
-    })),
-  ];
-
-  try {
-    const response = await openai.chat.completions.create(
-      {
-        model: "gpt-4o-mini",
-        max_completion_tokens: 20,
-        messages: [{ role: "user", content: imageContent }],
-      },
-      { timeout: 10000 },
-    );
-
-    const answer = response.choices[0]?.message?.content?.trim() ?? "";
-    const selectedNumber = Number(answer.match(/\d+/)?.[0]);
-
-    if (Number.isInteger(selectedNumber) && selectedNumber >= 1 && selectedNumber <= candidates.length) {
-      return candidates[selectedNumber - 1].url;
-    }
-
-    return candidates[0].url;
-  } catch (error) {
-    console.error("[image-selector] failed:", error);
-    return candidates[0].url;
-  }
+  const topN = candidates.slice(0, Math.min(4, candidates.length));
+  return topN[Math.floor(Math.random() * topN.length)].url;
 }
 
-async function fetchStockImage(query: string, completeBrief: string = query): Promise<string | null> {
+async function fetchStockImage(query: string): Promise<string | null> {
   const cosmosCandidates = await fetchCosmosImages(query);
-
   const pexelsCandidates = cosmosCandidates.length === 0 ? await fetchPexelsImages(query) : [];
-
   const candidates = [...cosmosCandidates, ...pexelsCandidates];
 
   if (candidates.length === 0) {
@@ -410,7 +278,7 @@ async function fetchStockImage(query: string, completeBrief: string = query): Pr
     return null;
   }
 
-  return selectBestImage(candidates, query, completeBrief);
+  return selectBestImage(candidates);
 }
 
 const COSMOS_SEARCH_ELEMENTS_URL = "https://api.parse.bot/scraper/518f0113-a227-49a8-95cf-31124444fa1e/search_elements";
@@ -437,8 +305,6 @@ async function fetchCosmosImages(query: string): Promise<ImageCandidate[]> {
         order: "RELEVANT",
         content_type: "IMAGE",
       }),
-      // Fail fast instead of hanging — a stuck Cosmos call used to leave the
-      // request open until Replit's proxy killed it with a 502.
       signal: AbortSignal.timeout(EXTERNAL_FETCH_TIMEOUT_MS),
     });
 
@@ -517,8 +383,6 @@ async function fetchPexelsImages(query: string): Promise<ImageCandidate[]> {
     return (data.photos ?? [])
       .map((photo) => ({
         id: `pexels-${photo.id}`,
-        // medium is plenty for a low-detail vision comparison and is
-        // meaningfully smaller/faster to fetch + upload than large.
         url: photo.src?.medium ?? photo.src?.large ?? "",
         source: "pexels" as const,
       }))
@@ -622,57 +486,16 @@ router.post("/moodboards/generate", requireAuth, async (req, res): Promise<void>
   }
 
   try {
-    const { purpose, styles, boardType, layoutStyle, imageCount, logoDescription, logoImageDataUrl } = parsed.data;
+    const { purpose, styles, boardType, layoutStyle, imageCount, logoDescription } = parsed.data;
 
-    const promptText = boardType === "brandboard"
-      ? `
-COMPLETE BRAND BRIEF
-Brand description:
-"${purpose}"
-
-Core principles / ethos:
-${styles.join(", ")}
-
-Logo description:
-${logoDescription?.trim() ? `"${logoDescription.trim()}"` : "No written logo description provided."}
-
-Reference logo:
-${logoImageDataUrl ? "A logo image is attached. Analyse it together with the written brief." : "No reference logo image provided."}
-
-BOARD DIRECTION
-Treat every section above as part of one connected brand brief.
-Do not reduce this brief to the brand's main product, industry, or a few keywords.
-Analyse all relevant details before generating the board.
-Create a memorable brand title, concise tagline, visual direction paragraph, useful keywords, palette, and the required 9-tile brand identity system.
-`
-      : `
-COMPLETE MOODBOARD BRIEF
-User's description:
-"${purpose}"
-
-Selected visual directions / vibe:
-${styles.join(", ")}
-
-Selected layout:
-${layoutStyle}
-
-Requested number of image tiles:
-${imageCount}
-
-BOARD DIRECTION
-Treat every section above as one connected creative brief.
-The description defines the concept.
-The selected visual directions define how the concept should visually feel.
-The selected layout should influence the hierarchy and organisation of the board.
-The requested image count determines how many distinct visual references must be included.
-Analyse the complete brief before generating any tile.
-Do not reduce the description to one or two keywords.
-Consider all visually relevant details and distribute them intelligently across the board.
-Include exactly ${imageCount} tiles of type "image" and create an appropriate supporting mix of text, color, and quote tiles.
-Give the board a memorable title, concise tagline, visual direction paragraph, and useful keywords.
-`;
-
-    const moodboard = await createMoodboard(boardType, promptText, boardType === "brandboard" ? logoImageDataUrl : undefined);
+    const moodboard = await createMoodboard(
+      boardType,
+      purpose,
+      styles,
+      layoutStyle,
+      imageCount,
+      boardType === "brandboard" ? logoDescription : undefined,
+    );
 
     res.json(GenerateMoodboardResponse.parse(moodboard));
   } catch (error) {
@@ -694,7 +517,7 @@ router.get("/moodboards/search-image", requireAuth, async (req, res): Promise<vo
   }
 
   try {
-    const imageUrl = await fetchStockImage(query, query);
+    const imageUrl = await fetchStockImage(query);
     res.json({ imageUrl });
   } catch (error) {
     console.error("[moodboards/search-image] failed:", error);
@@ -714,18 +537,14 @@ router.post("/moodboards/refine", requireAuth, async (req, res): Promise<void> =
   }
 
   try {
-    const { purpose, styles, prompt, promptHistory, moodboard, boardType, layoutStyle, imageCount } = parsed.data;
+    // NOTE: this makes the route compile and run, but `prompt` and
+    // `promptHistory` (the user's actual refinement request) are currently
+    // ignored — this just regenerates a fresh board from the same inputs.
+    // Still need to decide: drop refine, one thin Gemini call to steer it,
+    // or fixed refine actions (swap tile / new palette / etc).
+    const { purpose, styles, boardType, layoutStyle, imageCount } = parsed.data;
 
-    const refined = await createMoodboard(
-      boardType,
-      `Refine this existing ${boardType} for "${purpose}" using the selected styles: ${styles.join(", ")}. Preferred layout composition: ${layoutStyle}. Target image tile count: ${imageCount}.
-The user's requested change is: "${prompt}".
-This change must be clearly visible in the result: update the specific tiles it affects (their label, value, and/or accent color), and reflect it in the direction paragraph and keywords too. Do not re-generate tiles unrelated to this request.
-Previous refinement requests, in order: ${promptHistory?.length ? promptHistory.map((item, index) => `${index + 1}. ${item}`).join(" | ") : "none yet"}.
-Keep tiles that are unrelated to this request as they are, but change what the request asks for.
-Existing moodboard JSON:
-${JSON.stringify(moodboard)}`,
-    );
+    const refined = await createMoodboard(boardType, purpose, styles, layoutStyle, imageCount);
 
     res.json(RefineMoodboardResponse.parse(refined));
   } catch (error) {
