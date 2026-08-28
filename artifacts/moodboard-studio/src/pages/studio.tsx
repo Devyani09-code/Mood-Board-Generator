@@ -425,6 +425,63 @@ function FreeformFrame({ frame, onMove, onResize, onClick, children, testId }: {
   );
 }
 
+function TileImageSearch({ onSelect }: { onSelect: (url: string) => void }) {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<Array<{ url: string; source: string }>>([]);
+  const [loading, setLoading] = useState(false);
+  const debounceRef = useRef<number>();
+
+  useEffect(() => {
+    if (query.trim().length < 2) {
+      setResults([]);
+      return;
+    }
+    window.clearTimeout(debounceRef.current);
+    debounceRef.current = window.setTimeout(async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/moodboards/search-images?query=${encodeURIComponent(query.trim())}`);
+        const data = await res.json();
+        setResults(Array.isArray(data.results) ? data.results : []);
+      } catch {
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 450);
+    return () => window.clearTimeout(debounceRef.current);
+  }, [query]);
+
+  return (
+    <div className="space-y-2">
+      <input
+        type="text"
+        value={query}
+        onChange={(event) => setQuery(event.target.value)}
+        placeholder="Search for an image..."
+        className="w-full border border-[#fef7e5]/30 bg-transparent px-2 py-1.5 text-[10px] text-[#fef7e5] outline-none placeholder:text-[#fef7e5]/50 focus:border-[#788240]"
+        data-testid="input-tile-search"
+      />
+      {loading && <p className="text-[9px] text-[#fef7e5]/50">Searching…</p>}
+      {results.length > 0 && (
+        <div className="grid max-h-28 grid-cols-4 gap-1.5 overflow-y-auto">
+          {results.map((result, i) => (
+            <button
+              type="button"
+              key={`${result.url}-${i}`}
+              onClick={() => onSelect(result.url)}
+              className="aspect-square overflow-hidden border border-[#fef7e5]/20 hover:border-[#788240]"
+              data-testid={`button-search-result-${i}`}
+            >
+              <img src={result.url} alt="" className="h-full w-full object-cover" loading="lazy" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function FreeformTile({ tile, index, frame, onMove, onResize, onImageChange, onDelete }: {
   tile: MoodboardTile;
   index: number;
@@ -455,8 +512,9 @@ function FreeformTile({ tile, index, frame, onMove, onResize, onImageChange, onD
             <span className="text-[10px] font-bold uppercase tracking-[.12em]">Edit tile</span>
             <button type="button" onClick={() => setOpen(false)} data-testid={`button-close-edit-${index}`}><X size={14} /></button>
           </div>
+                   <TileImageSearch onSelect={(url) => { onImageChange(url); setOpen(false); }} />
           <label className="block cursor-pointer border border-[#fef7e5]/30 px-2 py-1.5 text-center text-[9px] uppercase tracking-[.08em] hover:bg-[#fef7e5]/10" data-testid={`input-tile-upload-${index}`}>
-            Replace image
+            Upload your own
             <input type="file" accept="image/*" className="hidden" onChange={(event) => handleUpload(event.target.files?.[0])} />
           </label>
           <button type="button" onClick={onDelete} className="block w-full border border-[#a25242]/60 px-2 py-1.5 text-center text-[9px] uppercase tracking-[.08em] text-[#e0a598] hover:bg-[#a25242]/20" data-testid={`button-delete-tile-${index}`}>
