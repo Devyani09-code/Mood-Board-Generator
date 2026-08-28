@@ -527,6 +527,30 @@ router.get("/moodboards/search-image", requireAuth, async (req, res): Promise<vo
   }
 });
 
+router.get("/moodboards/search-images", requireAuth, async (req, res): Promise<void> => {
+  const query = typeof req.query.query === "string" ? req.query.query.trim() : "";
+
+  if (query.length < 2) {
+    res.status(400).json({ error: "A search query is required" });
+    return;
+  }
+
+  try {
+    const cosmosCandidates = await fetchCosmosImages(query);
+    const pexelsCandidates = cosmosCandidates.length === 0 ? await fetchPexelsImages(query) : [];
+    const candidates = [...cosmosCandidates, ...pexelsCandidates];
+
+    res.json({
+      results: candidates.map((c) => ({ url: c.url, source: c.source })),
+    });
+  } catch (error) {
+    console.error("[moodboards/search-images] failed:", error);
+    res.status(500).json({
+      error: error instanceof Error ? error.message : "Image search failed",
+    });
+  }
+});
+
 router.post("/moodboards/refine", requireAuth, async (req, res): Promise<void> => {
   const parsed = RefineMoodboardBody.safeParse(req.body);
 
