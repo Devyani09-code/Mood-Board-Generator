@@ -257,11 +257,11 @@ function getExportColumns(layoutStyle: string) {
   return 3;
 }
 
-interface TileFrame { x: number; y: number; w: number; h: number; }
+interface TileFrame { x: number; y: number; w: number; h: number; rotation?: number; }
 const CANVAS_WIDTH = 1040;
 const MIN_TILE_SIZE = 90;
 
-function buildInitialFrames(tileCount: number, layoutStyle: string): TileFrame[] {
+function buildGridFrames(tileCount: number, layoutStyle: string): TileFrame[] {
   const cols = getExportColumns(layoutStyle);
   const gap = 14;
   const colW = (CANVAS_WIDTH - gap * (cols - 1)) / cols;
@@ -273,6 +273,69 @@ function buildInitialFrames(tileCount: number, layoutStyle: string): TileFrame[]
     frames.push({ x: col * (colW + gap), y: row * (rowH + gap), w: colW, h: rowH });
   }
   return frames;
+}
+
+function buildAsymmetricFrames(tileCount: number): TileFrame[] {
+  const cols = 3;
+  const gap = 14;
+  const colW = (CANVAS_WIDTH - gap * (cols - 1)) / cols;
+  const rowUnit = 170;
+  const spanPattern: Array<{ c: number; r: number }> = [
+    { c: 2, r: 2 }, { c: 1, r: 1 }, { c: 1, r: 1 },
+    { c: 1, r: 2 }, { c: 2, r: 1 }, { c: 1, r: 1 },
+  ];
+  const colHeights = new Array(cols).fill(0);
+  const frames: TileFrame[] = [];
+  for (let i = 0; i < tileCount; i += 1) {
+    const span = spanPattern[i % spanPattern.length];
+    const colSpan = Math.min(span.c, cols);
+    let bestCol = 0;
+    let bestHeight = Infinity;
+    for (let start = 0; start <= cols - colSpan; start += 1) {
+      const maxH = Math.max(...colHeights.slice(start, start + colSpan));
+      if (maxH < bestHeight) { bestHeight = maxH; bestCol = start; }
+    }
+    const x = bestCol * (colW + gap);
+    const y = bestHeight;
+    const w = colW * colSpan + gap * (colSpan - 1);
+    const h = rowUnit * span.r + gap * (span.r - 1);
+    frames.push({ x, y, w, h });
+    for (let c = bestCol; c < bestCol + colSpan; c += 1) {
+      colHeights[c] = y + h + gap;
+    }
+  }
+  return frames;
+}
+
+function buildScrapbookFrames(tileCount: number): TileFrame[] {
+  const baseSize = 230;
+  const cols = Math.ceil(Math.sqrt(tileCount));
+  const spacingX = baseSize * 0.62;
+  const spacingY = baseSize * 0.55;
+  const frames: TileFrame[] = [];
+  for (let i = 0; i < tileCount; i += 1) {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    const jitterX = (Math.random() - 0.5) * 40;
+    const jitterY = (Math.random() - 0.5) * 40;
+    const sizeJitter = Math.random() * 60 - 20;
+    const w = Math.max(MIN_TILE_SIZE, baseSize + sizeJitter);
+    const h = Math.max(MIN_TILE_SIZE, baseSize + sizeJitter * 0.85);
+    frames.push({
+      x: col * spacingX + jitterX,
+      y: row * spacingY + jitterY,
+      w,
+      h,
+      rotation: Math.random() * 12 - 6,
+    });
+  }
+  return frames;
+}
+
+function buildInitialFrames(tileCount: number, layoutStyle: string): TileFrame[] {
+  if (layoutStyle === 'Scrapbook stack') return buildScrapbookFrames(tileCount);
+  if (layoutStyle === 'Asymmetric collage') return buildAsymmetricFrames(tileCount);
+  return buildGridFrames(tileCount, layoutStyle);
 }
 
 function buildBrandInitialFrames(): TileFrame[] {
@@ -317,7 +380,7 @@ function FreeformFrame({ frame, onMove, onResize, onClick, children, testId }: {
   return (
     <div
       className="group absolute overflow-hidden border border-[#13273f]/25 bg-[#fef7e5] cursor-move select-none"
-      style={{ left: frame.x, top: frame.y, width: frame.w, height: frame.h }}
+     style={{ left: frame.x, top: frame.y, width: frame.w, height: frame.h, transform: frame.rotation ? `rotate(${frame.rotation}deg)` : undefined }}
       data-testid={testId}
       onPointerDown={(event) => {
         const target = event.target as HTMLElement;
@@ -489,12 +552,22 @@ async function renderFreeformBoardToCanvas(board: Moodboard, frames: TileFrame[]
   if (!ctx) throw new Error('Canvas not supported');
   drawHeader(ctx, board, padding, width);
 
-  for (let i = 0; i < board.layout.length; i += 1) {
-    const tile = board.layout[i];
-    const frame = frames[i];
-    if (!frame) continue;
-    await drawTileCell(ctx, tile, padding + frame.x, padding + headerH + frame.y, frame.w, frame.h);
+for (let i = 0; i < board.layout.length; i += 1) {
+  const tile = board.layout[i];
+  const frame = frames[i];
+  if (!frame) continue;
+  const px = padding + frame.x;
+  const py = padding + headerH + frame.y;
+  if (frame.rotation) {
+    ctx.save();
+    ctx.translate(px + frame.w / 2, py + frame.h / 2);
+    ctx.rotate((frame.rotation * Math.PI) / 180);
+    await drawTileCell(ctx, tile, -frame.w / 2, -frame.h / 2, frame.w, frame.h);
+    ctx.restore();
+  } else {
+    await drawTileCell(ctx, tile, px, py, frame.w, frame.h);
   }
+}
   const paletteFrame = frames[board.layout.length];
   if (paletteFrame) {
     drawPaletteCell(ctx, board, padding + paletteFrame.x, padding + headerH + paletteFrame.y, paletteFrame.w, paletteFrame.h, 2);
