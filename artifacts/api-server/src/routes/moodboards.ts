@@ -282,7 +282,8 @@ async function fetchStockImage(query: string): Promise<string | null> {
 }
 
 const COSMOS_SEARCH_ELEMENTS_URL = "https://api.parse.bot/scraper/518f0113-a227-49a8-95cf-31124444fa1e/search_elements";
-const COSMOS_MAX_CANDIDATES = 10;
+const COSMOS_MAX_CANDIDATES = 4;
+const SEARCH_PANEL_MAX_CANDIDATES = 10;
 const EXTERNAL_FETCH_TIMEOUT_MS = 6000;
 
 async function fetchCosmosImages(query: string): Promise<ImageCandidate[]> {
@@ -308,6 +309,7 @@ async function fetchCosmosImages(query: string): Promise<ImageCandidate[]> {
       signal: AbortSignal.timeout(EXTERNAL_FETCH_TIMEOUT_MS),
     });
 
+  
     if (!response.ok) {
       const body = await response.text();
       console.error(`[cosmos] request failed: ${response.status} ${response.statusText}`, body);
@@ -536,8 +538,10 @@ router.get("/moodboards/search-images", requireAuth, async (req, res): Promise<v
   }
 
   try {
-    const cosmosCandidates = await fetchCosmosImages(query);
-    const pexelsCandidates = cosmosCandidates.length === 0 ? await fetchPexelsImages(query) : [];
+    const [cosmosCandidates, pexelsCandidates] = await Promise.all([
+      fetchCosmosImages(query, SEARCH_PANEL_MAX_CANDIDATES),
+      fetchPexelsImages(query, SEARCH_PANEL_MAX_CANDIDATES),
+    ]);
     const candidates = [...cosmosCandidates, ...pexelsCandidates];
 
     res.json({
