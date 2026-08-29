@@ -482,7 +482,102 @@ function TileImageSearch({ onSelect }: { onSelect: (url: string) => void }) {
   );
 }
 
-function FreeformTile({ tile, index, frame, onMove, onResize, onImageChange, onDelete }: {
+function ImageReplacePanel({ onSelect, onClose }: { onSelect: (url: string) => void; onClose: () => void }) {
+  const [mode, setMode] = useState<'menu' | 'search'>('menu');
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<Array<{ url: string; source: string }>>([]);
+  const [loading, setLoading] = useState(false);
+  const debounceRef = useRef<number>();
+
+  useEffect(() => {
+    if (query.trim().length < 2) {
+      setResults([]);
+      return;
+    }
+    window.clearTimeout(debounceRef.current);
+    debounceRef.current = window.setTimeout(async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/moodboards/search-images?query=${encodeURIComponent(query.trim())}`);
+        const data = await res.json();
+        setResults(Array.isArray(data.results) ? data.results : []);
+      } catch {
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 450);
+    return () => window.clearTimeout(debounceRef.current);
+  }, [query]);
+
+  const handleUpload = (file: File | undefined) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') onSelect(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  return (
+    <div className="fixed bottom-5 left-5 z-50 w-[300px] border border-[#13273f]/30 bg-[#fef7e5] shadow-[0_12px_32px_rgba(38,61,73,.25)]" data-testid="panel-image-replace">
+      <div className="flex items-center justify-between border-b border-[#13273f]/15 px-3 py-2.5">
+        <span className="text-[10px] font-bold uppercase tracking-[.12em] text-[#13273f]">
+          {mode === 'menu' ? 'Replace image' : 'Search images'}
+        </span>
+        <button type="button" onClick={onClose} className="text-[#13273f]" data-testid="button-close-replace-panel"><X size={14} /></button>
+      </div>
+      <div className="p-3">
+        {mode === 'menu' && (
+          <div className="space-y-2">
+            <button type="button" onClick={() => setMode('search')} className="block w-full border border-[#13273f]/30 px-3 py-2 text-left text-[11px] text-[#13273f] hover:border-[#788240] hover:text-[#788240]" data-testid="button-mode-search">
+              New (search Cosmos)
+            </button>
+            <label className="block cursor-pointer border border-[#13273f]/30 px-3 py-2 text-left text-[11px] text-[#13273f] hover:border-[#788240] hover:text-[#788240]" data-testid="input-panel-upload">
+              Upload your own
+              <input type="file" accept="image/*" className="hidden" onChange={(event) => handleUpload(event.target.files?.[0])} />
+            </label>
+          </div>
+        )}
+        {mode === 'search' && (
+          <div className="space-y-2">
+            <input
+              type="text"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search images..."
+              autoFocus
+              className="w-full border border-[#13273f]/30 bg-transparent px-2 py-1.5 text-[11px] text-[#13273f] outline-none placeholder:text-[#13273f]/50 focus:border-[#788240]"
+              data-testid="input-tile-search"
+            />
+            {loading && <p className="text-[10px] text-[#13273f]/60">Searching…</p>}
+            {results.length > 0 && (
+              <div className="grid max-h-40 grid-cols-3 gap-1.5 overflow-y-auto">
+                {results.map((result, i) => (
+                  <button
+                    type="button"
+                    key={`${result.url}-${i}`}
+                    onClick={() => onSelect(result.url)}
+                    className="aspect-square overflow-hidden border border-[#13273f]/20 hover:border-[#788240]"
+                    data-testid={`button-search-result-${i}`}
+                  >
+                    <img src={result.url} alt="" className="h-full w-full object-cover" loading="lazy" />
+                  </button>
+                ))}
+              </div>
+            )}
+            <label className="block cursor-pointer border border-[#13273f]/30 px-3 py-2 text-center text-[10px] uppercase tracking-[.08em] text-[#13273f] hover:border-[#788240] hover:text-[#788240]" data-testid="input-panel-upload-fallback">
+              Upload your own instead
+              <input type="file" accept="image/*" className="hidden" onChange={(event) => handleUpload(event.target.files?.[0])} />
+            </label>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function FreeformTile({ tile, index, frame, onMove, onResize, onImageChange, onDelete, onRequestReplace }: {
   tile: MoodboardTile;
   index: number;
   frame: TileFrame;
@@ -490,19 +585,9 @@ function FreeformTile({ tile, index, frame, onMove, onResize, onImageChange, onD
   onResize: (w: number, h: number) => void;
   onImageChange: (url: string) => void;
   onDelete: () => void;
+  onRequestReplace: () => void;
 }) {
   const [open, setOpen] = useState(false);
-  const handleUpload = (file: File | undefined) => {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        onImageChange(reader.result);
-        setOpen(false);
-      }
-    };
-    reader.readAsDataURL(file);
-  };
   return (
     <FreeformFrame frame={frame} onMove={onMove} onResize={onResize} onClick={() => setOpen((v) => !v)} testId={`card-moodboard-tile-${index}`}>
       <TileArt tile={tile} />
@@ -512,11 +597,9 @@ function FreeformTile({ tile, index, frame, onMove, onResize, onImageChange, onD
             <span className="text-[10px] font-bold uppercase tracking-[.12em]">Edit tile</span>
             <button type="button" onClick={() => setOpen(false)} data-testid={`button-close-edit-${index}`}><X size={14} /></button>
           </div>
-                   <TileImageSearch onSelect={(url) => { onImageChange(url); setOpen(false); }} />
-          <label className="block cursor-pointer border border-[#fef7e5]/30 px-2 py-1.5 text-center text-[9px] uppercase tracking-[.08em] hover:bg-[#fef7e5]/10" data-testid={`input-tile-upload-${index}`}>
-            Upload your own
-            <input type="file" accept="image/*" className="hidden" onChange={(event) => handleUpload(event.target.files?.[0])} />
-          </label>
+          <button type="button" onClick={() => { onRequestReplace(); setOpen(false); }} className="block w-full border border-[#fef7e5]/30 px-2 py-1.5 text-center text-[9px] uppercase tracking-[.08em] hover:bg-[#fef7e5]/10" data-testid={`button-replace-image-${index}`}>
+            Replace image
+          </button>
           <button type="button" onClick={onDelete} className="block w-full border border-[#a25242]/60 px-2 py-1.5 text-center text-[9px] uppercase tracking-[.08em] text-[#e0a598] hover:bg-[#a25242]/20" data-testid={`button-delete-tile-${index}`}>
             Delete tile
           </button>
@@ -526,7 +609,6 @@ function FreeformTile({ tile, index, frame, onMove, onResize, onImageChange, onD
     </FreeformFrame>
   );
 }
-
 async function drawTileCell(ctx: CanvasRenderingContext2D, tile: MoodboardTile, x: number, y: number, w: number, h: number) {
   if (tile.type === 'image') {
     if (tile.imageUrl) {
@@ -671,6 +753,7 @@ function PaletteTileCard({ board, copied, onCopyColor, sizeClass, extraClass }: 
 }
 
 function MoodboardEditor({ board, boardType, layoutStyle, onReset, onBoardChange }: { board: Moodboard; boardType: 'moodboard' | 'brandboard'; layoutStyle: string; onReset: () => void; onBoardChange: (board: Moodboard) => void }) {
+  const [replacePanelIndex, setReplacePanelIndex] = useState<number | null>(null);
   const [copied, setCopied] = useState('');
   const copy = async (text: string, label: string) => {
     try {
@@ -758,6 +841,7 @@ function MoodboardEditor({ board, boardType, layoutStyle, onReset, onBoardChange
                   onResize={(w, h) => updateFrame(index, { w, h })}
                   onImageChange={(url) => updateTileImage(index, url)}
                   onDelete={() => deleteTile(index)}
+                  onRequestReplace={() => setReplacePanelIndex(index)}
                 />
               ))}
               {frames[board.layout.length] && (
@@ -783,6 +867,12 @@ function MoodboardEditor({ board, boardType, layoutStyle, onReset, onBoardChange
           </div>
         </aside>
       </div>
+      {replacePanelIndex !== null && (
+  <ImageReplacePanel
+    onSelect={(url) => { updateTileImage(replacePanelIndex, url); setReplacePanelIndex(null); }}
+    onClose={() => setReplacePanelIndex(null)}
+  />
+)}
     </div>
   );
 }
