@@ -282,7 +282,7 @@ async function fetchStockImage(query: string): Promise<string | null> {
 }
 
 const COSMOS_SEARCH_ELEMENTS_URL = "https://api.parse.bot/scraper/518f0113-a227-49a8-95cf-31124444fa1e/search_elements";
-const COSMOS_MAX_CANDIDATES = 4;
+const COSMOS_MAX_CANDIDATES = 10;
 const EXTERNAL_FETCH_TIMEOUT_MS = 6000;
 
 async function fetchCosmosImages(query: string): Promise<ImageCandidate[]> {
