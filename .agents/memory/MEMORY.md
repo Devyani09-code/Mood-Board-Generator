@@ -1,0 +1,1 @@
+- [API codegen and Zod compatibility](api-codegen-zod.md) — verify generated Zod helpers against the installed version after every schema regeneration.

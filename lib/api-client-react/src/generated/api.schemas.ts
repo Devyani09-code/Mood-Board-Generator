@@ -20,6 +20,10 @@ export const MoodboardGenerateInputBoardType = {
 export interface MoodboardGenerateInput {
   boardType: MoodboardGenerateInputBoardType;
   layoutStyle: string;
+  /**
+     * @minimum 1
+     * @maximum 12
+     */
   imageCount: number;
   /** @minLength 3 */
   purpose: string;
@@ -31,6 +35,14 @@ export interface MoodboardGenerateInput {
      */
   styles: string[];
 }
+
+export type MoodboardRefineInputBoardType = typeof MoodboardRefineInputBoardType[keyof typeof MoodboardRefineInputBoardType];
+
+
+export const MoodboardRefineInputBoardType = {
+  moodboard: 'moodboard',
+  brandboard: 'brandboard',
+} as const;
 
 export interface PaletteColor {
   name: string;
@@ -83,8 +95,12 @@ export interface Moodboard {
 }
 
 export interface MoodboardRefineInput {
-  boardType: MoodboardGenerateInputBoardType;
+  boardType: MoodboardRefineInputBoardType;
   layoutStyle: string;
+  /**
+     * @minimum 1
+     * @maximum 12
+     */
   imageCount: number;
   /** @minLength 3 */
   purpose: string;

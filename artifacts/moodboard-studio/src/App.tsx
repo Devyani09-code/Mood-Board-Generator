@@ -10,7 +10,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import HomePage from '@/pages/home';
 import NotFound from '@/pages/not-found';
 import StudioPage from '@/pages/studio';
-import velvetTexture from '@assets/download.jpg';
+import paperTexture from '@assets/image_1789901248457.png';
 
 const queryClient = new QueryClient();
 const clerkPubKey = publishableKeyFromHost(window.location.hostname, import.meta.env.VITE_CLERK_PUBLISHABLE_KEY);
@@ -36,41 +36,41 @@ const clerkAppearance = {
     socialButtonsVariant: 'blockButton' as const,
   },
   variables: {
-    colorPrimary: '#13273f',
-    colorForeground: '#13273f',
-    colorMutedForeground: '#8a5a45',
-    colorDanger: '#a25242',
-    colorBackground: '#fef7e5',
-    colorInput: '#fef7e5',
-    colorInputForeground: '#13273f',
-    colorNeutral: '#9aa9aa',
-    fontFamily: 'DM Sans, sans-serif',
+    colorPrimary: '#7b3131',
+    colorForeground: '#7b3131',
+    colorMutedForeground: '#7b3131',
+    colorDanger: '#7b3131',
+    colorBackground: '#ece8df',
+    colorInput: '#ece8df',
+    colorInputForeground: '#7b3131',
+    colorNeutral: '#b99e91',
+    fontFamily: 'Cormorant Upright, Georgia, serif',
     borderRadius: '2px',
   },
   elements: {
     rootBox: 'w-full flex justify-center',
-    cardBox: 'bg-[#fef7e5] rounded-none w-[440px] max-w-full overflow-hidden border border-[#13273f]/25 shadow-[0_22px_55px_rgba(92,26,3,.18)]',
+    cardBox: 'bg-[#ece8df] rounded-none w-[440px] max-w-full overflow-hidden border border-[#7b3131]/25 shadow-[0_22px_55px_rgba(123,49,49,.18)]',
     card: '!shadow-none !border-0 !bg-transparent !rounded-none',
     footer: '!shadow-none !border-0 !bg-transparent !rounded-none',
-    headerTitle: 'font-serif text-[#13273f] text-3xl',
-    headerSubtitle: 'text-[#8a5a45]',
-    socialButtonsBlockButtonText: 'text-[#13273f]',
-    formFieldLabel: 'text-[#13273f]',
-    footerActionLink: 'text-[#bca106] hover:text-[#13273f]',
-    footerActionText: 'text-[#8a5a45]',
-    dividerText: 'text-[#8a5a45]',
-    identityPreviewEditButton: 'text-[#bca106]',
-    formFieldSuccessText: 'text-[#567f75]',
-    alertText: 'text-[#a25242]',
+    headerTitle: 'font-serif text-[#7b3131] text-3xl',
+    headerSubtitle: 'text-[#7b3131]/75',
+    socialButtonsBlockButtonText: 'text-[#7b3131]',
+    formFieldLabel: 'text-[#7b3131]',
+    footerActionLink: 'text-[#7b3131] hover:text-[#5f2020]',
+    footerActionText: 'text-[#7b3131]/75',
+    dividerText: 'text-[#7b3131]/75',
+    identityPreviewEditButton: 'text-[#7b3131]',
+    formFieldSuccessText: 'text-[#7b3131]',
+    alertText: 'text-[#7b3131]',
     logoBox: 'h-12',
     logoImage: 'max-h-12',
-    socialButtonsBlockButton: 'border-[#13273f]/25 bg-[#fef7e5] hover:bg-[#13273f]/10',
-    formButtonPrimary: 'bg-[#13273f] text-[#fef7e5] hover:bg-[#bca106] hover:text-[#13273f]',
-    formFieldInput: 'bg-[#fef7e5] border-[#13273f]/25 text-[#13273f]',
-    footerAction: 'border-t border-[#13273f]/15',
-    dividerLine: 'bg-[#13273f]/20',
+    socialButtonsBlockButton: 'border-[#7b3131]/25 bg-[#ece8df] hover:bg-[#7b3131]/10',
+    formButtonPrimary: 'bg-[#7b3131] text-[#ece8df] hover:bg-[#5f2020]',
+    formFieldInput: 'bg-[#ece8df] border-[#7b3131]/25 text-[#7b3131]',
+    footerAction: 'border-t border-[#7b3131]/15',
+    dividerLine: 'bg-[#7b3131]/20',
     alert: 'border-[#a25242]/40 bg-[#f0ddd4]',
-    otpCodeFieldInput: 'bg-[#fef7e5] border-[#13273f]/25 text-[#13273f]',
+    otpCodeFieldInput: 'bg-[#ece8df] border-[#7b3131]/25 text-[#7b3131]',
     formFieldRow: 'gap-2',
     main: 'gap-5',
   },
@@ -100,11 +100,11 @@ function StudioRoute() {
 }
 
 function SignInPage() {
-  return <div className="paper-surface flex min-h-[100dvh] items-center justify-center px-4 py-10" style={{ backgroundImage: `linear-gradient(rgba(92,26,3,.15), rgba(92,26,3,.15)), url(${velvetTexture})` }}><SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} /></div>;
+  return <div className="paper-surface flex min-h-[100dvh] items-center justify-center px-4 py-10" style={{ backgroundImage: `linear-gradient(rgba(123,49,49,.2), rgba(123,49,49,.2)), url(${paperTexture})` }}><SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} /></div>;
 }
 
 function SignUpPage() {
-  return <div className="paper-surface flex min-h-[100dvh] items-center justify-center px-4 py-10" style={{ backgroundImage: `linear-gradient(rgba(92,26,3,.15), rgba(92,26,3,.15)), url(${velvetTexture})` }}><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} /></div>;
+  return <div className="paper-surface flex min-h-[100dvh] items-center justify-center px-4 py-10" style={{ backgroundImage: `linear-gradient(rgba(123,49,49,.2), rgba(123,49,49,.2)), url(${paperTexture})` }}><SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} /></div>;
 }
 
 function ClerkQueryClientCacheInvalidator() {

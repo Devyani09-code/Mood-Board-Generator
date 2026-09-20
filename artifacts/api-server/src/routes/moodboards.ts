@@ -51,6 +51,10 @@ type GeminiBoardOutput = {
   palette: Array<{ name: string; hex: string; role: string }>;
 };
 
+type GeminiResponse = {
+  candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+};
+
 async function generateQueriesAndPalette(purpose: string, styles: string[], imageCount: number): Promise<GeminiBoardOutput> {
   const apiKey = process.env.GEMINI_API_KEY;
 
@@ -95,8 +99,9 @@ Return ONLY valid JSON, no markdown, matching exactly this shape:
       return fallback;
     }
 
-    const data = await response.json();
+    const data = await response.json() as GeminiResponse;
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (typeof text !== "string") return fallback;
     const parsed = JSON.parse(text) as GeminiBoardOutput;
 
     if (!Array.isArray(parsed.queries) || !Array.isArray(parsed.palette)) {
@@ -163,8 +168,9 @@ Return ONLY valid JSON, no markdown, matching exactly this shape:
       return fallback;
     }
 
-    const data = await response.json();
+    const data = await response.json() as GeminiResponse;
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (typeof text !== "string") return fallback;
     const parsed = JSON.parse(text) as GeminiBrandOutput;
 
     if (!Array.isArray(parsed.queries) || !Array.isArray(parsed.palette) || typeof parsed.fonts !== "string") {
@@ -262,6 +268,143 @@ async function createMoodboard(boardType: "moodboard" | "brandboard", purpose: s
   return content;
 }
 
+type RefinementBoard = {
+  id: string;
+  title: string;
+  tagline: string;
+  palette: Array<{ name: string; hex: string; role: string }>;
+  keywords: string[];
+  direction: string;
+  layout: Array<{
+    type: "image" | "text" | "color" | "quote";
+    label: string;
+    value: string;
+    accent: string | null;
+    size: "small" | "medium" | "large";
+    imageUrl?: string | null;
+  }>;
+};
+
+function parseGeminiJson(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    const match = text.match(/\{[\s\S]*\}/);
+    return match ? JSON.parse(match[0]) : null;
+  }
+}
+
+function isRefinementBoard(value: unknown): value is RefinementBoard {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as Partial<RefinementBoard>;
+  return typeof candidate.title === "string"
+    && typeof candidate.tagline === "string"
+    && typeof candidate.direction === "string"
+    && Array.isArray(candidate.palette)
+    && Array.isArray(candidate.keywords)
+    && Array.isArray(candidate.layout)
+    && candidate.layout.length > 0;
+}
+
+async function refineMoodboardContent(
+  board: RefinementBoard,
+  boardType: "moodboard" | "brandboard",
+  purpose: string,
+  styles: string[],
+  layoutStyle: string,
+  imageCount: number,
+  prompt: string,
+  promptHistory: string[],
+): Promise<RefinementBoard> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return {
+      ...board,
+      id: crypto.randomUUID(),
+      title: `${board.title} — refined`,
+      direction: `${board.direction} The latest refinement asks for: "${prompt}".`,
+    };
+  }
+
+  const instruction = `You are refining an existing ${boardType} in a visual direction studio.
+Original brief: "${purpose}"
+Selected styles: ${styles.join(", ")}
+Layout preference: "${layoutStyle}"
+Target image count: ${imageCount}
+Previous refinement requests, in order: ${promptHistory.length ? promptHistory.map((item, index) => `${index + 1}. ${item}`).join(" | ") : "none"}
+Latest refinement request: "${prompt}"
+
+Existing board JSON:
+${JSON.stringify(board)}
+
+Return ONLY valid JSON, no markdown, with this exact shape:
+{
+  "id": string,
+  "title": string,
+  "tagline": string,
+  "palette": [{ "name": string, "hex": string, "role": string }],
+  "keywords": string[],
+  "direction": string,
+  "layout": [{
+    "type": "image"|"text"|"color"|"quote",
+    "label": string,
+    "value": string,
+    "accent": string|null,
+    "size": "small"|"medium"|"large",
+    "imageUrl": string|null
+  }]
+}
+
+Honor the latest request while keeping useful parts of the existing board. Keep the layout count at ${board.layout.length}, keep image tiles concrete and searchable, and make image tile value fields 2-5 word stock-photo queries. Do not invent remote image URLs; use null for imageUrl.`;
+
+  try {
+    const response = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: instruction }] }],
+        generationConfig: { responseMimeType: "application/json" },
+      }),
+      signal: AbortSignal.timeout(EXTERNAL_FETCH_TIMEOUT_MS),
+    });
+
+    if (!response.ok) {
+      console.error(`[gemini/refine] request failed: ${response.status} ${response.statusText}`, await response.text());
+      return board;
+    }
+
+    const data = await response.json() as GeminiResponse;
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const parsed = typeof text === "string" ? parseGeminiJson(text) : null;
+    if (!isRefinementBoard(parsed)) return board;
+
+    const refined: RefinementBoard = {
+      ...parsed,
+      id: crypto.randomUUID(),
+      palette: parsed.palette.slice(0, 6),
+      keywords: parsed.keywords.slice(0, 8),
+      layout: parsed.layout.slice(0, Math.max(1, Math.min(12, imageCount + 2))).map((tile, index) => ({
+        type: tile.type,
+        label: tile.label || `Reference ${index + 1}`,
+        value: tile.value || "visual reference",
+        accent: tile.accent ?? null,
+        size: tile.size || "medium",
+        imageUrl: tile.imageUrl ?? null,
+      })),
+    };
+
+    await Promise.all(refined.layout.map(async (tile) => {
+      if (tile.type !== "image") return;
+      tile.imageUrl = await withDeadline(fetchStockImage(tile.value), 15000, null);
+    }));
+
+    return refined;
+  } catch (error) {
+    console.error("[gemini/refine] failed:", error);
+    return board;
+  }
+}
+
 function selectBestImage(candidates: ImageCandidate[]): string | null {
   if (candidates.length === 0) return null;
   const topN = candidates.slice(0, Math.min(4, candidates.length));
@@ -286,7 +429,7 @@ const COSMOS_MAX_CANDIDATES = 4;
 const SEARCH_PANEL_MAX_CANDIDATES = 10;
 const EXTERNAL_FETCH_TIMEOUT_MS = 6000;
 
-async function fetchCosmosImages(query: string): Promise<ImageCandidate[]> {
+async function fetchCosmosImages(query: string, limit = COSMOS_MAX_CANDIDATES): Promise<ImageCandidate[]> {
   const apiKey = process.env.PARSE_API_KEY;
 
   if (!apiKey) {
@@ -335,7 +478,7 @@ async function fetchCosmosImages(query: string): Promise<ImageCandidate[]> {
 
     return items
       .filter((item) => item.media?.notSafeForWorkStatus !== "EXPLICIT")
-      .slice(0, COSMOS_MAX_CANDIDATES)
+      .slice(0, limit)
       .map((item) => ({
         id: `cosmos-${item.id}`,
         url: item.media?.url ?? "",
@@ -348,7 +491,7 @@ async function fetchCosmosImages(query: string): Promise<ImageCandidate[]> {
   }
 }
 
-async function fetchPexelsImages(query: string): Promise<ImageCandidate[]> {
+async function fetchPexelsImages(query: string, limit = COSMOS_MAX_CANDIDATES): Promise<ImageCandidate[]> {
   const apiKey = process.env.PEXELS_API_KEY;
 
   if (!apiKey) {
@@ -357,7 +500,7 @@ async function fetchPexelsImages(query: string): Promise<ImageCandidate[]> {
   }
 
   try {
-    const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=${COSMOS_MAX_CANDIDATES}&orientation=square`;
+    const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=${limit}&orientation=square`;
 
     const response = await fetch(url, {
       headers: {
@@ -478,6 +621,16 @@ router.get("/moodboards/debug/unsplash", async (req, res): Promise<void> => {
   res.json(results);
 });
 
+type MoodboardRequestFields = {
+  boardType: "moodboard" | "brandboard";
+  layoutStyle: string;
+  imageCount: number;
+  purpose: string;
+  styles: string[];
+  logoDescription?: string;
+  logoImageDataUrl?: string;
+};
+
 router.post("/moodboards/generate", requireAuth, async (req, res): Promise<void> => {
   const parsed = GenerateMoodboardBody.safeParse(req.body);
 
@@ -488,7 +641,7 @@ router.post("/moodboards/generate", requireAuth, async (req, res): Promise<void>
   }
 
   try {
-    const { purpose, styles, boardType, layoutStyle, imageCount, logoDescription } = parsed.data;
+    const { purpose, styles, boardType, layoutStyle, imageCount, logoDescription } = parsed.data as MoodboardRequestFields;
 
     const moodboard = await createMoodboard(
       boardType,
@@ -565,14 +718,21 @@ router.post("/moodboards/refine", requireAuth, async (req, res): Promise<void> =
   }
 
   try {
-    // NOTE: this makes the route compile and run, but `prompt` and
-    // `promptHistory` (the user's actual refinement request) are currently
-    // ignored — this just regenerates a fresh board from the same inputs.
-    // Still need to decide: drop refine, one thin Gemini call to steer it,
-    // or fixed refine actions (swap tile / new palette / etc).
-    const { purpose, styles, boardType, layoutStyle, imageCount } = parsed.data;
-
-    const refined = await createMoodboard(boardType, purpose, styles, layoutStyle, imageCount);
+    const { purpose, styles, boardType, layoutStyle, imageCount, prompt, promptHistory = [], moodboard } = parsed.data as MoodboardRequestFields & {
+      prompt: string;
+      promptHistory?: string[];
+      moodboard: RefinementBoard;
+    };
+    const refined = await refineMoodboardContent(
+      moodboard,
+      boardType,
+      purpose,
+      styles,
+      layoutStyle,
+      imageCount,
+      prompt,
+      promptHistory,
+    );
 
     res.json(RefineMoodboardResponse.parse(refined));
   } catch (error) {

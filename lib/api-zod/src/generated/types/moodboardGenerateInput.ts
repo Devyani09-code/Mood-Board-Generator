@@ -5,10 +5,20 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { MoodboardGenerateInputBoardType } from './moodboardGenerateInputBoardType';
 
 export interface MoodboardGenerateInput {
+  boardType: MoodboardGenerateInputBoardType;
+  layoutStyle: string;
+  /**
+     * @minimum 1
+     * @maximum 12
+     */
+  imageCount: number;
   /** @minLength 3 */
   purpose: string;
+  logoDescription?: string;
+  logoImageDataUrl?: string;
   /**
      * @minItems 1
      * @maxItems 6

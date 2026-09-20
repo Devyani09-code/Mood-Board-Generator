@@ -6,8 +6,16 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { Moodboard } from './moodboard';
+import type { MoodboardRefineInputBoardType } from './moodboardRefineInputBoardType';
 
 export interface MoodboardRefineInput {
+  boardType: MoodboardRefineInputBoardType;
+  layoutStyle: string;
+  /**
+     * @minimum 1
+     * @maximum 12
+     */
+  imageCount: number;
   /** @minLength 3 */
   purpose: string;
   /**
