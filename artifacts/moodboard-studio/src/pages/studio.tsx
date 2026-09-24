@@ -4,7 +4,6 @@ import { getHealthCheckQueryKey, useGenerateMoodboard, useHealthCheck, useRefine
 import type { Moodboard, MoodboardTile } from '@workspace/api-client-react';
 import { ArrowRight, Check, Clipboard, Download, History, LayoutDashboard, LogOut, Menu, RefreshCw, SlidersHorizontal, Sparkles, UserRound, X } from 'lucide-react';
 import { Link } from 'wouter';
-import paperTexture from '@assets/image_1789901248457.png';
 
 const STYLE_OPTIONS = ['quiet luxury', 'raw & tactile', 'cinematic', 'sun-washed', 'editorial', 'strange & tender'];
 const BOARD_TYPE_OPTIONS: Array<{ value: 'moodboard' | 'brandboard'; label: string; copy: string }> = [
@@ -876,17 +875,17 @@ function MoodboardEditor({ board, boardType, layoutStyle, onReset, onBoardChange
           </div>
         </section>
         <aside className="space-y-5">
-           <div className="border border-[#7b3131] bg-[#7b3131] p-5 text-[#ece8df]" data-testid="panel-refine-moodboard">
-             <div className="flex items-center gap-2 text-[#ece8df]"><Sparkles size={16} /><span className="eyebrow">Keep shaping</span></div>
-             <p className="mt-3 text-[14px] leading-6 text-[#ece8df]/78">Ask for a new mood, a sharper palette, or a different point of view. Each pass sees the board and your earlier thoughts.</p>
+           <div className="border border-[#FCEEA8] bg-[#D62E2F] p-5 text-[#FCEEA8]" data-testid="panel-refine-moodboard">
+             <div className="flex items-center gap-2 text-[#FCEEA8]"><Sparkles size={16} /><span className="eyebrow">Keep shaping</span></div>
+             <p className="mt-3 text-[14px] leading-6 text-[#FCEEA8]/78">Ask for a new mood, a sharper palette, or a different point of view. Each pass sees the board and your earlier thoughts.</p>
              <form onSubmit={submitRefinement} className="mt-4">
-               <textarea value={refinementPrompt} onChange={(event) => setRefinementPrompt(event.target.value)} rows={3} placeholder="Make it warmer and more tactile..." className="w-full resize-none border border-[#ece8df]/35 bg-transparent px-3 py-2.5 text-[14px] leading-5 text-[#ece8df] outline-none placeholder:text-[#ece8df]/50 focus:border-[#ece8df]" data-testid="input-refine-prompt" />
-               <button type="submit" disabled={isRefining || refinementPrompt.trim().length < 3} className="mt-3 flex w-full items-center justify-center gap-2 bg-[#ece8df] px-3 py-2.5 text-[11px] font-bold uppercase tracking-[.14em] text-[#7b3131] transition-colors hover:bg-white disabled:cursor-wait disabled:opacity-55" data-testid="button-refine-moodboard">
+               <textarea value={refinementPrompt} onChange={(event) => setRefinementPrompt(event.target.value)} rows={3} placeholder="Make it warmer and more tactile..." className="w-full resize-none border border-[#FCEEA8]/35 bg-transparent px-3 py-2.5 text-[14px] leading-5 text-[#FCEEA8] outline-none placeholder:text-[#FCEEA8]/50 focus:border-[#FCEEA8]" data-testid="input-refine-prompt" />
+               <button type="submit" disabled={isRefining || refinementPrompt.trim().length < 3} className="mt-3 flex w-full items-center justify-center gap-2 bg-[#FCEEA8] px-3 py-2.5 text-[11px] font-bold uppercase tracking-[.14em] text-[#D62E2F] transition-colors hover:bg-white disabled:cursor-wait disabled:opacity-55" data-testid="button-refine-moodboard">
                  {isRefining ? 'Reworking the board' : 'Refine this direction'} {isRefining ? <span className="loading-dashes" aria-hidden="true"><i /><i /><i /></span> : <ArrowRight size={14} />}
                </button>
              </form>
-             {promptHistory.length > 0 && <div className="mt-4 border-t border-[#ece8df]/20 pt-3"><span className="eyebrow text-[#ece8df]/55">Earlier passes</span><div className="mt-2 space-y-1.5">{promptHistory.slice(-3).map((item, index) => <p key={`${item}-${index}`} className="truncate text-[12px] text-[#ece8df]/70">“{item}”</p>)}</div></div>}
-             {Boolean(refineError) && <p className="mt-3 border-l-2 border-[#ece8df] pl-3 text-[12px] leading-5 text-[#ece8df]" data-testid="status-refine-error">{getErrorMessage(refineError)}</p>}
+             {promptHistory.length > 0 && <div className="mt-4 border-t border-[#FCEEA8]/20 pt-3"><span className="eyebrow text-[#FCEEA8]/55">Earlier passes</span><div className="mt-2 space-y-1.5">{promptHistory.slice(-3).map((item, index) => <p key={`${item}-${index}`} className="truncate text-[12px] text-[#FCEEA8]/70">“{item}”</p>)}</div></div>}
+             {Boolean(refineError) && <p className="mt-3 border-l-2 border-[#FCEEA8] pl-3 text-[12px] leading-5 text-[#FCEEA8]" data-testid="status-refine-error">{getErrorMessage(refineError)}</p>}
            </div>
           <div className="border border-[#13273f] bg-[#13273f] p-5">
             <div className="flex items-center gap-2 text-[#788240]"><SlidersHorizontal size={16} strokeWidth={1.5} /><span className="eyebrow">Edit the board</span></div>
@@ -1140,17 +1139,17 @@ export default function StudioPage() {
         : (
           <section className="flex min-h-[calc(100dvh-80px)] flex-col items-center justify-center px-5 py-12 sm:px-8">
             <div className="mb-8 w-full max-w-[700px]">
-              <div className="flex items-center justify-between text-[12px] font-bold uppercase tracking-[.16em] text-[#7b3131]">
+              <div className="flex items-center justify-between text-[12px] font-bold uppercase tracking-[.16em] text-[#FCEEA8]">
                 <span>New visual direction</span><span data-testid="text-brief-progress">{Math.round(((step + 1) / 5) * 100)}%</span>
               </div>
-              <div className="mt-3 h-[2px] w-full bg-[#7b3131]/15"><div className="h-full bg-[#7b3131] transition-all duration-500" style={{ width: `${((step + 1) / 5) * 100}%` }} /></div>
+              <div className="mt-3 h-[2px] w-full bg-[#FCEEA8]/20"><div className="h-full bg-[#D62E2F] transition-all duration-500" style={{ width: `${((step + 1) / 5) * 100}%` }} /></div>
             </div>
             <BriefCard step={step} boardType={boardType} setBoardType={setBoardType} purpose={purpose} setPurpose={setPurpose} logoDescription={logoDescription} setLogoDescription={setLogoDescription} logoImageDataUrl={logoImageDataUrl} setLogoImageDataUrl={setLogoImageDataUrl} layoutStyle={layoutStyle} setLayoutStyle={setLayoutStyle} imageCount={imageCount} setImageCount={setImageCount} styles={styles} toggleStyle={toggleStyle} onAdvance={advance} onGenerate={submit} isExiting={isExiting} isEntering={isEntering} isGenerating={generate.isPending} error={generate.error} />
           </section>
         );
 
   return (
-    <main className="grain min-h-[100dvh] bg-[#ece8df] text-[#7b3131]" style={{ backgroundImage: `linear-gradient(rgba(236,232,223,.73), rgba(236,232,223,.73)), url(${paperTexture})` }}>
+    <main className="grain min-h-[100dvh] bg-[#293F76] text-[#FCEEA8]">
       <StudioHeader healthLabel={healthLabel} userName={user?.firstName || 'maker'} signOut={() => signOut({ redirectUrl: import.meta.env.BASE_URL || '/' })} onMenu={() => setSidebarOpen(true)} />
       <div className="studio-shell">
         <StudioSidebar activeSection={activeSection} history={history} isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} onSelect={setActiveSection} onOpenBoard={openBoard} />
@@ -1162,17 +1161,17 @@ export default function StudioPage() {
 
 function StudioHeader({ healthLabel, userName, signOut, onMenu }: { healthLabel: string; userName: string; signOut: () => void; onMenu: () => void }) {
   return (
-    <header className="flex items-center justify-between border-b border-[#7b3131]/20 px-5 py-5 sm:px-8 lg:px-12">
+    <header className="flex items-center justify-between border-b border-[#FCEEA8]/20 px-5 py-5 text-[#FCEEA8] sm:px-8 lg:px-12">
       <div className="flex items-center gap-3">
-        <button type="button" onClick={onMenu} className="rounded-full border border-[#7b3131]/25 p-2 text-[#7b3131] lg:hidden" aria-label="Open studio navigation" data-testid="button-open-sidebar"><Menu size={17} /></button>
+        <button type="button" onClick={onMenu} className="rounded-full border border-[#FCEEA8]/25 p-2 text-[#FCEEA8] lg:hidden" aria-label="Open studio navigation" data-testid="button-open-sidebar"><Menu size={17} /></button>
         <Link href="/studio" className="flex items-center gap-3" data-testid="link-studio-logo">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[#7b3131]/40 bg-[#7b3131] text-[#ece8df]"><span className="serif text-2xl">T</span></span>
+          <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[#D62E2F]/40 bg-[#D62E2F] text-[#FCEEA8]"><span className="serif text-2xl">T</span></span>
           <span className="hidden text-[12px] font-bold uppercase tracking-[.22em] sm:block">Tinge</span>
         </Link>
       </div>
       <div className="flex items-center gap-4">
-        <span className="hidden text-[12px] text-[#7b3131]/70 sm:block" data-testid="text-user-name">for {userName}</span>
-        <button type="button" onClick={signOut} className="flex items-center gap-2 border-l border-[#7b3131]/20 pl-4 text-[11px] font-bold uppercase tracking-[.12em] text-[#7b3131] transition-colors hover:text-[#5f2020]" data-testid="button-sign-out"><LogOut size={14} /> <span className="hidden sm:inline">Leave studio</span></button>
+        <span className="hidden text-[12px] text-[#FCEEA8]/70 sm:block" data-testid="text-user-name">for {userName}</span>
+        <button type="button" onClick={signOut} className="flex items-center gap-2 border-l border-[#FCEEA8]/20 pl-4 text-[11px] font-bold uppercase tracking-[.12em] text-[#FCEEA8] transition-colors hover:text-[#D62E2F]" data-testid="button-sign-out"><LogOut size={14} /> <span className="hidden sm:inline">Leave studio</span></button>
       </div>
     </header>
   );
