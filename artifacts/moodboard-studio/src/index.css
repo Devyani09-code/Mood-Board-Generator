@@ -182,9 +182,15 @@
 .reveal-delay-2 { animation-delay: .16s; }
 .reveal-delay-3 { animation-delay: .24s; }
 @keyframes reveal { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-.flashcard { transition: transform .42s cubic-bezier(.62,.04,.32,1), opacity .32s ease; }
+/* .flashcard { transition: transform .42s cubic-bezier(.62,.04,.32,1), opacity .32s ease; }
 .flashcard.entering { animation: card-enter .48s cubic-bezier(.21,.7,.32,1) both; }
-.flashcard.exit { opacity: 0; transform: translate3d(56%, 24%, 0) rotate(5deg); }
+.flashcard.exit { opacity: 0; transform: translate3d(56%, 24%, 0) rotate(5deg); } */
+.flashcard { position: relative; }
+.flashcard > div:nth-child(1) { z-index: 2; }
+.flashcard > div:nth-child(2) { z-index: 3; }
+.flashcard > div.relative { position: relative; z-index: 4; transition: transform .42s cubic-bezier(.62,.04,.32,1); }
+.flashcard.entering > div.relative { animation: card-enter .48s cubic-bezier(.21,.7,.32,1) both; }
+.flashcard.exit > div.relative { animation: card-exit .5s cubic-bezier(.45,0,.2,1) forwards; }
 .flashcard > div { border-color: rgba(236,232,223,.38) !important; }
 .flashcard > div.relative { background: #7b3131 !important; color: #ece8df !important; box-shadow: 0 22px 50px rgba(123,49,49,.22); }
 .flashcard [class*="text-[#13273f]"], .flashcard [class*="text-[#390404]"], .flashcard [class*="text-[#788240]"] { color: #ece8df !important; }
