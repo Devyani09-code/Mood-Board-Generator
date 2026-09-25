@@ -222,6 +222,13 @@
 .tile-image-art { background: radial-gradient(circle at 70% 24%, #e8d9b4 0 10%, transparent 11%), linear-gradient(140deg, #364c59 0 42%, #b16d59 42% 61%, #d6caa8 61%); }
 .tile-image-art::after { content: ''; display: block; width: 42%; height: 130%; background: rgba(239,226,192,.48); transform: rotate(28deg) translateY(-15%); }
 .status-pulse { animation: pulse 2.8s ease-in-out infinite; }
+
+@keyframes card-exit {
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg); z-index: 4; }
+  45%  { transform: translate3d(56%, 24%, 0) rotate(6deg); z-index: 4; }
+  46%  { z-index: 1; }
+  100% { transform: translate3d(30%, 14%, 0) rotate(3deg) scale(.96); z-index: 1; }
+}
 @keyframes pulse { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
 .loading-dashes { display: inline-flex; gap: 3px; align-items: center; }
 .loading-dashes i { display: block; width: 4px; height: 4px; border-radius: 999px; background: currentColor; opacity: .45; animation: loading-dash 1s ease-in-out infinite; }
